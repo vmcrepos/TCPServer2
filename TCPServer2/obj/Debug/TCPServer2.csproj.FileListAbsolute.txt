@@ -1,0 +1,16 @@
+C:\Users\gregg\Documents\Visual Studio 2015\Projects\TCPServer2\TCPServer2\bin\Debug\TCPServer2.exe.config
+C:\Users\gregg\Documents\Visual Studio 2015\Projects\TCPServer2\TCPServer2\bin\Debug\TCPServer2.exe.manifest
+C:\Users\gregg\Documents\Visual Studio 2015\Projects\TCPServer2\TCPServer2\bin\Debug\TCPServer2.application
+C:\Users\gregg\Documents\Visual Studio 2015\Projects\TCPServer2\TCPServer2\bin\Debug\TCPServer2.exe
+C:\Users\gregg\Documents\Visual Studio 2015\Projects\TCPServer2\TCPServer2\bin\Debug\TCPServer2.pdb
+C:\Users\gregg\Documents\Visual Studio 2015\Projects\TCPServer2\TCPServer2\obj\Debug\TCPServer2.csprojResolveAssemblyReference.cache
+C:\Users\gregg\Documents\Visual Studio 2015\Projects\TCPServer2\TCPServer2\obj\Debug\TCPServer2.Form1.resources
+C:\Users\gregg\Documents\Visual Studio 2015\Projects\TCPServer2\TCPServer2\obj\Debug\TCPServer2.frmChgPort.resources
+C:\Users\gregg\Documents\Visual Studio 2015\Projects\TCPServer2\TCPServer2\obj\Debug\TCPServer2.frmReboot.resources
+C:\Users\gregg\Documents\Visual Studio 2015\Projects\TCPServer2\TCPServer2\obj\Debug\TCPServer2.Properties.Resources.resources
+C:\Users\gregg\Documents\Visual Studio 2015\Projects\TCPServer2\TCPServer2\obj\Debug\TCPServer2.csproj.GenerateResource.Cache
+C:\Users\gregg\Documents\Visual Studio 2015\Projects\TCPServer2\TCPServer2\obj\Debug\TCPServer2.TrustInfo.xml
+C:\Users\gregg\Documents\Visual Studio 2015\Projects\TCPServer2\TCPServer2\obj\Debug\TCPServer2.exe.manifest
+C:\Users\gregg\Documents\Visual Studio 2015\Projects\TCPServer2\TCPServer2\obj\Debug\TCPServer2.application
+C:\Users\gregg\Documents\Visual Studio 2015\Projects\TCPServer2\TCPServer2\obj\Debug\TCPServer2.exe
+C:\Users\gregg\Documents\Visual Studio 2015\Projects\TCPServer2\TCPServer2\obj\Debug\TCPServer2.pdb
