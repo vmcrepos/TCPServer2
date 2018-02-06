@@ -65,6 +65,7 @@ namespace TCPServer2
         static DataSet ds2 = new DataSet();
         //static IPAddress foundip;
         static Socket foundsocket;
+        static Socket foundsocket2;
         public static List<Socket> clientSockets = new List<Socket>();
         static int remoteport;
         public static Dictionary<int, string> actisoreqdict = new Dictionary<int, string>();
@@ -1554,7 +1555,7 @@ namespace TCPServer2
                             content2a = content2.TrimEnd('}');
                             indata.Clear();
                             indata.AddRange(content2a.Split(',')); // split response at delimiters and store elements in arraylist
-                            sernum = indata[1].ToString(); // extract serial number from messge
+                            sernum = indata[1].ToString(); // extract serial number from message
 
                             // check if unit serial number matches a unit in the Units database table
 
@@ -1618,10 +1619,63 @@ namespace TCPServer2
                                         }
 
                                         else   // if unit ID is found in units2 dictionary, remove entry and add new entry (in case socket has changed)
+                                               // in both the units and units2 dictionaries 
+                                               // do the same for the associated serial number entries in the sernumdict2 and sernumdict dictionaries 
                                         {
                                             units2.Remove(response);
                                             units2.Add(response, handler);
-                                            //TODO 
+                                           
+                                            
+                                            // create array of unit IDs from units dictionary
+                                            Dictionary<Socket, int>.ValueCollection valueColl =
+                                                units.Values;
+                                            int[] unitarray = new int[units.Count];
+                                            valueColl.CopyTo(unitarray, 0);
+
+                                            // create array of sockets from units dictionary
+                                            Dictionary<Socket, int>.KeyCollection keyColl =
+                                                        units.Keys;
+                                            Socket[] addarray = new Socket[units.Count];
+                                            keyColl.CopyTo(addarray, 0);
+
+                                            for (int x = 0; x < unitarray.Length; x++)
+                                            {
+                                                // get socket associated with the current unit id
+                                                if (unitarray[x] == response)
+                                                    foundsocket = addarray[x];
+                                            }
+                                            if (units.ContainsKey(foundsocket))
+                                            {
+                                                units.Remove(foundsocket);
+                                                units.Add(handler, response);
+                                            }
+
+                                            sernumdict2.Remove(sernum);
+                                            sernumdict2.Add(sernum, handler);
+
+                                            // create array of serial numbers from sernumdict dictionary
+                                            Dictionary<Socket, string>.ValueCollection valueColl2 =
+                                                sernumdict.Values;
+                                            string[] sernumarray = new string[sernumdict.Count];
+                                            valueColl2.CopyTo(sernumarray, 0);
+
+                                            // create array of sockets from sernumdict dictionary
+                                            Dictionary<Socket, string>.KeyCollection keyColl2 =
+                                                        sernumdict.Keys;
+                                            Socket[] sernumaddarray = new Socket[sernumdict.Count];
+                                            keyColl2.CopyTo(sernumaddarray, 0);
+
+                                            for (int x = 0; x < unitarray.Length; x++)
+                                            {
+                                                // get socket associated with the current serial number
+                                                if (sernumarray[x] == sernum)
+                                                    foundsocket2 = sernumaddarray[x];
+                                            }
+                                            if (sernumdict.ContainsKey(foundsocket2))
+                                            {
+                                                sernumdict.Remove(foundsocket2);
+                                                sernumdict.Add(handler, sernum);
+                                            }
                                         }
 
                                        
@@ -1732,12 +1786,13 @@ namespace TCPServer2
                             //if (OpMode != "0000" && timeset) // send message if operation mode is not set to default
                             if (OpMode != "0000" && !modeset) // send message if operation mode is not set to default and mode command has not been previously sent
                             {
-                                string opmodeset = "{VMC," + sernum + ",67,FE," + OpMode + "}\r\n";
+                                string opmodeset = "{VMC01," + sernum + ",67,FE," + OpMode + "}\r\n";
                                 Thread.Sleep(1000);
                                 Send(handler, opmodeset);
                                 //modeset = true;
                                 modesetdict.Remove(unitid);
                                 modesetdict.Add(unitid, true); // set dictionary value to indicate that mode command has been sent
+                                
                             }
 
                             modesetdict.TryGetValue(unitid, out modeset);
@@ -1746,7 +1801,7 @@ namespace TCPServer2
                             if (Interval != "0000" && !modeset) // send message if transmission interval is not set to default
 
                             {
-                                string intervalset = "{VMC," + sernum + ",71,FC," + Interval + "}\r\n";
+                                string intervalset = "{VMC01," + sernum + ",71,FC," + Interval + "}\r\n";
                                 Thread.Sleep(1000);
                                 Send(handler, intervalset);
                                 intervalsetdict.Remove(unitid);
@@ -1816,7 +1871,7 @@ namespace TCPServer2
                             //if (Interval != "0000" && timeset) // send message if transmission interval is not set to default
                             if (Interval != "0000") // send message if transmission interval is not set to default
                             {
-                                string intervalset = "{VMC," + sernum + ",71,FC," + Interval + "}\r\n";
+                                string intervalset = "{VMC01," + sernum + ",71,FC," + Interval + "}\r\n";
                                 Thread.Sleep(1000);
                                 Send(handler, intervalset);
                                 //interset = true;
