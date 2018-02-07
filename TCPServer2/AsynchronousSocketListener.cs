@@ -1614,17 +1614,18 @@ namespace TCPServer2
                                             sernumdict.Add(handler, sernum); // add entry for unit serial number in the dictionary of actively connected units (IP address and serial number)
                                             sernumdict2.Add(sernum, handler);
 
-                                            modesetdict.Add(response, false); // add entry to dictionary inidcating that mode command has not been sent to this unit
-                                            intervalsetdict.Add(response, false); // add entry to dictionary inidcating that interval command has not been sent to this unit
+                                            modesetdict.Add(response, false); // add entry to dictionary indicating that mode command has not been sent to this unit
+                                            intervalsetdict.Add(response, false); // add entry to dictionary indicating that interval command has not been sent to this unit
                                         }
 
                                         else   // if unit ID is found in units2 dictionary, remove entry and add new entry (in case socket has changed)
                                                // in both the units and units2 dictionaries 
                                                // do the same for the associated serial number entries in the sernumdict2 and sernumdict dictionaries 
                                         {
+                                           
                                             units2.Remove(response);
                                             units2.Add(response, handler);
-                                           
+
                                             
                                             // create array of unit IDs from units dictionary
                                             Dictionary<Socket, int>.ValueCollection valueColl =
@@ -1638,17 +1639,35 @@ namespace TCPServer2
                                             Socket[] addarray = new Socket[units.Count];
                                             keyColl.CopyTo(addarray, 0);
 
+                                            MessageBox.Show("units count = " + units.Count.ToString()); // TEST
+                                            int i = 0;
                                             for (int x = 0; x < unitarray.Length; x++)
                                             {
                                                 // get socket associated with the current unit id
                                                 if (unitarray[x] == response)
+                                                {
+                                                    i++;
                                                     foundsocket = addarray[x];
+                                                }
                                             }
-                                            if (units.ContainsKey(foundsocket))
+                                            MessageBox.Show("got to 1650");  //TEST
+                                            //MessageBox.Show("got to 1650; foundsocket = " + foundsocket.RemoteEndPoint.ToString());  //TEST
+                                            if (i > 0)
                                             {
-                                                units.Remove(foundsocket);
+                                                if (units.ContainsKey(foundsocket))
+                                                {
+                                                    units.Remove(foundsocket);
+                                                    units.Add(handler, response);
+                                                }
+                                            }
+
+                                            else
+                                            {
+                                                MessageBox.Show("i = " + i.ToString());
                                                 units.Add(handler, response);
                                             }
+                                            i = 0;
+
 
                                             sernumdict2.Remove(sernum);
                                             sernumdict2.Add(sernum, handler);
@@ -1669,13 +1688,30 @@ namespace TCPServer2
                                             {
                                                 // get socket associated with the current serial number
                                                 if (sernumarray[x] == sernum)
+                                                {
+                                                    i++;
                                                     foundsocket2 = sernumaddarray[x];
+                                                }
                                             }
-                                            if (sernumdict.ContainsKey(foundsocket2))
+
+                                            if (i > 0)
                                             {
-                                                sernumdict.Remove(foundsocket2);
+                                                if (sernumdict.ContainsKey(foundsocket2))
+                                                {
+                                                    sernumdict.Remove(foundsocket2);
+                                                    sernumdict.Add(handler, sernum);
+                                                }
+                                            }
+                                            else
+                                            {
+                                                MessageBox.Show("this time i = " + i.ToString());
                                                 sernumdict.Add(handler, sernum);
                                             }
+
+                                            i = 0;
+
+                                            //modesetdict.Add(response, false); // add entry to dictionary indicating that mode command has not been sent to this unit
+                                            //intervalsetdict.Add(response, false); // add entry to dictionary indicating that interval command has not been sent to this unit
                                         }
 
                                        
