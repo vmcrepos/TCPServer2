@@ -23,7 +23,7 @@ namespace TCPServer2
             // send message TBD
             if (Form1.selid != "")
             {
-                string data = "{70,00,REBOOT}\r\n";
+                string data = "{VMC01," + Form1.selid + ",70,00,REBOOT}\r\n";
                 if (Form1.foundsocket != null)
                     AsynchronousSocketListener.Send(Form1.foundsocket, data);
             }

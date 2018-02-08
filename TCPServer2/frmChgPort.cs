@@ -83,7 +83,7 @@ namespace TCPServer2
                 
                 if (Form1.selid != "")
                 {
-                    string data = "{69,00," + newaddress + "," + newport + "}\r\n";
+                    string data = "{VMC01," + Form1.selid + ",69,00," + newaddress + "," + newport + "}\r\n";
                     if (Form1.foundsocket != null)
                         AsynchronousSocketListener.Send(Form1.foundsocket, data);
                 }

@@ -447,7 +447,7 @@ namespace TCPServer2
                 foundsocket = getSocket();
                 Int32 unixTimecurr = (Int32)(DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1))).TotalSeconds; // get current Unix time
                 string hexTimecurr = unixTimecurr.ToString("X");
-                string data = "{59,00," + hexTimecurr.ToString() + "}\r\n";
+                string data = "{VMC01," + selid + ",59,00," + hexTimecurr.ToString() + "}\r\n";
                 //AsynchronousSocketListener_Outgoing("foundsocket = " + foundsocket.ToString());
                 if (foundsocket != null)
                     AsynchronousSocketListener.Send(foundsocket, data);
@@ -469,7 +469,7 @@ namespace TCPServer2
             if (selid != "")
             {
                 foundsocket = getSocket();
-                string data = "{53,01}\r\n";
+                string data = "{VMC01," + selid + ",53,01}\r\n";
                 if (foundsocket != null)
                     AsynchronousSocketListener.Send(foundsocket, data);
             }
@@ -508,41 +508,43 @@ namespace TCPServer2
                         for (int x = dt.Rows.Count - 1; x > -1; x--)
 
                         {
-                            // create datatable containing only connected units
-
+                            //// create datatable containing only connected units
+                            
+                            // create datatable containe all available units
                             if (!AsynchronousSocketListener.sernumdict.ContainsValue(dt.Rows[x]["SerialNumber"].ToString()))
                             {
                                 dr = dt.Rows[x];
-                                dt.Rows.Remove(dr);
+                                //dt.Rows.Remove(dr);
 
                             }
 
                         }
 
-                        for (int x = dt2.Rows.Count - 1; x > -1; x--)
+                        //for (int x = dt2.Rows.Count - 1; x > -1; x--)
 
-                        {
-                            // create datatable containing only non-connected units
+                        //{
+                        //    // create datatable containing only non-connected units
 
-                            if (AsynchronousSocketListener.sernumdict.ContainsValue(dt2.Rows[x]["SerialNumber"].ToString()))
-                            {
-                                dr2 = dt2.Rows[x];
-                                dt2.Rows.Remove(dr2);
+                        //    if (AsynchronousSocketListener.sernumdict.ContainsValue(dt2.Rows[x]["SerialNumber"].ToString()))
+                        //    {
+                        //        dr2 = dt2.Rows[x];
+                        //        dt2.Rows.Remove(dr2);
 
-                            }
+                        //    }
 
-                        }
+                        //}
 
                         BindingSource bSource = new BindingSource();
                         dataGridView1.Visible = true;
 
-                        // create combined datatable with connected units followed by non-connected units and use this table as the
+                        //// create combined datatable with connected units followed by non-connected units and use this table as the
                         // data source for the datagridview object
-                        for (int x = 0; x < dt2.Rows.Count; x++)
-                            dt.ImportRow(dt2.Rows[x]);
+                        //for (int x = 0; x < dt2.Rows.Count; x++)
+                        //    dt.ImportRow(dt2.Rows[x]);
                         bSource.DataSource = dt;
 
                         dataGridView1.DataSource = bSource;
+                        bSource.Sort = "SerialNumber";
 
                     }
                 }
@@ -635,13 +637,13 @@ namespace TCPServer2
             if (dataGridView1.Rows[e.RowIndex].Cells[e.ColumnIndex].Value != null)
             {
                 selid = dataGridView1.Rows[e.RowIndex].Cells[e.ColumnIndex].Value.ToString();
-                if (AsynchronousSocketListener.sernumdict.ContainsValue(selid))
+                //if (AsynchronousSocketListener.sernumdict.ContainsValue(selid))
                     label4.Text = "Selected unit: " + selid;
-                else
-                {
-                    MessageBox.Show("Please select (click on) a CONNECTED unit from the serial number list");
-                    selid = "";
-                }
+                //else
+                //{
+                //    MessageBox.Show("Please select (click on) a CONNECTED unit from the serial number list");
+                //    selid = "";
+                //}
 
             }
         }
@@ -651,8 +653,9 @@ namespace TCPServer2
             if (selid != "")
             {
                 AsynchronousSocketListener.fwreq2 = true;
+                AsynchronousSocketListener.pos = 0;
                 Socket foundsocket = getSocket();
-                string data = "{64,FF,FWUpdate}" + "\r\n";
+                string data = "{VMC01," + selid + ",64,FF,FWUpdate}" + "\r\n";
                 if (foundsocket != null)
                     AsynchronousSocketListener.Send(foundsocket, data);
             }

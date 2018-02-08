@@ -111,7 +111,7 @@ namespace TCPServer2
         static double diffInSeconds = 0;
         //static int count = 0;
         //static int pos = 1;
-        static int pos = 0;
+        public static int pos = 0;
         static DateTime start;
         static DateTime current;
         static string content2 = String.Empty;
@@ -130,6 +130,7 @@ namespace TCPServer2
         static Dictionary<int, int> setoutsentcount = new Dictionary<int, int>();
         static Dictionary<int, int> outcyclecount = new Dictionary<int, int>();
         static Dictionary<int, bool> outcyclereset = new Dictionary<int, bool>();
+        //static int missingunit = 0;
 
 
 
@@ -1616,6 +1617,8 @@ namespace TCPServer2
 
                                             modesetdict.Add(response, false); // add entry to dictionary indicating that mode command has not been sent to this unit
                                             intervalsetdict.Add(response, false); // add entry to dictionary indicating that interval command has not been sent to this unit
+
+
                                         }
 
                                         else   // if unit ID is found in units2 dictionary, remove entry and add new entry (in case socket has changed)
@@ -1639,7 +1642,7 @@ namespace TCPServer2
                                             Socket[] addarray = new Socket[units.Count];
                                             keyColl.CopyTo(addarray, 0);
 
-                                            MessageBox.Show("units count = " + units.Count.ToString()); // TEST
+                                            //MessageBox.Show("units count = " + units.Count.ToString()); // TEST
                                             int i = 0;
                                             for (int x = 0; x < unitarray.Length; x++)
                                             {
@@ -1650,8 +1653,8 @@ namespace TCPServer2
                                                     foundsocket = addarray[x];
                                                 }
                                             }
-                                            MessageBox.Show("got to 1650");  //TEST
-                                            //MessageBox.Show("got to 1650; foundsocket = " + foundsocket.RemoteEndPoint.ToString());  //TEST
+                                            //MessageBox.Show("got to 1650");  //TEST
+                                            
                                             if (i > 0)
                                             {
                                                 if (units.ContainsKey(foundsocket))
@@ -1663,7 +1666,7 @@ namespace TCPServer2
 
                                             else
                                             {
-                                                MessageBox.Show("i = " + i.ToString());
+                                                //MessageBox.Show("i = " + i.ToString());
                                                 units.Add(handler, response);
                                             }
                                             i = 0;
@@ -1704,7 +1707,7 @@ namespace TCPServer2
                                             }
                                             else
                                             {
-                                                MessageBox.Show("this time i = " + i.ToString());
+                                                //MessageBox.Show("this time i = " + i.ToString());
                                                 sernumdict.Add(handler, sernum);
                                             }
 
@@ -3137,6 +3140,9 @@ namespace TCPServer2
 
             // Convert the string data to byte data using ASCII encoding.
             byte[] byteData = Encoding.ASCII.GetBytes(data);
+            //int missingunit;
+            //if (missingunit == 0)
+            //    units.TryGetValue(handler, out missingunit);
 
             // Begin sending the data to the remote device.
 
@@ -3169,11 +3175,29 @@ namespace TCPServer2
             }
             catch (Exception e)
             {
+                MessageBox.Show("got to 3176");
+                if (File.Exists("C:\\ProgramData\\TCPServer\\Unsent_Messages.txt"))
+                {
+                    StreamWriter unsent = new StreamWriter(new FileStream("C:\\ProgramData\\TCPServer\\Unsent_Messages.txt", FileMode.Append, FileAccess.Write));
+                    //unsent.Write("\r\n" + missingunit.ToString() + ";" + data);
+                    unsent.Write("\r\n" + Form1.selid + ";" + data);
+                    unsent.Close();
+                }
                 MessageBox.Show(e.ToString());
             }
 
             if (!SocketExtensions.IsConnected(handler))
             {
+                //int missingunit;
+                //units.TryGetValue(handler, out missingunit);
+                MessageBox.Show("got to 3183");
+                if (File.Exists("C:\\ProgramData\\TCPServer\\Unsent_Messages.txt"))
+                {
+                    StreamWriter unsent = new StreamWriter(new FileStream("C:\\ProgramData\\TCPServer\\Unsent_Messages.txt", FileMode.Append, FileAccess.Write));
+                    unsent.Write("\r\n" + Form1.selid + ";" + data);
+                    unsent.Close();
+                }
+
                 handler.Shutdown(SocketShutdown.Both);
                 handler.Disconnect(true);
                 clientSockets.Remove(handler);
@@ -3253,25 +3277,27 @@ namespace TCPServer2
                                 disclogmod.Add(handler, false);
                             }
 
-                            //DateTime currtime = DateTime.Now;
-                            //MessageBox.Show("number of sockets = " + clientSockets.Count.ToString());
-                            Int32 unixTimecurr = (Int32)(DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1))).TotalSeconds; // get current Unix time
-                            string hexTimecurr = unixTimecurr.ToString("X");
-                            string data = "{59,00," + hexTimecurr.ToString() + "}\r\n";
-                            Send(handler, data);
-
                             if (sernumdict.ContainsKey(handler)) //&& sernum2 != ""))                                                                                                         
                             {
                                 sernumdict.TryGetValue(handler, out sernum2); // get serial number of connected unit
-
-                                {
-                                    // add log file entry indicating that this unit is still connected
-
-                                    StreamWriter connlog = new StreamWriter(new FileStream("C:\\Users\\gayakawa\\desktop\\TCPServer Log\\" + sernum2 + ".log", FileMode.Append, FileAccess.Write));
-                                    connlog.Write("\r\n" + DateTime.Now + " " + handler.RemoteEndPoint.ToString() + " (Serial Number " + sernum2 + ") connected");
-                                    connlog.Close();
-                                }
                             }
+                            Int32 unixTimecurr = (Int32)(DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1))).TotalSeconds; // get current Unix time
+                            string hexTimecurr = unixTimecurr.ToString("X");
+                            string data = "{VMC01," + sernum2 + ",59,00," + hexTimecurr.ToString() + "}\r\n";
+                            Send(handler, data);
+
+                            //if (sernumdict.ContainsKey(handler)) //&& sernum2 != ""))                                                                                                         
+                            //{
+                            //    sernumdict.TryGetValue(handler, out sernum2); // get serial number of connected unit
+
+                            //    {
+                            // add log file entry indicating that this unit is still connected
+
+                            StreamWriter connlog = new StreamWriter(new FileStream("C:\\Users\\gayakawa\\desktop\\TCPServer Log\\" + sernum2 + ".log", FileMode.Append, FileAccess.Write));
+                            connlog.Write("\r\n" + DateTime.Now + " " + handler.RemoteEndPoint.ToString() + " (Serial Number " + sernum2 + ") connected");
+                            connlog.Close();
+                            //    }
+                            //}
 
 
                         }
