@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.IO;
 
 namespace TCPServer2
 {
@@ -24,8 +25,24 @@ namespace TCPServer2
             if (Form1.selid != "")
             {
                 string data = "{VMC01," + Form1.selid + ",70,00,REBOOT}\r\n";
+
                 if (Form1.foundsocket != null)
+                {
+                    //MessageBox.Show("foundsocket = " + Form1.foundsocket.RemoteEndPoint.ToString()); // TEST
                     AsynchronousSocketListener.Send(Form1.foundsocket, data);
+                }
+                else
+                {
+                    if (File.Exists("C:\\ProgramData\\TCPServer\\Unsent_Messages.txt"))
+                    {
+                        StreamWriter unsent = new StreamWriter(new FileStream("C:\\ProgramData\\TCPServer\\Unsent_Messages.txt", FileMode.Append, FileAccess.Write));
+                        //unsent.Write("\r\n" + missingunit.ToString() + ";" + data);
+                        unsent.Write("\r\n" + data);
+                        unsent.Close();
+                    }
+                    //MessageBox.Show("foundsocket = null"); // TEST
+
+                }
             }
 
             Close();

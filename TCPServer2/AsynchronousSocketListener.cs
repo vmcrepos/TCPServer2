@@ -130,7 +130,7 @@ namespace TCPServer2
         static Dictionary<int, int> setoutsentcount = new Dictionary<int, int>();
         static Dictionary<int, int> outcyclecount = new Dictionary<int, int>();
         static Dictionary<int, bool> outcyclereset = new Dictionary<int, bool>();
-        //static int missingunit = 0;
+        static ArrayList unsentarr = new ArrayList();
 
 
 
@@ -1549,7 +1549,7 @@ namespace TCPServer2
                         }
 
                         if (content2.StartsWith("{VMC01,") && content2.EndsWith("}")) // received VLink message
-                        
+
                         {
                             //Outgoing("count = " + count.ToString() + "\r\n"); //TEST
                             string content2a = "";
@@ -1625,11 +1625,11 @@ namespace TCPServer2
                                                // in both the units and units2 dictionaries 
                                                // do the same for the associated serial number entries in the sernumdict2 and sernumdict dictionaries 
                                         {
-                                           
+
                                             units2.Remove(response);
                                             units2.Add(response, handler);
 
-                                            
+
                                             // create array of unit IDs from units dictionary
                                             Dictionary<Socket, int>.ValueCollection valueColl =
                                                 units.Values;
@@ -1654,7 +1654,7 @@ namespace TCPServer2
                                                 }
                                             }
                                             //MessageBox.Show("got to 1650");  //TEST
-                                            
+
                                             if (i > 0)
                                             {
                                                 if (units.ContainsKey(foundsocket))
@@ -1717,12 +1717,12 @@ namespace TCPServer2
                                             //intervalsetdict.Add(response, false); // add entry to dictionary indicating that interval command has not been sent to this unit
                                         }
 
-                                       
+
 
                                         if (response2 != response)
-                                        
+
                                         {
-                                           
+
 
                                             //units.Add(handler, response); // add entry for unit in the dictionary of actively connected units (IP address and unit id)
                                             //sernumdict.Add(handler, sernum); // add entry for unit serial number in the dictionary of actively connected units (IP address and serial number)
@@ -1735,7 +1735,7 @@ namespace TCPServer2
                                             //connlog.Write("\r\n" + DateTime.Now + " " + handler.RemoteEndPoint.ToString() + " (Serial Number " + sernum + ") connection established");
                                             //connlog.Close();
 
-                                                                                        
+
                                             // set current time
                                             //Int32 unixTimecurr = (Int32)(DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1))).TotalSeconds; // get current Unix time
                                             //string hexTimecurr = unixTimecurr.ToString("X");
@@ -1791,7 +1791,7 @@ namespace TCPServer2
                                                 }
                                             }
 
-                                           
+
                                         }
 
 
@@ -1831,7 +1831,7 @@ namespace TCPServer2
                                 //modeset = true;
                                 modesetdict.Remove(unitid);
                                 modesetdict.Add(unitid, true); // set dictionary value to indicate that mode command has been sent
-                                
+
                             }
 
                             modesetdict.TryGetValue(unitid, out modeset);
@@ -1851,7 +1851,67 @@ namespace TCPServer2
                             //if (OpMode == "0000" && fwreq && timeset)
                             //    FWSend();
                         }
-                    
+
+                        if (File.Exists("C:\\ProgramData\\TCPServer\\Unsent_Messages.txt"))
+                        {
+                            StreamReader unsentcheck = new StreamReader(new FileStream("C:\\ProgramData\\TCPServer\\Unsent_Messages.txt", FileMode.Open, FileAccess.Read));
+                            string line = unsentcheck.ReadLine();
+                            string snunsent = String.Empty;
+                            //while (line != null && line.Length > 0)
+                            unsentarr.Clear();
+                            while (line != null)
+                            {
+                                if (line.Contains(","))
+                                {
+                                    snunsent = line.Split(',')[1];
+                                    if (snunsent == sernum)
+                                    {
+                                        unsentarr.Add(line);
+                                    }
+                                }
+                                line = unsentcheck.ReadLine();
+
+                            }
+                            unsentcheck.Close();
+                            unsentcheck.Dispose();
+                            
+
+                            for (int x = 0; x < unsentarr.Count; x++)
+                            {
+                                Send(handler, unsentarr[x].ToString() + "\r\n");
+                                Thread.Sleep(2000);
+
+                            }
+
+                            //TODO Fix this
+
+                            //https://stackoverflow.com/questions/668907/how-to-delete-a-line-from-a-text-file-in-c
+                            string tempFile = Path.GetTempFileName();
+
+                            using (var sr = new StreamReader("C:\\ProgramData\\TCPServer\\Unsent_Messages.txt"))
+                            using (var sw = new StreamWriter(tempFile))
+                            {
+                                string line2;
+
+                                while ((line2 = sr.ReadLine()) != null)
+                                {
+                                    if (!(line2.Contains("," + sernum + ",")))
+                                        sw.WriteLine(line2);
+                                }
+                            }
+
+                            File.Delete("C:\\ProgramData\\TCPServer\\Unsent_Messages.txt");
+                            File.Move(tempFile, "C:\\ProgramData\\TCPServer\\Unsent_Messages.txt");
+                           
+
+                           
+
+                        }
+
+                        
+
+
+
 
 
 
@@ -3180,10 +3240,10 @@ namespace TCPServer2
                 {
                     StreamWriter unsent = new StreamWriter(new FileStream("C:\\ProgramData\\TCPServer\\Unsent_Messages.txt", FileMode.Append, FileAccess.Write));
                     //unsent.Write("\r\n" + missingunit.ToString() + ";" + data);
-                    unsent.Write("\r\n" + Form1.selid + ";" + data);
+                    unsent.Write("\r\n" + data);
                     unsent.Close();
                 }
-                MessageBox.Show(e.ToString());
+                //MessageBox.Show(e.ToString());
             }
 
             if (!SocketExtensions.IsConnected(handler))
@@ -3194,7 +3254,7 @@ namespace TCPServer2
                 if (File.Exists("C:\\ProgramData\\TCPServer\\Unsent_Messages.txt"))
                 {
                     StreamWriter unsent = new StreamWriter(new FileStream("C:\\ProgramData\\TCPServer\\Unsent_Messages.txt", FileMode.Append, FileAccess.Write));
-                    unsent.Write("\r\n" + Form1.selid + ";" + data);
+                    unsent.Write("\r\n" + data);
                     unsent.Close();
                 }
 

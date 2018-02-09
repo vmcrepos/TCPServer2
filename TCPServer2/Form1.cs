@@ -364,7 +364,7 @@ namespace TCPServer2
         private Socket getSocket()
         {
             string foundsernum = "";
-            //Socket foundsocket = null;
+            foundsocket = null;
 
             //try
             //{
@@ -401,7 +401,7 @@ namespace TCPServer2
 
                 for (int x = 0; x < sernumarray.Length; x++)
                 {
-                    // get socket associated with the selected serial number string and send current time message
+                    // get socket associated with the selected serial number string
                     //if (sernumarray[x] == dataGridView1.SelectedCells[0].Value.ToString())
                     if (sernumarray[x] == selid)
                     {
@@ -450,12 +450,25 @@ namespace TCPServer2
                 string data = "{VMC01," + selid + ",59,00," + hexTimecurr.ToString() + "}\r\n";
                 //AsynchronousSocketListener_Outgoing("foundsocket = " + foundsocket.ToString());
                 if (foundsocket != null)
+                {
+                    //MessageBox.Show("foundsocket = " + foundsocket.RemoteEndPoint.ToString()); // TEST
                     AsynchronousSocketListener.Send(foundsocket, data);
-                //else
-                //    return;
+                }
+                else
+                {
+                    if (File.Exists("C:\\ProgramData\\TCPServer\\Unsent_Messages.txt"))
+                    {
+                        StreamWriter unsent = new StreamWriter(new FileStream("C:\\ProgramData\\TCPServer\\Unsent_Messages.txt", FileMode.Append, FileAccess.Write));
+                        //unsent.Write("\r\n" + missingunit.ToString() + ";" + data);
+                        unsent.Write("\r\n" + data);
+                        unsent.Close();
+                    }
+                    //MessageBox.Show("foundsocket = null"); // TEST
+                                                           
+                }
             }
             else
-                MessageBox.Show("Please select (click on) a CONNECTED unit from the serial number list");
+                MessageBox.Show("Please select (click on) a unit from the serial number list");
 
             //}
 
@@ -470,11 +483,27 @@ namespace TCPServer2
             {
                 foundsocket = getSocket();
                 string data = "{VMC01," + selid + ",53,01}\r\n";
+                
                 if (foundsocket != null)
+                {
+                    //MessageBox.Show("foundsocket = " + foundsocket.RemoteEndPoint.ToString()); // TEST
                     AsynchronousSocketListener.Send(foundsocket, data);
+                }
+                else
+                {
+                    if (File.Exists("C:\\ProgramData\\TCPServer\\Unsent_Messages.txt"))
+                    {
+                        StreamWriter unsent = new StreamWriter(new FileStream("C:\\ProgramData\\TCPServer\\Unsent_Messages.txt", FileMode.Append, FileAccess.Write));
+                        //unsent.Write("\r\n" + missingunit.ToString() + ";" + data);
+                        unsent.Write("\r\n" + data);
+                        unsent.Close();
+                    }
+                    //MessageBox.Show("foundsocket = null"); // TEST
+                                                         
+                }
             }
             else
-                MessageBox.Show("Please select (click on) a CONNECTED unit from the serial number list");
+                MessageBox.Show("Please select (click on) a unit from the serial number list");
         }
 
         private void CheckForNewUnits()
@@ -613,7 +642,7 @@ namespace TCPServer2
                 ChgPortForm.ShowDialog();
             }
             else
-                MessageBox.Show("Please select (click on) a CONNECTED unit from the serial number list");
+                MessageBox.Show("Please select (click on) a unit from the serial number list");
 
         }
 
@@ -626,7 +655,7 @@ namespace TCPServer2
                 RebootForm.ShowDialog();
             }
             else
-                MessageBox.Show("Please select (click on) a CONNECTED unit from the serial number list");
+                MessageBox.Show("Please select (click on) a unit from the serial number list");
            
         }
 
@@ -641,7 +670,7 @@ namespace TCPServer2
                     label4.Text = "Selected unit: " + selid;
                 //else
                 //{
-                //    MessageBox.Show("Please select (click on) a CONNECTED unit from the serial number list");
+                //    MessageBox.Show("Please select (click on) a unit from the serial number list");
                 //    selid = "";
                 //}
 
@@ -657,10 +686,25 @@ namespace TCPServer2
                 Socket foundsocket = getSocket();
                 string data = "{VMC01," + selid + ",64,FF,FWUpdate}" + "\r\n";
                 if (foundsocket != null)
+                {
+                    //MessageBox.Show("foundsocket = " + foundsocket.RemoteEndPoint.ToString()); // TEST
                     AsynchronousSocketListener.Send(foundsocket, data);
+                }
+                else
+                {
+                    if (File.Exists("C:\\ProgramData\\TCPServer\\Unsent_Messages.txt"))
+                    {
+                        StreamWriter unsent = new StreamWriter(new FileStream("C:\\ProgramData\\TCPServer\\Unsent_Messages.txt", FileMode.Append, FileAccess.Write));
+                        //unsent.Write("\r\n" + missingunit.ToString() + ";" + data);
+                        unsent.Write("\r\n" + data);
+                        unsent.Close();
+                    }
+                    //MessageBox.Show("foundsocket = null"); // TEST
+
+                }
             }
             else
-                MessageBox.Show("Please select (click on) a CONNECTED unit from the serial number list");
+                MessageBox.Show("Please select (click on) a unit from the serial number list");
         }
 
         private void btnClrIncoming_Click(object sender, EventArgs e)
