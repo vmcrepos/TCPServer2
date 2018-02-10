@@ -456,13 +456,14 @@ namespace TCPServer2
                 }
                 else
                 {
-                    if (File.Exists("C:\\ProgramData\\TCPServer\\Unsent_Messages.txt"))
-                    {
-                        StreamWriter unsent = new StreamWriter(new FileStream("C:\\ProgramData\\TCPServer\\Unsent_Messages.txt", FileMode.Append, FileAccess.Write));
-                        //unsent.Write("\r\n" + missingunit.ToString() + ";" + data);
-                        unsent.Write("\r\n" + data);
-                        unsent.Close();
-                    }
+                    AsynchronousSocketListener.AddUnsentMessage(selid, "\r\n" + data);
+                    //if (File.Exists("C:\\ProgramData\\TCPServer\\Unsent_Messages.txt"))
+                    //{
+                    //    StreamWriter unsent = new StreamWriter(new FileStream("C:\\ProgramData\\TCPServer\\Unsent_Messages.txt", FileMode.Append, FileAccess.Write));
+                    //    //unsent.Write("\r\n" + missingunit.ToString() + ";" + data);
+                    //    unsent.Write("\r\n" + data);
+                    //    unsent.Close();
+                    //}
                     //MessageBox.Show("foundsocket = null"); // TEST
                                                            
                 }
@@ -491,13 +492,14 @@ namespace TCPServer2
                 }
                 else
                 {
-                    if (File.Exists("C:\\ProgramData\\TCPServer\\Unsent_Messages.txt"))
-                    {
-                        StreamWriter unsent = new StreamWriter(new FileStream("C:\\ProgramData\\TCPServer\\Unsent_Messages.txt", FileMode.Append, FileAccess.Write));
-                        //unsent.Write("\r\n" + missingunit.ToString() + ";" + data);
-                        unsent.Write("\r\n" + data);
-                        unsent.Close();
-                    }
+                    AsynchronousSocketListener.AddUnsentMessage(selid, "\r\n" + data);
+                    //if (File.Exists("C:\\ProgramData\\TCPServer\\Unsent_Messages.txt"))
+                    //{
+                    //    StreamWriter unsent = new StreamWriter(new FileStream("C:\\ProgramData\\TCPServer\\Unsent_Messages.txt", FileMode.Append, FileAccess.Write));
+                    //    //unsent.Write("\r\n" + missingunit.ToString() + ";" + data);
+                    //    unsent.Write("\r\n" + data);
+                    //    unsent.Close();
+                    //}
                     //MessageBox.Show("foundsocket = null"); // TEST
                                                          
                 }
@@ -692,13 +694,14 @@ namespace TCPServer2
                 }
                 else
                 {
-                    if (File.Exists("C:\\ProgramData\\TCPServer\\Unsent_Messages.txt"))
-                    {
-                        StreamWriter unsent = new StreamWriter(new FileStream("C:\\ProgramData\\TCPServer\\Unsent_Messages.txt", FileMode.Append, FileAccess.Write));
-                        //unsent.Write("\r\n" + missingunit.ToString() + ";" + data);
-                        unsent.Write("\r\n" + data);
-                        unsent.Close();
-                    }
+                    AsynchronousSocketListener.AddUnsentMessage(selid, "\r\n" + data);
+                    //if (File.Exists("C:\\ProgramData\\TCPServer\\Unsent_Messages.txt"))
+                    //{
+                    //    StreamWriter unsent = new StreamWriter(new FileStream("C:\\ProgramData\\TCPServer\\Unsent_Messages.txt", FileMode.Append, FileAccess.Write));
+                    //    //unsent.Write("\r\n" + missingunit.ToString() + ";" + data);
+                    //    unsent.Write("\r\n" + data);
+                    //    unsent.Close();
+                    //}
                     //MessageBox.Show("foundsocket = null"); // TEST
 
                 }

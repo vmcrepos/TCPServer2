@@ -443,9 +443,9 @@ namespace TCPServer2
                             string packetid = (actionidreq % 255).ToString("X"); // create packet id from action id (packet id must be a single hex byte)
                             if (packetid.Length == 1)
                                 packetid = "0" + packetid;
-                            byte[] isoreq = System.Text.Encoding.ASCII.GetBytes("{66," + packetid + ",00}\r\n"); // create request message string using packet id
+                            //byte[] isoreq = System.Text.Encoding.ASCII.GetBytes("{66," + packetid + ",00}\r\n"); // create request message string using packet id
+                            byte[] isoreq = System.Text.Encoding.ASCII.GetBytes("{VMC01," + sernum + ",66," + packetid + ",00}\r\n"); // create request message string using packet id
                             string isoreqstr = System.Text.Encoding.ASCII.GetString(isoreq);
-
                             Socket handler2 = new Socket(AddressFamily.InterNetwork,
                                 SocketType.Stream, ProtocolType.Tcp); // socket to send message
                                                                       //int connectid = Convert.ToInt32(dr["UnitID"]);
@@ -534,7 +534,8 @@ namespace TCPServer2
                             string packetid = (actionidsetd % 255).ToString("X"); // create packet id from action id (packet id must be a single hex byte)
                             if (packetid.Length == 1)
                                 packetid = "0" + packetid;
-                            byte[] setdoutput = System.Text.Encoding.ASCII.GetBytes("{65," + packetid + "," + setting + ",00,00}\r\n"); // create "set output" message string using packet id and setting string
+                            //byte[] setdoutput = System.Text.Encoding.ASCII.GetBytes("{65," + packetid + "," + setting + ",00,00}\r\n"); // create "set output" message string using packet id and setting string
+                            byte[] setdoutput = System.Text.Encoding.ASCII.GetBytes("{VMC01," + sernum + ",65," + packetid + "," + setting + ",00,00}\r\n"); // create "set output" message string using packet id and setting string
                             string setdoutputstr = System.Text.Encoding.ASCII.GetString(setdoutput);
                             bool match = false;
                             bool resetcycle = false;
@@ -655,7 +656,7 @@ namespace TCPServer2
                                 else if (outcount == 10)
                                 {
                                     setoutsentcount[actionidsetd] = 0;
-                                    string data = "{70,00,REBOOT}\r\n";
+                                    string data = "{VMC01," + sernum + ",70,00,REBOOT}\r\n";
                                     Send(handler2, data);
 
                                 }
@@ -704,7 +705,8 @@ namespace TCPServer2
                             string packetid = (actionidseta % 255).ToString("X"); // create packet id from action id (packet id must be a single hex byte)
                             if (packetid.Length == 1)
                                 packetid = "0" + packetid;
-                            byte[] setaoutput = System.Text.Encoding.ASCII.GetBytes("{65," + packetid + "," + setting + ",00,00}\r\n"); // create "set output" message string using packet id and setting string
+                            //byte[] setaoutput = System.Text.Encoding.ASCII.GetBytes("{65," + packetid + "," + setting + ",00,00}\r\n"); // create "set output" message string using packet id and setting string
+                            byte[] setaoutput = System.Text.Encoding.ASCII.GetBytes("{VMC01," + sernum + ",65," + packetid + "," + setting + ",00,00}\r\n"); // create "set output" message string using packet id and setting string
                             string setaoutputstr = System.Text.Encoding.ASCII.GetString(setaoutput);
 
                             bool resetcycle = false;
@@ -785,7 +787,7 @@ namespace TCPServer2
                                 else if (outcount == 10)
                                 {
                                     setoutsentcount[actionidseta] = 0;
-                                    string data = "{70,00,REBOOT}\r\n";
+                                    string data = "{VMC01," + sernum + ",70,00,REBOOT}\r\n";
                                     Send(handler2, data);
 
                                 }
@@ -1189,7 +1191,7 @@ namespace TCPServer2
             if (fwreq)
             {
                 Thread.Sleep(1000);
-                byte[] fwreqarr = System.Text.Encoding.ASCII.GetBytes("{64,FF,FWUpdate}" + "\r\n");
+                byte[] fwreqarr = System.Text.Encoding.ASCII.GetBytes("{VMC01," + sernum + ",64,FF,FWUpdate}" + "\r\n");
                 string fwreqstr = System.Text.Encoding.ASCII.GetString(fwreqarr);
                 // Retrieve the state object and the handler socket
                 // from the asynchronous state object.
@@ -1852,22 +1854,25 @@ namespace TCPServer2
                             //    FWSend();
                         }
 
-                        if (File.Exists("C:\\ProgramData\\TCPServer\\Unsent_Messages.txt"))
+                        string filename = "C:\\ProgramData\\TCPServer\\Unsent_Messages_" + sernum;
+                        //if (File.Exists("C:\\ProgramData\\TCPServer\\Unsent_Messages.txt"))
+                        if (File.Exists(filename + ".txt"))
                         {
-                            StreamReader unsentcheck = new StreamReader(new FileStream("C:\\ProgramData\\TCPServer\\Unsent_Messages.txt", FileMode.Open, FileAccess.Read));
+                            //StreamReader unsentcheck = new StreamReader(new FileStream("C:\\ProgramData\\TCPServer\\Unsent_Messages.txt", FileMode.Open, FileAccess.Read));
+                            StreamReader unsentcheck = new StreamReader(new FileStream(filename + ".txt", FileMode.Open, FileAccess.Read));
                             string line = unsentcheck.ReadLine();
-                            string snunsent = String.Empty;
+                            //string snunsent = String.Empty;
                             //while (line != null && line.Length > 0)
                             unsentarr.Clear();
                             while (line != null)
                             {
                                 if (line.Contains(","))
                                 {
-                                    snunsent = line.Split(',')[1];
-                                    if (snunsent == sernum)
-                                    {
+                                    //snunsent = line.Split(',')[1];
+                                    //if (snunsent == sernum)
+                                    //{
                                         unsentarr.Add(line);
-                                    }
+                                    //}
                                 }
                                 line = unsentcheck.ReadLine();
 
@@ -1883,77 +1888,63 @@ namespace TCPServer2
 
                             }
 
-                            //TODO Fix this
 
-                            //https://stackoverflow.com/questions/668907/how-to-delete-a-line-from-a-text-file-in-c
-                            string tempFile = Path.GetTempFileName();
 
-                            using (var sr = new StreamReader("C:\\ProgramData\\TCPServer\\Unsent_Messages.txt"))
-                            using (var sw = new StreamWriter(tempFile))
-                            {
-                                string line2;
+                            ////https://stackoverflow.com/questions/668907/how-to-delete-a-line-from-a-text-file-in-c
+                            //string tempFile = Path.GetTempFileName();
 
-                                while ((line2 = sr.ReadLine()) != null)
-                                {
-                                    if (!(line2.Contains("," + sernum + ",")))
-                                        sw.WriteLine(line2);
-                                }
-                            }
+                            //using (var sr = new StreamReader("C:\\ProgramData\\TCPServer\\Unsent_Messages.txt"))
+                            //using (var sw = new StreamWriter(tempFile))
+                            //{
+                            //    string line2;
 
-                            File.Delete("C:\\ProgramData\\TCPServer\\Unsent_Messages.txt");
-                            File.Move(tempFile, "C:\\ProgramData\\TCPServer\\Unsent_Messages.txt");
-                           
+                            //    while ((line2 = sr.ReadLine()) != null)
+                            //    {
+                            //        if (!(line2.Contains("," + sernum + ",")))
+                            //            sw.WriteLine(line2);
+                            //    }
+                            //}
 
-                           
+                            //File.Delete("C:\\ProgramData\\TCPServer\\Unsent_Messages.txt");
+                            //File.Move(tempFile, "C:\\ProgramData\\TCPServer\\Unsent_Messages.txt");
+                            File.Delete(filename + ".txt");
 
+
+
+
+                        }
+
+
+
+
+
+
+
+
+
+                        //if (content2.Contains("{09,")) // received date and time request
+                        if (content2.Contains("{VMC01," + sernum + ",09,")) // received date and time request
+                        {
+                            SendCurrTime(); // send set time message
+
+                            //try
+                            //{
+                            //    //DateTime currtime = DateTime.Now;
+                            //    Int32 unixTimecurr = (Int32)(DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1))).TotalSeconds;
+                            //    string data = "{59,00," + unixTimecurr.ToString() + "}\r\n";
+                            //    Send(handler, data);
+
+                            //}
+
+                            //catch (Exception e){
+                            //{
+                            //    MessageBox.Show(e.ToString());
+                            //}
                         }
 
                         
-
-
-
-
-
-
-
-                        if (content2.Contains("{09,")) // received date and time request
-                        {
-                            SendCurrTime(); // send set time message
-
-                            //try
-                            //{
-                            //    //DateTime currtime = DateTime.Now;
-                            //    Int32 unixTimecurr = (Int32)(DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1))).TotalSeconds;
-                            //    string data = "{59,00," + unixTimecurr.ToString() + "}\r\n";
-                            //    Send(handler, data);
-
-                            //}
-
-                            //catch (Exception e){
-                            //{
-                            //    MessageBox.Show(e.ToString());
-                            //}
-                        }
-
-                        if (content2.Contains("{09,")) // received date and time request
-                        {
-                            SendCurrTime(); // send set time message
-
-                            //try
-                            //{
-                            //    //DateTime currtime = DateTime.Now;
-                            //    Int32 unixTimecurr = (Int32)(DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1))).TotalSeconds;
-                            //    string data = "{59,00," + unixTimecurr.ToString() + "}\r\n";
-                            //    Send(handler, data);
-
-                            //}
-
-                            //catch (Exception e){
-                            //{
-                            //    MessageBox.Show(e.ToString());
-                            //}
-                        }
-                        if (content2.Contains("{0A,FF") && fwreq2) // received initial acknowledgement for firmware update request
+                        //if (content2.Contains("{0A,FF") && fwreq2) // received initial acknowledgement for firmware update request
+                        if (content2.Contains("{VMC01," + sernum + ",0A,FF") && fwreq2) // received initial acknowledgement for firmware update request
                         {
                             fwreq2 = false;
                             fwstart = true;
@@ -1963,7 +1954,8 @@ namespace TCPServer2
                             FWSendFile(); // begin sending firmware file
                                                     }
 
-                        if (content2.Contains("0A,FE") && modeset) // received acknowledgement for mode set command
+                        //if (content2.Contains("0A,FE") && modeset) // received acknowledgement for mode set command
+                        if (content2.Contains("{VMC01," + sernum + ",0A,FE") && fwreq2) // received initial acknowledgement for mode set command
                         {
                             //modeset = false;
 
@@ -1985,15 +1977,16 @@ namespace TCPServer2
                         //if (content2.Contains("{0A,FC") && interset) // received acknowledgement for interval set command
                         //{
                         //    interset = false;
-                            
+
 
                         //}
 
-                            //if (content2.Contains("{0A,") && actisoreq) // acknowledgement of sensor data request ("request measurement") message
-                            //if (content2.Contains("{0A,"))
+                        //if (content2.Contains("{0A,") && actisoreq) // acknowledgement of sensor data request ("request measurement") message
+                        //if (content2.Contains("{0A,"))
 
-                            // received acknowledgement not associated with a firmware update
-                            if (content2.Contains("{0A,") && fwreq2 == false && fwackwait == false)
+                        // received acknowledgement not associated with a firmware update
+                        //if (content2.Contains("{0A,") && fwreq2 == false && fwackwait == false)
+                        if (content2.Contains("{VMC01," + sernum + ",0A") && fwreq2 == false && fwackwait == false)
                         {
                             bool match2 = false;
                             string actupdate;
@@ -2176,7 +2169,8 @@ namespace TCPServer2
 
                         }
 
-                        if (content2.Contains("{11") && fwreq2 == false && fwackwait == true) // received acknowledgement upon receipt of firmware chunk
+                        //if (content2.Contains("{11") && fwreq2 == false && fwackwait == true) // received acknowledgement upon receipt of firmware chunk
+                        if (content2.Contains("{VMC01," + sernum + ",11") && fwreq2 == false && fwackwait == true) // received acknowledgement upon receipt of firmware chunk
                         {
                             
                             //MessageBox.Show("Here I am! content2 = " + content2);
@@ -2223,7 +2217,9 @@ namespace TCPServer2
                         }
 
                         content2 = content2.TrimEnd('\r', '\n');
-                        if (content2.StartsWith("{01,") && content2.EndsWith("}")) // received sensor data packet with proper structure
+                        //if (content2.StartsWith("{01,") && content2.EndsWith("}")) // received sensor data packet with proper structure
+                        string sensorstart = "{VMC01," + sernum + ",01";
+                        if (content2.StartsWith(sensorstart) && content2.EndsWith("}")) // received sensor data packet with proper structure
                         //if (content2.Contains("{01,")) // received sensor data packet
                         {
                             //MessageBox.Show("CONTENT2 = " + content2); //test
@@ -2416,7 +2412,8 @@ namespace TCPServer2
                         // if a packet of returned sensor data does not have the proper structure, reset the "pending time"
                         // in the database action table to trigger new requests for sensor data
 
-                        else if (content2.StartsWith("{01,") && !content2.EndsWith("}"))
+                        //else if (content2.StartsWith("{01,") && !content2.EndsWith("}"))
+                        else if (content2.StartsWith(sensorstart) && !content2.EndsWith("}"))
                         {
 
                             //MessageBox.Show("this is a bad packet; action to update = " + actiontoupdate.ToString());
@@ -2454,7 +2451,9 @@ namespace TCPServer2
                             }
                         }
 
-                        if (content2.Contains("{06,")) // received diagnostic data packet
+                        //if (content2.Contains("{06,")) // received diagnostic data packet
+                        string diagstart = "{VMC01," + sernum + ",06";
+                        if (content2.Contains(diagstart)) // received diagnostic data packet
                         {
                             DateTime packettime = DateTime.Now;
                             content2 = content2.Replace("}", ""); // remove "}"
@@ -3196,8 +3195,7 @@ namespace TCPServer2
 
         public static void Send(Socket handler, String data)
         {
-
-
+            
             // Convert the string data to byte data using ASCII encoding.
             byte[] byteData = Encoding.ASCII.GetBytes(data);
             //int missingunit;
@@ -3235,14 +3233,15 @@ namespace TCPServer2
             }
             catch (Exception e)
             {
-                MessageBox.Show("got to 3176");
-                if (File.Exists("C:\\ProgramData\\TCPServer\\Unsent_Messages.txt"))
-                {
-                    StreamWriter unsent = new StreamWriter(new FileStream("C:\\ProgramData\\TCPServer\\Unsent_Messages.txt", FileMode.Append, FileAccess.Write));
-                    //unsent.Write("\r\n" + missingunit.ToString() + ";" + data);
-                    unsent.Write("\r\n" + data);
-                    unsent.Close();
-                }
+                //MessageBox.Show("got to 3176");
+                AddUnsentMessage(sernum, "\r\n" + data);
+                //if (File.Exists("C:\\ProgramData\\TCPServer\\Unsent_Messages.txt"))
+                //{
+                //    StreamWriter unsent = new StreamWriter(new FileStream("C:\\ProgramData\\TCPServer\\Unsent_Messages.txt", FileMode.Append, FileAccess.Write));
+                //    //unsent.Write("\r\n" + missingunit.ToString() + ";" + data);
+                //    unsent.Write("\r\n" + data);
+                //    unsent.Close();
+                //}
                 //MessageBox.Show(e.ToString());
             }
 
@@ -3250,13 +3249,14 @@ namespace TCPServer2
             {
                 //int missingunit;
                 //units.TryGetValue(handler, out missingunit);
-                MessageBox.Show("got to 3183");
-                if (File.Exists("C:\\ProgramData\\TCPServer\\Unsent_Messages.txt"))
-                {
-                    StreamWriter unsent = new StreamWriter(new FileStream("C:\\ProgramData\\TCPServer\\Unsent_Messages.txt", FileMode.Append, FileAccess.Write));
-                    unsent.Write("\r\n" + data);
-                    unsent.Close();
-                }
+                //MessageBox.Show("got to 3183");
+                AddUnsentMessage(sernum, "\r\n" + data);
+                //if (File.Exists("C:\\ProgramData\\TCPServer\\Unsent_Messages.txt"))
+                //{
+                //    StreamWriter unsent = new StreamWriter(new FileStream("C:\\ProgramData\\TCPServer\\Unsent_Messages.txt", FileMode.Append, FileAccess.Write));
+                //    unsent.Write("\r\n" + data);
+                //    unsent.Close();
+                //}
 
                 handler.Shutdown(SocketShutdown.Both);
                 handler.Disconnect(true);
@@ -3480,6 +3480,18 @@ namespace TCPServer2
             foreach (byte b in ba)
                 hex.AppendFormat("{0:x2}", b);
             return hex.ToString();
+        }
+
+        public static void AddUnsentMessage(string sn, string data)
+        {
+            string filename = "C:\\ProgramData\\TCPServer\\Unsent_Messages_" + sn;
+            StreamWriter unsent = new StreamWriter(new FileStream(filename + ".txt", FileMode.Append, FileAccess.Write));
+            //StreamWriter unsent = new StreamWriter(new FileStream("C:\\ProgramData\\TCPServer\\Unsent_Messages_" + sn + ".txt", FileMode.Append, FileAccess.Write));
+            //unsent.Write("\r\n" + missingunit.ToString() + ";" + data);
+            //unsent.Write("\r\n" + data);
+            unsent.Write(data);
+            unsent.Close();
+
         }
     }
 

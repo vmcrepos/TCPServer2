@@ -318,9 +318,9 @@
             this.label4.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label4.Location = new System.Drawing.Point(23, 23);
             this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(321, 18);
+            this.label4.Size = new System.Drawing.Size(211, 18);
             this.label4.TabIndex = 20;
-            this.label4.Text = "<== Select a CONNECTED Unit from List";
+            this.label4.Text = "<== Select a Unit from List";
             // 
             // groupBox1
             // 
