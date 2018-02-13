@@ -87,20 +87,13 @@ namespace TCPServer2
                     
                     if (Form1.foundsocket != null)
                     {
-                        //MessageBox.Show("foundsocket = " + Form1.foundsocket.RemoteEndPoint.ToString()); // TEST
+                       
                         AsynchronousSocketListener.Send(Form1.foundsocket, data);
                     }
-                    else
+                    else  // if no socket is associated with the selected unit serial number, add message string to list of unsent messages for that unit
                     {
                         AsynchronousSocketListener.AddUnsentMessage(Form1.selid, "\r\n" + data);
-                        //if (File.Exists("C:\\ProgramData\\TCPServer\\Unsent_Messages.txt"))
-                        //{
-                        //    StreamWriter unsent = new StreamWriter(new FileStream("C:\\ProgramData\\TCPServer\\Unsent_Messages.txt", FileMode.Append, FileAccess.Write));
-                        //    //unsent.Write("\r\n" + missingunit.ToString() + ";" + data);
-                        //    unsent.Write("\r\n" + data);
-                        //    unsent.Close();
-                        //}
-                        //MessageBox.Show("foundsocket = null"); // TEST
+                       
 
                     }
                 }

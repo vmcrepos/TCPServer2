@@ -55,9 +55,9 @@ namespace TCPServer2
 
 
         }
-    
 
-       
+
+
 
 
 
@@ -75,69 +75,7 @@ namespace TCPServer2
             CheckForNewUnits();
             timer4.Enabled = true;
 
-
-            //string query = "SELECT SerialNumber FROM [VLink106466].[dbo].VLinkUnit";
-
-            //try
-            //{
-            //    using (SqlConnection conn = new SqlConnection(connectionString))
-            //    {
-            //        using (SqlCommand comm = new SqlCommand(query, conn))
-            //        {
-            //            conn.Open();
-
-            //            SqlDataAdapter da = new SqlDataAdapter();
-            //            DataSet ds = new DataSet();
-
-
-            //            // create dataset and datatable from returned data
-            //            da.SelectCommand = comm;
-            //            da.Fill(ds, "UnitTable");
-            //            dt = ds.Tables["UnitTable"];
-            //            BindingSource bSource2 = new BindingSource();
-            //            dataGridView1.Visible = true;
-            //            bSource2.DataSource = dt;
-
-            //            dataGridView1.DataSource = bSource2;
-                        
-            //        }
-            //    }
-
-            //}
-
-            //catch (Exception ex)
-            //{
-            //    MessageBox.Show(ex.ToString());
-            //}
-
-            //foreach (DataRow dr in dt.Rows)
-            //{
-            //    //lstUnits.Items.Add(dr[0]);
-            //    lstUnits2.Items.Add(dr[0]);
-
-
-            //}
         }
-
-        //private void lstUnits_DrawItem(object sender, DrawItemEventArgs e)
-        //{
-            
-        //    e.DrawBackground();
-           
-        //    if (e.Index % 2 == 0)
-        //        e.Graphics.DrawString(lstUnits.Items[e.Index].ToString(), new Font("Arial", 10, FontStyle.Bold), Brushes.Black, e.Bounds);
-        //    else
-        //        e.Graphics.DrawString(lstUnits.Items[e.Index].ToString(), new Font("Arial", 10, FontStyle.Regular), Brushes.Black, e.Bounds);
-        //    e.DrawFocusRectangle();
-        //}
-
-
-
-
-
-
-
-    
 
         private void AsynchronousSocketListener_Outgoing(string Data)
         {
@@ -203,12 +141,7 @@ namespace TCPServer2
         }
 
        
-        private void Form1_Load(object sender, EventArgs e)
-        {
-
-        }
-
-       
+        
         
         public static DateTime UnixTimeStampToDateTime(double unixTimeStamp)
         {
@@ -234,36 +167,7 @@ namespace TCPServer2
 
         public void btnSend_Click(object sender, EventArgs e)
         {
-            // set flag indicating firmware update required
-            if (btnSend.Text == "Enter FW Update Mode")
-            {
-                AsynchronousSocketListener.fwreq = true;
-                btnSend.Text = "Exit FW Update Mode";
-                lblUpdateFW.BackColor = Color.Yellow;
-                lblUpdateFW.ForeColor = Color.Red;
-                lblUpdateFW.Text = "FW Update Mode ENABLED";
-            }
-            else
-            {
-                AsynchronousSocketListener.fwreq = false;
-                AsynchronousSocketListener.fwreq2 = false;
-                btnSend.Text = "Enter FW Update Mode";
-                lblUpdateFW.BackColor = DefaultBackColor;
-                lblUpdateFW.ForeColor = DefaultForeColor;
-                lblUpdateFW.Text = "FW Update Mode NOT ENABLED";
-
-            }
-            //AsynchronousSocketListener.FWSend();
-
-
-
-
-            //// Show the open file dialog to select firmware file
-
-            //openFileDialog1.ShowDialog();
-            //fwfile = openFileDialog1.FileName;
-            //m_split = rtbIncoming.Text.m_split(delimiter);
-            //int limit = m_split.Length;
+            
 
         }
 
@@ -293,20 +197,11 @@ namespace TCPServer2
 
         private void button1_Click(object sender, EventArgs e)
         {
-            //for (int x = 0; x < lstUnits2.Items.Count; x++)
             for (int x = 0; x < dataGridView1.RowCount; x++)
             {
-                //if (x % 2 == 0)
-                //    lstUnits2.SetItemChecked(x, true);
-                //if (AsynchronousSocketListener.sernumdict.ContainsValue(lstUnits2.Items[x].ToString()))
-                //    lstUnits2.SetItemChecked(x, true);
-                //else if (!AsynchronousSocketListener.sernumdict.ContainsValue(lstUnits2.Items[x].ToString()))
-                //    lstUnits2.SetItemChecked(x, false);
+               
                 if (AsynchronousSocketListener.sernumdict.ContainsValue(dataGridView1.Rows[x].Cells[0].Value.ToString()))
                     dataGridView1.Rows[x].Cells[0].Style.Font = new Font(dataGridView1.DefaultCellStyle.Font, FontStyle.Bold | FontStyle.Italic);
-
-                //else if (!AsynchronousSocketListener.sernumdict.ContainsValue(lstUnits2.Items[x].ToString()))
-                //    lstUnits2.SetItemChecked(x, false);
                
             }
         }
@@ -314,41 +209,16 @@ namespace TCPServer2
 
         private void timer3_Tick(object sender, EventArgs e)
         {
-            //for (int x = 0; x < lstUnits2.Items.Count; x++)
-            //{
-            //    if (AsynchronousSocketListener.sernumdict.ContainsValue(lstUnits2.Items[x].ToString()))
-
-//    {
-//        //MessageBox.Show("checked = true for " + x.ToString());
-//        lstUnits2.SetItemChecked(x, true);
-
-//    }
-
-//    else
-//    {
-//        //MessageBox.Show("checked = false for " + x.ToString());
-//        lstUnits2.SetItemChecked(x, false);
-//    }
-//}
+            
             
             AsynchronousSocketListener.CheckConnection(); // check if disconnection has occurred
 
             for (int x = 0; x < dataGridView1.RowCount; x++)
             {
-                //if (x % 2 == 0)
-                //    lstUnits2.SetItemChecked(x, true);
-                //if (AsynchronousSocketListener.sernumdict.ContainsValue(lstUnits2.Items[x].ToString()))
-                //    lstUnits2.SetItemChecked(x, true);
-                //else if (!AsynchronousSocketListener.sernumdict.ContainsValue(lstUnits2.Items[x].ToString()))
-                //    lstUnits2.SetItemChecked(x, false);
-
                 // if socket connected (serial number still included in dictionary), display serial number in datagridview list
                 // using bold and italic font
                 if (AsynchronousSocketListener.sernumdict.ContainsValue(dataGridView1.Rows[x].Cells[0].Value.ToString()))
                     dataGridView1.Rows[x].Cells[0].Style.Font = new Font(dataGridView1.DefaultCellStyle.Font, FontStyle.Bold | FontStyle.Italic);
-
-                //else if (!AsynchronousSocketListener.sernumdict.ContainsValue(lstUnits2.Items[x].ToString()))
-                //    lstUnits2.SetItemChecked(x, false);
 
                 // if socket disconnected (serial number no longer included in dictionary), display serial number in datagridview
                 // list using regular font
@@ -365,24 +235,8 @@ namespace TCPServer2
         {
             string foundsernum = "";
             foundsocket = null;
+                   
 
-            //try
-            //{
-            //    if (selid == "")
-            //    {
-            //        MessageBox.Show("Please select (click on) a unit from the serial number list");
-            //        selid = dataGridView1.SelectedCells[0].Value.ToString();
-            //        label4.Text = "Selected unit: " + selid;
-            //    }
-            //}
-
-            //catch (Exception e)
-            //{
-            //    MessageBox.Show(e.ToString());
-            //}
-                
-
-            //if (AsynchronousSocketListener.sernumdict.ContainsValue(dataGridView1.SelectedCells[0].Value.ToString()))
             if (AsynchronousSocketListener.sernumdict.ContainsValue(selid))
             {
                 // create array of serial numbers
@@ -402,7 +256,6 @@ namespace TCPServer2
                 for (int x = 0; x < sernumarray.Length; x++)
                 {
                     // get socket associated with the selected serial number string
-                    //if (sernumarray[x] == dataGridView1.SelectedCells[0].Value.ToString())
                     if (sernumarray[x] == selid)
                     {
                         foundsernum = sernumarray[x];
@@ -418,64 +271,27 @@ namespace TCPServer2
 
         private void btnSendTime_Click(object sender, EventArgs e) // send a "set time" message to the unit whose serial number is selected in the datagridview object
         {
-            //string foundsernum = "";
-            //Socket foundsocket;
-
-            //if (AsynchronousSocketListener.sernumdict.ContainsValue(dataGridView1.SelectedCells[0].Value.ToString()))
-            //{
-            //    // create array of serial numbers
-            //    Dictionary<Socket, string>.ValueCollection valueColl =
-            //        AsynchronousSocketListener.sernumdict.Values;
-            //    string[] sernumarray = new string[AsynchronousSocketListener.sernumdict.Count];
-            //    valueColl.CopyTo(sernumarray, 0);
-
-            //    // create array of sockets
-            //    Dictionary<Socket, string>.KeyCollection keyColl =
-            //                AsynchronousSocketListener.sernumdict.Keys;
-            //    Socket[] sockarray = new Socket[AsynchronousSocketListener.sernumdict.Count];
-            //    keyColl.CopyTo(sockarray, 0);
-
-            //    for (int x = 0; x < sernumarray.Length; x++)
-            //    {
-            //        // get socket associated with the selected serial number string and send current time message
-            //        if (sernumarray[x] == dataGridView1.SelectedCells[0].Value.ToString())
-            //        {
-            //            foundsernum = sernumarray[x];
-            //            foundsocket = sockarray[x];
             if (selid != "")
             {
                 foundsocket = getSocket();
                 Int32 unixTimecurr = (Int32)(DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1))).TotalSeconds; // get current Unix time
                 string hexTimecurr = unixTimecurr.ToString("X");
                 string data = "{VMC01," + selid + ",59,00," + hexTimecurr.ToString() + "}\r\n";
-                //AsynchronousSocketListener_Outgoing("foundsocket = " + foundsocket.ToString());
+                
                 if (foundsocket != null)
                 {
-                    //MessageBox.Show("foundsocket = " + foundsocket.RemoteEndPoint.ToString()); // TEST
                     AsynchronousSocketListener.Send(foundsocket, data);
                 }
-                else
+                else // if no socket is associated with the selected unit serial number, add message string to list of unsent messages for that unit
                 {
                     AsynchronousSocketListener.AddUnsentMessage(selid, "\r\n" + data);
-                    //if (File.Exists("C:\\ProgramData\\TCPServer\\Unsent_Messages.txt"))
-                    //{
-                    //    StreamWriter unsent = new StreamWriter(new FileStream("C:\\ProgramData\\TCPServer\\Unsent_Messages.txt", FileMode.Append, FileAccess.Write));
-                    //    //unsent.Write("\r\n" + missingunit.ToString() + ";" + data);
-                    //    unsent.Write("\r\n" + data);
-                    //    unsent.Close();
-                    //}
-                    //MessageBox.Show("foundsocket = null"); // TEST
-                                                           
+                    
                 }
             }
             else
                 MessageBox.Show("Please select (click on) a unit from the serial number list");
 
-            //}
-
-
-            //}
-            //}
+            
         }
 
         private void btnReqVer_Click(object sender, EventArgs e) // send a version request message to the unit whose serial number is selected in the datagridview object
@@ -487,21 +303,12 @@ namespace TCPServer2
                 
                 if (foundsocket != null)
                 {
-                    //MessageBox.Show("foundsocket = " + foundsocket.RemoteEndPoint.ToString()); // TEST
                     AsynchronousSocketListener.Send(foundsocket, data);
                 }
-                else
+                else // if no socket is associated with the selected unit serial number, add message string to list of unsent messages for that unit
                 {
                     AsynchronousSocketListener.AddUnsentMessage(selid, "\r\n" + data);
-                    //if (File.Exists("C:\\ProgramData\\TCPServer\\Unsent_Messages.txt"))
-                    //{
-                    //    StreamWriter unsent = new StreamWriter(new FileStream("C:\\ProgramData\\TCPServer\\Unsent_Messages.txt", FileMode.Append, FileAccess.Write));
-                    //    //unsent.Write("\r\n" + missingunit.ToString() + ";" + data);
-                    //    unsent.Write("\r\n" + data);
-                    //    unsent.Close();
-                    //}
-                    //MessageBox.Show("foundsocket = null"); // TEST
-                                                         
+                   
                 }
             }
             else
@@ -528,7 +335,7 @@ namespace TCPServer2
                         DataRow dr2 = null;
 
 
-                        
+
                         // create dataset and datatable from returned data
                         da.SelectCommand = comm;
                         da.Fill(ds, "UnitTable");
@@ -536,50 +343,52 @@ namespace TCPServer2
                         dt = ds.Tables["UnitTable"];
                         dt2 = ds2.Tables["UnitTable"];
 
-                        for (int x = dt.Rows.Count - 1; x > -1; x--)
+                        //for (int x = dt.Rows.Count - 1; x > -1; x--)
 
                         {
                             //// create datatable containing only connected units
-                            
-                            // create datatable containe all available units
-                            if (!AsynchronousSocketListener.sernumdict.ContainsValue(dt.Rows[x]["SerialNumber"].ToString()))
-                            {
-                                dr = dt.Rows[x];
-                                //dt.Rows.Remove(dr);
 
-                            }
+                            // create datatable containing all available units
+                            //if (!AsynchronousSocketListener.sernumdict.ContainsValue(dt.Rows[x]["SerialNumber"].ToString()))
+                            //{
+                            //    dr = dt.Rows[x];
+                            //dt.Rows.Remove(dr);
 
+                            //}
+
+                            //}
+
+                            //for (int x = dt2.Rows.Count - 1; x > -1; x--)
+
+                            //{
+                            //    // create datatable containing only non-connected units
+
+                            //    if (AsynchronousSocketListener.sernumdict.ContainsValue(dt2.Rows[x]["SerialNumber"].ToString()))
+                            //    {
+                            //        dr2 = dt2.Rows[x];
+                            //        dt2.Rows.Remove(dr2);
+
+                            //    }
+
+                            //}
+
+                            BindingSource bSource = new BindingSource();
+                            dataGridView1.Visible = true;
+
+                            //// create combined datatable with connected units followed by non-connected units and use this table as the
+                            // data source for the datagridview object
+                            //for (int x = 0; x < dt2.Rows.Count; x++)
+                            //    dt.ImportRow(dt2.Rows[x]);
+
+                            // create datatable containing all available units
+                            bSource.DataSource = dt;
+
+                            dataGridView1.DataSource = bSource;
+                            bSource.Sort = "SerialNumber"; // sort serial numbers alphabetically
                         }
-
-                        //for (int x = dt2.Rows.Count - 1; x > -1; x--)
-
-                        //{
-                        //    // create datatable containing only non-connected units
-
-                        //    if (AsynchronousSocketListener.sernumdict.ContainsValue(dt2.Rows[x]["SerialNumber"].ToString()))
-                        //    {
-                        //        dr2 = dt2.Rows[x];
-                        //        dt2.Rows.Remove(dr2);
-
-                        //    }
-
-                        //}
-
-                        BindingSource bSource = new BindingSource();
-                        dataGridView1.Visible = true;
-
-                        //// create combined datatable with connected units followed by non-connected units and use this table as the
-                        // data source for the datagridview object
-                        //for (int x = 0; x < dt2.Rows.Count; x++)
-                        //    dt.ImportRow(dt2.Rows[x]);
-                        bSource.DataSource = dt;
-
-                        dataGridView1.DataSource = bSource;
-                        bSource.Sort = "SerialNumber";
-
                     }
-                }
 
+                }
             }
 
             catch (Exception ex)
@@ -591,21 +400,12 @@ namespace TCPServer2
 
             for (int x = 0; x < dataGridView1.RowCount; x++)
             {
-                //if (x % 2 == 0)
-                //    lstUnits2.SetItemChecked(x, true);
-                //if (AsynchronousSocketListener.sernumdict.ContainsValue(lstUnits2.Items[x].ToString()))
-                //    lstUnits2.SetItemChecked(x, true);
-                //else if (!AsynchronousSocketListener.sernumdict.ContainsValue(lstUnits2.Items[x].ToString()))
-                //    lstUnits2.SetItemChecked(x, false);
-
                 // if socket connected (serial number still included in dictionary), display serial number in datagridview list
                 // using bold and italic font
                 if (AsynchronousSocketListener.sernumdict.ContainsValue(dataGridView1.Rows[x].Cells[0].Value.ToString()))
                     dataGridView1.Rows[x].Cells[0].Style.Font = new Font(dataGridView1.DefaultCellStyle.Font, FontStyle.Bold | FontStyle.Italic);
 
-                //else if (!AsynchronousSocketListener.sernumdict.ContainsValue(lstUnits2.Items[x].ToString()))
-                //    lstUnits2.SetItemChecked(x, false);
-
+              
                 // if socket disconnected (serial number no longer included in dictionary), display serial number in datagridview
                 // list using regular font
                 else if (!AsynchronousSocketListener.sernumdict.ContainsValue(dataGridView1.Rows[x].Cells[0].Value.ToString()))
@@ -622,17 +422,7 @@ namespace TCPServer2
         private void timer4_Tick(object sender, EventArgs e)
         {
             CheckForNewUnits();
-            //int rowIndex = -1;
-            //foreach (DataGridViewRow row in dataGridView1.Rows)
-            //{
-            //    if (row.Cells[1].Value.ToString().Equals(selid))
-            //    {
-            //        rowIndex = row.Index;
-            //        break;
-            //    }
-            //}
-
-            
+                        
         }
 
         private void btnChgPort_Click(object sender, EventArgs e)
@@ -689,21 +479,12 @@ namespace TCPServer2
                 string data = "{VMC01," + selid + ",64,FF,FWUpdate}" + "\r\n";
                 if (foundsocket != null)
                 {
-                    //MessageBox.Show("foundsocket = " + foundsocket.RemoteEndPoint.ToString()); // TEST
                     AsynchronousSocketListener.Send(foundsocket, data);
                 }
-                else
+                else // if no socket is associated with the selected unit serial number, add message string to list of unsent messages for that unit
                 {
                     AsynchronousSocketListener.AddUnsentMessage(selid, "\r\n" + data);
-                    //if (File.Exists("C:\\ProgramData\\TCPServer\\Unsent_Messages.txt"))
-                    //{
-                    //    StreamWriter unsent = new StreamWriter(new FileStream("C:\\ProgramData\\TCPServer\\Unsent_Messages.txt", FileMode.Append, FileAccess.Write));
-                    //    //unsent.Write("\r\n" + missingunit.ToString() + ";" + data);
-                    //    unsent.Write("\r\n" + data);
-                    //    unsent.Close();
-                    //}
-                    //MessageBox.Show("foundsocket = null"); // TEST
-
+                    
                 }
             }
             else

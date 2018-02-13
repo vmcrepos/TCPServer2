@@ -1613,9 +1613,32 @@ namespace TCPServer2
                                         if (!units2.ContainsKey(response))  // if unit ID not found in units2 dictionary
                                         {
                                             units2.Add(response, handler); // add entry for unit ID to units2 dictionary
-                                            units.Add(handler, response); // add entry for unit in the dictionary of actively connected units (IP address and unit id)
-                                            sernumdict.Add(handler, sernum); // add entry for unit serial number in the dictionary of actively connected units (IP address and serial number)
-                                            sernumdict2.Add(sernum, handler);
+                                            if (!units.ContainsKey(handler))
+                                                units.Add(handler, response); // add entry for unit in the dictionary of actively connected units (IP address and unit id)
+                                            else
+                                            {
+                                                units.Remove(handler);
+                                                units.Add(handler, response);
+                                            }
+
+                                            if (!sernumdict.ContainsKey(handler))
+                                                sernumdict.Add(handler, sernum); // add entry for unit in the dictionary of actively connected units (IP address and unit id)
+                                            else
+                                            {
+                                                sernumdict.Remove(handler);
+                                                sernumdict.Add(handler, sernum);
+                                            }
+                                            //sernumdict.Add(handler, sernum); // add entry for unit serial number in the dictionary of actively connected units (IP address and serial number)
+
+                                            if (!sernumdict2.ContainsKey(sernum))
+                                                sernumdict2.Add(sernum, handler); // add entry for unit in the dictionary of actively connected units (IP address and unit id)
+                                            else
+                                            {
+                                                sernumdict2.Remove(sernum);
+                                                sernumdict2.Add(sernum, handler);
+                                            }
+
+                                            //sernumdict2.Add(sernum, handler);
 
                                             modesetdict.Add(response, false); // add entry to dictionary indicating that mode command has not been sent to this unit
                                             intervalsetdict.Add(response, false); // add entry to dictionary indicating that interval command has not been sent to this unit
