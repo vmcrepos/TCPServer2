@@ -1,4 +1,4 @@
-﻿#define TEST
+﻿#define DON
 
 using System;
 using System.Text;
@@ -1503,24 +1503,24 @@ namespace TCPServer2
                     // more data.
 
                     //content = handler.RemoteEndPoint.ToString() + "   " + DateTime.Now.ToShortDateString() + " " + DateTime.Now.ToShortTimeString() + "   " + state.sb.ToString();
-                    string outsernum = "";
-                    sernumdict.TryGetValue(handler, out outsernum);
-                    content = outsernum + "   " + handler.RemoteEndPoint.ToString() + "   " + DateTime.Now.ToShortDateString() + " " + DateTime.Now.ToShortTimeString() + "   " + state.sb.ToString();
+                    //string outsernum = "";
+                    //sernumdict.TryGetValue(handler, out outsernum);
+                    //content = outsernum + "   " + handler.RemoteEndPoint.ToString() + "   " + DateTime.Now.ToShortDateString() + " " + DateTime.Now.ToShortTimeString() + "   " + state.sb.ToString();
                     //content = sernum + "   " + DateTime.Now.ToShortDateString() + " " + DateTime.Now.ToShortTimeString() + "   " + state.sb.ToString();
                     content2 = "";
                     content2 = state.sb.ToString();
                     //Incoming(handler, "Raw Incoming " + content2 + "\r\n");
-#if TEST
-                    StreamWriter testincominglog = new StreamWriter(new FileStream("C:\\Users\\gayakawa\\desktop\\TCPServer Log\\" + "testincoming.log", FileMode.Append, FileAccess.Write));
-                    testincominglog.Write("\r\n" + DateTime.Now + " " + handler.RemoteEndPoint.ToString() + " raw incoming " + content2);
-                    testincominglog.Close();
-#else
+//#if TEST
+//                    StreamWriter testincominglog = new StreamWriter(new FileStream("C:\\Users\\gayakawa\\desktop\\TCPServer Log\\" + "testincoming.log", FileMode.Append, FileAccess.Write));
+//                    testincominglog.Write("\r\n" + DateTime.Now + " " + handler.RemoteEndPoint.ToString() + " raw incoming " + content2);
+//                    testincominglog.Close();
+//#else
 
-                    StreamWriter incominglog = new StreamWriter(new FileStream("C:\\Users\\gayakawa\\desktop\\TCPServer Log\\" + "incoming.log", FileMode.Append, FileAccess.Write));
-                    incominglog.Write("\r\n" + DateTime.Now + " " + handler.RemoteEndPoint.ToString() + " (Serial Number " + outsernum + ")  " + "raw incoming " + content2);
-                    incominglog.Close();
-#endif
-                    Incoming(null, content);
+//                    StreamWriter incominglog = new StreamWriter(new FileStream("C:\\Users\\gayakawa\\desktop\\TCPServer Log\\" + "incoming.log", FileMode.Append, FileAccess.Write));
+//                    incominglog.Write("\r\n" + DateTime.Now + " " + handler.RemoteEndPoint.ToString() + " (Serial Number " + outsernum + ")  " + "raw incoming " + content2);
+//                    incominglog.Close();
+//#endif
+                    //Incoming(null, content);
                     //fm.SetText(content);
                     //if (content2.IndexOf("}\r") > -1)
                     if (content2.IndexOf("}") > -1)
@@ -1609,142 +1609,159 @@ namespace TCPServer2
                                     }
                                     else // unit serial number found in database table (stored procedure returns unit id [non-zero value])
                                     {
-                                        //units.TryGetValue(handler, out response2);
-                                        if (!units2.ContainsKey(response))  // if unit ID not found in units2 dictionary
-                                        {
+                                        //if (!units2.ContainsKey(response))  // if unit ID not found in units2 dictionary
+                                        //{
+                                            units2.Remove(response);
                                             units2.Add(response, handler); // add entry for unit ID to units2 dictionary
-                                            if (!units.ContainsKey(handler))
-                                                units.Add(handler, response); // add entry for unit in the dictionary of actively connected units (IP address and unit id)
-                                            else
-                                            {
-                                                units.Remove(handler);
-                                                units.Add(handler, response);
-                                            }
+                                            //if (!units.ContainsKey(handler))
+                                            units.Remove(handler);
+                                            units.Add(handler, response); // add entry for unit in the dictionary of actively connected units (IP address and unit id)
+                                            //else
+                                            //{
+                                            //    units.Remove(handler);
+                                            //    units.Add(handler, response);
+                                            //}
 
-                                            if (!sernumdict.ContainsKey(handler))
-                                                sernumdict.Add(handler, sernum); // add entry for unit in the dictionary of actively connected units (IP address and unit id)
-                                            else
-                                            {
-                                                sernumdict.Remove(handler);
-                                                sernumdict.Add(handler, sernum);
-                                            }
+                                            //if (!sernumdict.ContainsKey(handler))
+                                            sernumdict.Remove(handler);
+                                            sernumdict.Add(handler, sernum); // add entry for unit in the dictionary of actively connected units (IP address and unit id)
+                                            //else
+                                            //{
+                                            //    sernumdict.Remove(handler);
+                                            //    sernumdict.Add(handler, sernum);
+                                            //}
                                             //sernumdict.Add(handler, sernum); // add entry for unit serial number in the dictionary of actively connected units (IP address and serial number)
 
-                                            if (!sernumdict2.ContainsKey(sernum))
-                                                sernumdict2.Add(sernum, handler); // add entry for unit in the dictionary of actively connected units (IP address and unit id)
-                                            else
-                                            {
-                                                sernumdict2.Remove(sernum);
-                                                sernumdict2.Add(sernum, handler);
-                                            }
+                                            //if (!sernumdict2.ContainsKey(sernum))
+                                            sernumdict2.Remove(sernum);
+                                            sernumdict2.Add(sernum, handler); // add entry for unit in the dictionary of actively connected units (IP address and unit id)
+                                            //else
+                                            //{
+                                            //    sernumdict2.Remove(sernum);
+                                            //    sernumdict2.Add(sernum, handler);
+                                            //}
 
                                             //sernumdict2.Add(sernum, handler);
 
-                                            modesetdict.Add(response, false); // add entry to dictionary indicating that mode command has not been sent to this unit
-                                            intervalsetdict.Add(response, false); // add entry to dictionary indicating that interval command has not been sent to this unit
+                                            if (!modesetdict.ContainsKey(response))
+                                                modesetdict.Add(response, false); // add entry to dictionary indicating that mode command has not been sent to this unit
+                                            if (!intervalsetdict.ContainsKey(response))
+                                                intervalsetdict.Add(response, false); // add entry to dictionary indicating that interval command has not been sent to this unit
+
+                                            content = sernum + "   " + handler.RemoteEndPoint.ToString() + "   " + DateTime.Now.ToShortDateString() + " " + DateTime.Now.ToShortTimeString() + "   " + content2 +"\r\n";
+                                            Incoming(null, content);
+#if TEST
+                                            StreamWriter testincominglog = new StreamWriter(new FileStream("C:\\Users\\gayakawa\\desktop\\TCPServer Log\\" + "testincoming.log", FileMode.Append, FileAccess.Write));
+                                            testincominglog.Write("\r\n" + DateTime.Now + " " + handler.RemoteEndPoint.ToString() + " raw incoming " + content2);
+                                            testincominglog.Close();
+#else
+
+                                            StreamWriter incominglog = new StreamWriter(new FileStream("C:\\Users\\gayakawa\\desktop\\TCPServer Log\\" + "incoming.log", FileMode.Append, FileAccess.Write));
+                                            incominglog.Write("\r\n" + DateTime.Now + " " + handler.RemoteEndPoint.ToString() + " (Serial Number " + sernum + ")  " + "raw incoming " + content2);
+                                            incominglog.Close();
+#endif
+
+                                        //}
+
+                                        //else   // if unit ID is found in units2 dictionary, remove entry and add new entry (in case socket has changed)
+                                        //       // in both the units and units2 dictionaries 
+                                        //       // do the same for the associated serial number entries in the sernumdict2 and sernumdict dictionaries 
+                                        //{
+
+                                        //    units2.Remove(response);
+                                        //    units2.Add(response, handler);
 
 
-                                        }
+                                        //    // create array of unit IDs from units dictionary
+                                        //    Dictionary<Socket, int>.ValueCollection valueColl =
+                                        //        units.Values;
+                                        //    int[] unitarray = new int[units.Count];
+                                        //    valueColl.CopyTo(unitarray, 0);
 
-                                        else   // if unit ID is found in units2 dictionary, remove entry and add new entry (in case socket has changed)
-                                               // in both the units and units2 dictionaries 
-                                               // do the same for the associated serial number entries in the sernumdict2 and sernumdict dictionaries 
-                                        {
+                                        //    // create array of sockets from units dictionary
+                                        //    Dictionary<Socket, int>.KeyCollection keyColl =
+                                        //                units.Keys;
+                                        //    Socket[] addarray = new Socket[units.Count];
+                                        //    keyColl.CopyTo(addarray, 0);
 
-                                            units2.Remove(response);
-                                            units2.Add(response, handler);
+                                        //    //MessageBox.Show("units count = " + units.Count.ToString()); // TEST
+                                        //    int i = 0;
+                                        //    for (int x = 0; x < unitarray.Length; x++)
+                                        //    {
+                                        //        // get socket associated with the current unit id
+                                        //        if (unitarray[x] == response)
+                                        //        {
+                                        //            i++;
+                                        //            foundsocket = addarray[x];
+                                        //        }
+                                        //    }
+                                        //    //MessageBox.Show("got to 1650");  //TEST
 
+                                        //    if (i > 0)
+                                        //    {
+                                        //        if (units.ContainsKey(foundsocket))
+                                        //        {
+                                        //            units.Remove(foundsocket);
+                                        //            units.Add(handler, response);
+                                        //        }
+                                        //    }
 
-                                            // create array of unit IDs from units dictionary
-                                            Dictionary<Socket, int>.ValueCollection valueColl =
-                                                units.Values;
-                                            int[] unitarray = new int[units.Count];
-                                            valueColl.CopyTo(unitarray, 0);
-
-                                            // create array of sockets from units dictionary
-                                            Dictionary<Socket, int>.KeyCollection keyColl =
-                                                        units.Keys;
-                                            Socket[] addarray = new Socket[units.Count];
-                                            keyColl.CopyTo(addarray, 0);
-
-                                            //MessageBox.Show("units count = " + units.Count.ToString()); // TEST
-                                            int i = 0;
-                                            for (int x = 0; x < unitarray.Length; x++)
-                                            {
-                                                // get socket associated with the current unit id
-                                                if (unitarray[x] == response)
-                                                {
-                                                    i++;
-                                                    foundsocket = addarray[x];
-                                                }
-                                            }
-                                            //MessageBox.Show("got to 1650");  //TEST
-
-                                            if (i > 0)
-                                            {
-                                                if (units.ContainsKey(foundsocket))
-                                                {
-                                                    units.Remove(foundsocket);
-                                                    units.Add(handler, response);
-                                                }
-                                            }
-
-                                            else
-                                            {
-                                                //MessageBox.Show("i = " + i.ToString());
-                                                units.Add(handler, response);
-                                            }
-                                            i = 0;
+                                        //    else
+                                        //    {
+                                        //        //MessageBox.Show("i = " + i.ToString());
+                                        //        units.Add(handler, response);
+                                        //    }
+                                        //    i = 0;
 
 
-                                            sernumdict2.Remove(sernum);
-                                            sernumdict2.Add(sernum, handler);
+                                        //    sernumdict2.Remove(sernum);
+                                        //    sernumdict2.Add(sernum, handler);
 
-                                            // create array of serial numbers from sernumdict dictionary
-                                            Dictionary<Socket, string>.ValueCollection valueColl2 =
-                                                sernumdict.Values;
-                                            string[] sernumarray = new string[sernumdict.Count];
-                                            valueColl2.CopyTo(sernumarray, 0);
+                                        //    // create array of serial numbers from sernumdict dictionary
+                                        //    Dictionary<Socket, string>.ValueCollection valueColl2 =
+                                        //        sernumdict.Values;
+                                        //    string[] sernumarray = new string[sernumdict.Count];
+                                        //    valueColl2.CopyTo(sernumarray, 0);
 
-                                            // create array of sockets from sernumdict dictionary
-                                            Dictionary<Socket, string>.KeyCollection keyColl2 =
-                                                        sernumdict.Keys;
-                                            Socket[] sernumaddarray = new Socket[sernumdict.Count];
-                                            keyColl2.CopyTo(sernumaddarray, 0);
+                                        //    // create array of sockets from sernumdict dictionary
+                                        //    Dictionary<Socket, string>.KeyCollection keyColl2 =
+                                        //                sernumdict.Keys;
+                                        //    Socket[] sernumaddarray = new Socket[sernumdict.Count];
+                                        //    keyColl2.CopyTo(sernumaddarray, 0);
 
-                                            for (int x = 0; x < unitarray.Length; x++)
-                                            {
-                                                // get socket associated with the current serial number
-                                                if (sernumarray[x] == sernum)
-                                                {
-                                                    i++;
-                                                    foundsocket2 = sernumaddarray[x];
-                                                }
-                                            }
+                                        //    for (int x = 0; x < unitarray.Length; x++)
+                                        //    {
+                                        //        // get socket associated with the current serial number
+                                        //        if (sernumarray[x] == sernum)
+                                        //        {
+                                        //            i++;
+                                        //            foundsocket2 = sernumaddarray[x];
+                                        //        }
+                                        //    }
 
-                                            if (i > 0)
-                                            {
-                                                if (sernumdict.ContainsKey(foundsocket2))
-                                                {
-                                                    sernumdict.Remove(foundsocket2);
-                                                    sernumdict.Add(handler, sernum);
-                                                }
-                                            }
-                                            else
-                                            {
-                                                //MessageBox.Show("this time i = " + i.ToString());
-                                                sernumdict.Add(handler, sernum);
-                                            }
+                                        //    if (i > 0)
+                                        //    {
+                                        //        if (sernumdict.ContainsKey(foundsocket2))
+                                        //        {
+                                        //            sernumdict.Remove(foundsocket2);
+                                        //            sernumdict.Add(handler, sernum);
+                                        //        }
+                                        //    }
+                                        //    else
+                                        //    {
+                                        //        //MessageBox.Show("this time i = " + i.ToString());
+                                        //        sernumdict.Add(handler, sernum);
+                                        //    }
 
-                                            i = 0;
+                                        //    i = 0;
 
-                                            //modesetdict.Add(response, false); // add entry to dictionary indicating that mode command has not been sent to this unit
-                                            //intervalsetdict.Add(response, false); // add entry to dictionary indicating that interval command has not been sent to this unit
-                                        }
+                                        //    //modesetdict.Add(response, false); // add entry to dictionary indicating that mode command has not been sent to this unit
+                                        //    //intervalsetdict.Add(response, false); // add entry to dictionary indicating that interval command has not been sent to this unit
+                                    }
 
 
 
-                                        if (response2 != response)
+                                    if (response2 != response)
 
                                         {
 
@@ -1824,7 +1841,7 @@ namespace TCPServer2
                                     }
                                 }
                             }
-                        }
+                        //}
 
 
                         //if (content2.Contains("{03,") && verrqstd && count != 6) // received incorrectly formatted version response
@@ -1844,7 +1861,7 @@ namespace TCPServer2
                         //if (content2.Contains("{08,FD") && fwstart == false) // received date and time acknowledgement for initial time set message
                         modesetdict.TryGetValue(unitid, out modeset);
                         intervalsetdict.TryGetValue(unitid, out interset);
-                        {
+                        //{
                             //timeset = true;
 
                             //if (OpMode != "0000" && timeset) // send message if operation mode is not set to default
@@ -1875,7 +1892,7 @@ namespace TCPServer2
                             // if in firmware update mode, begin firmware update process
                             //if (OpMode == "0000" && fwreq && timeset)
                             //    FWSend();
-                        }
+                        //}
 
                         string filename = "C:\\ProgramData\\TCPServer\\Unsent_Messages_" + sernum;
                         //if (File.Exists("C:\\ProgramData\\TCPServer\\Unsent_Messages.txt"))
@@ -2666,6 +2683,7 @@ namespace TCPServer2
                             {
                                 if (!alarmsensor.ContainsKey(Convert.ToInt32(dr["id"])))
                                     alarmsensor.Add(Convert.ToInt32(dr["id"]), Convert.ToInt32(dr["SensorID"]));
+
                             }
 
                             // add entry to dictionary that relates alarm ID to low limit value
@@ -2697,7 +2715,7 @@ namespace TCPServer2
 
                         catch (Exception e2)
                         {
-                            MessageBox.Show(e2.ToString());
+                            MessageBox.Show("problem at 2718\r\n" + e2.ToString());
                         }
 
                         // create array of sensor IDs associated with alarms
@@ -2800,7 +2818,8 @@ namespace TCPServer2
 
                         catch (Exception e)
                         {
-                            MessageBox.Show(e.ToString());
+                            
+                            MessageBox.Show("problem at 2822\r\n" + e.ToString());
                         }
 
 
@@ -2847,7 +2866,8 @@ namespace TCPServer2
                             }
                             catch (Exception e)
                             {
-                                MessageBox.Show(e.ToString());
+                                
+                                MessageBox.Show("problem at 2870\r\n" + e.ToString());
                             }
 
 
@@ -3097,7 +3117,8 @@ namespace TCPServer2
                                                     }
                                                     catch (Exception e)
                                                     {
-                                                        MessageBox.Show(e.ToString());
+                                                        
+                                                        MessageBox.Show("problem at 3120\r\n" + e.ToString());
                                                     }
                                                 }
                                             }
@@ -3535,3 +3556,4 @@ namespace TCPServer2
         }
     }
 }
+
