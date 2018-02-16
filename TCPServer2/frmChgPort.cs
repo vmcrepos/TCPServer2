@@ -85,17 +85,18 @@ namespace TCPServer2
                 {
                     string data = "{VMC01," + Form1.selid + ",69,00," + newaddress + "," + newport + "}\r\n";
                     
-                    if (Form1.foundsocket != null)
-                    {
+                    //if (Form1.foundsocket != null)
+                    //{
                        
-                        AsynchronousSocketListener.Send(Form1.foundsocket, data);
-                    }
-                    else  // if no socket is associated with the selected unit serial number, add message string to list of unsent messages for that unit
-                    {
-                        AsynchronousSocketListener.AddUnsentMessage(Form1.selid, "\r\n" + data);
+                    //    AsynchronousSocketListener.Send(Form1.foundsocket, data);
+                    //}
+                    //else  // if no socket is associated with the selected unit serial number, add message string to list of unsent messages for that unit
+                    //{
+                    AsynchronousSocketListener.AddUnsentMessage(Form1.selid, "\r\n" + data);
+                    AsynchronousSocketListener.SendCurrTime(Form1.selid);
                        
 
-                    }
+                    //}
                 }
                 
 

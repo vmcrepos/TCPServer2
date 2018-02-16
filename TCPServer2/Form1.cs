@@ -189,11 +189,11 @@ namespace TCPServer2
             
         }
 
-        private void timer2_Tick(object sender, EventArgs e)
-        {
-            if (AsynchronousSocketListener.fwstart == false)
-                AsynchronousSocketListener.SendCurrTime(); // send "set time" message periodically
-        }
+        //private void timer2_Tick(object sender, EventArgs e)
+        //{
+        //    if (AsynchronousSocketListener.fwstart == false)
+        //        AsynchronousSocketListener.SendCurrTime(); // send "set time" message periodically
+        //}
 
         private void button1_Click(object sender, EventArgs e)
         {
@@ -273,20 +273,22 @@ namespace TCPServer2
         {
             if (selid != "")
             {
-                foundsocket = getSocket();
-                Int32 unixTimecurr = (Int32)(DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1))).TotalSeconds; // get current Unix time
-                string hexTimecurr = unixTimecurr.ToString("X");
-                string data = "{VMC01," + selid + ",59,00," + hexTimecurr.ToString() + "}\r\n";
-                
-                if (foundsocket != null)
-                {
-                    AsynchronousSocketListener.Send(foundsocket, data);
-                }
-                else // if no socket is associated with the selected unit serial number, add message string to list of unsent messages for that unit
-                {
-                    AsynchronousSocketListener.AddUnsentMessage(selid, "\r\n" + data);
-                    
-                }
+                //foundsocket = getSocket();
+                //Int32 unixTimecurr = (Int32)(DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1))).TotalSeconds; // get current Unix time
+                //string hexTimecurr = unixTimecurr.ToString("X");
+                //string data = "{VMC01," + selid + ",59,00," + hexTimecurr.ToString() + "}\r\n";
+
+                //if (foundsocket != null)
+                //{
+                //AsynchronousSocketListener.Send(foundsocket, data);
+                AsynchronousSocketListener.AddUnsentMessage(selid, "\r\n" + "Send Current Time,\r\n");
+                AsynchronousSocketListener.SendCurrTime(selid);
+                //}
+                //else // if no socket is associated with the selected unit serial number, add message string to list of unsent messages for that unit
+                //{
+                //    AsynchronousSocketListener.AddUnsentMessage(selid, "\r\n" + data);
+
+                //}
             }
             else
                 MessageBox.Show("Please select (click on) a unit from the serial number list");
@@ -298,18 +300,19 @@ namespace TCPServer2
         {
             if (selid != "")
             {
-                foundsocket = getSocket();
+                //foundsocket = getSocket();
                 string data = "{VMC01," + selid + ",53,01}\r\n";
                 
-                if (foundsocket != null)
-                {
-                    AsynchronousSocketListener.Send(foundsocket, data);
-                }
-                else // if no socket is associated with the selected unit serial number, add message string to list of unsent messages for that unit
-                {
-                    AsynchronousSocketListener.AddUnsentMessage(selid, "\r\n" + data);
+                //if (foundsocket != null)
+                //{
+                //    AsynchronousSocketListener.Send(foundsocket, data);
+                //}
+                //else // if no socket is associated with the selected unit serial number, add message string to list of unsent messages for that unit
+                //{
+                AsynchronousSocketListener.AddUnsentMessage(selid, "\r\n" + data);
+                AsynchronousSocketListener.SendCurrTime(selid);
                    
-                }
+                //}
             }
             else
                 MessageBox.Show("Please select (click on) a unit from the serial number list");
@@ -429,7 +432,7 @@ namespace TCPServer2
         {
             if (selid != "")
             {
-                foundsocket = getSocket();
+                //foundsocket = getSocket();
                 Form ChgPortForm = new frmChgPort(); // display form for changing incoming port
                 ChgPortForm.ShowDialog();
             }
@@ -442,7 +445,7 @@ namespace TCPServer2
         {
             if (selid != "")
             {
-                foundsocket = getSocket();
+                //foundsocket = getSocket();
                 Form RebootForm = new frmReboot(); // display form for confirming reboot
                 RebootForm.ShowDialog();
             }
@@ -473,19 +476,20 @@ namespace TCPServer2
         {
             if (selid != "")
             {
-                AsynchronousSocketListener.fwreq2 = true;
-                AsynchronousSocketListener.pos = 0;
-                Socket foundsocket = getSocket();
+                //AsynchronousSocketListener.fwreq2 = true;
+                //AsynchronousSocketListener.pos = 0;
+                //Socket foundsocket = getSocket();
                 string data = "{VMC01," + selid + ",64,FF,FWUpdate}" + "\r\n";
-                if (foundsocket != null)
-                {
-                    AsynchronousSocketListener.Send(foundsocket, data);
-                }
-                else // if no socket is associated with the selected unit serial number, add message string to list of unsent messages for that unit
-                {
-                    AsynchronousSocketListener.AddUnsentMessage(selid, "\r\n" + data);
+                //if (foundsocket != null)
+                //{
+                //    AsynchronousSocketListener.Send(foundsocket, data);
+                //}
+                //else // if no socket is associated with the selected unit serial number, add message string to list of unsent messages for that unit
+                //{
+                AsynchronousSocketListener.AddUnsentMessage(selid, "\r\n" + data);
+                AsynchronousSocketListener.SendCurrTime(selid);
                     
-                }
+                //}
             }
             else
                 MessageBox.Show("Please select (click on) a unit from the serial number list");

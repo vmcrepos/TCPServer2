@@ -1,4 +1,4 @@
-﻿#define DON
+﻿#define TEST
 
 using System;
 using System.Text;
@@ -1923,7 +1923,17 @@ namespace TCPServer2
 
                             for (int x = 0; x < unsentarr.Count; x++)
                             {
-                                Send(handler, unsentarr[x].ToString() + "\r\n");
+                                if (unsentarr[x].ToString().Contains("Send Current Time,"))
+                                    SendCurrTime(sernum);
+                                else
+                                {
+                                    if (unsentarr[x].ToString().Contains("64,FF"))
+                                    {
+                                        fwreq2 = true;
+                                        pos = 0;
+                                    }
+                                    Send(handler, unsentarr[x].ToString() + "\r\n");
+                                }
                                 Thread.Sleep(2000);
 
                             }
@@ -1965,7 +1975,7 @@ namespace TCPServer2
                         //if (content2.Contains("{09,")) // received date and time request
                         if (content2.Contains("{VMC01," + sernum + ",09,")) // received date and time request
                         {
-                            SendCurrTime(); // send set time message
+                            SendCurrTime(sernum); // send set time message
 
                             //try
                             //{
@@ -3250,15 +3260,20 @@ namespace TCPServer2
 
             try
             {
-                if (SocketExtensions.IsConnected(handler))
-                {
+                //if (SocketExtensions.IsConnected(handler))
+                //{
                     handler.BeginSend(byteData, 0, byteData.Length, 0,
                     new AsyncCallback(SendCallback), handler);
                     //Outgoing(ipa + " " + DateTime.Now.ToShortDateString() + " " + DateTime.Now.ToShortTimeString() + " " + data);
                     //Outgoing(handler.RemoteEndPoint.ToString() + "   " + DateTime.Now.ToShortDateString() + " " +
                     //    DateTime.Now.ToShortTimeString() + "   " + data);
                     string outsernum = "";
-                    sernumdict.TryGetValue(handler, out outsernum);
+                    ArrayList senddata = new ArrayList();
+                    senddata.Clear();
+                    senddata.AddRange(data.Split(',')); // split message data string at delimiters and store elements in arraylist
+                    sernum = senddata[1].ToString(); // extract serial number from message
+                    outsernum = senddata[1].ToString(); // extract serial number from message
+                    //sernumdict.TryGetValue(handler, out outsernum);
                     Outgoing(outsernum + "   " + handler.RemoteEndPoint.ToString() + "   " + DateTime.Now.ToShortDateString() + " " +
                         DateTime.Now.ToShortTimeString() + "   " + data);
 
@@ -3273,7 +3288,7 @@ namespace TCPServer2
                 outgoinglog.Close();
 #endif
 
-                }
+                //}
             }
             catch (Exception e)
             {
@@ -3289,26 +3304,26 @@ namespace TCPServer2
                 //MessageBox.Show(e.ToString());
             }
 
-            if (!SocketExtensions.IsConnected(handler))
-            {
-                //int missingunit;
-                //units.TryGetValue(handler, out missingunit);
-                //MessageBox.Show("got to 3183");
-                AddUnsentMessage(sernum, "\r\n" + data);
-                //if (File.Exists("C:\\ProgramData\\TCPServer\\Unsent_Messages.txt"))
-                //{
-                //    StreamWriter unsent = new StreamWriter(new FileStream("C:\\ProgramData\\TCPServer\\Unsent_Messages.txt", FileMode.Append, FileAccess.Write));
-                //    unsent.Write("\r\n" + data);
-                //    unsent.Close();
-                //}
+            //if (!SocketExtensions.IsConnected(handler))
+            //{
+            //    //int missingunit;
+            //    //units.TryGetValue(handler, out missingunit);
+            //    //MessageBox.Show("got to 3183");
+            //    AddUnsentMessage(sernum, "\r\n" + data);
+            //    //if (File.Exists("C:\\ProgramData\\TCPServer\\Unsent_Messages.txt"))
+            //    //{
+            //    //    StreamWriter unsent = new StreamWriter(new FileStream("C:\\ProgramData\\TCPServer\\Unsent_Messages.txt", FileMode.Append, FileAccess.Write));
+            //    //    unsent.Write("\r\n" + data);
+            //    //    unsent.Close();
+            //    //}
 
-                handler.Shutdown(SocketShutdown.Both);
-                handler.Disconnect(true);
-                clientSockets.Remove(handler);
-                units.Remove(handler);
-                sernumdict.Remove(handler);
-                //MessageBox.Show("Lost connection");
-            }
+            //    handler.Shutdown(SocketShutdown.Both);
+            //    handler.Disconnect(true);
+            //    clientSockets.Remove(handler);
+            //    units.Remove(handler);
+            //    sernumdict.Remove(handler);
+            //    //MessageBox.Show("Lost connection");
+            //}
         }
 
         private static void SendCallback(IAsyncResult ar)
@@ -3346,123 +3361,128 @@ namespace TCPServer2
         }
 
         // send "set time" message
-        public static void SendCurrTime()
+        public static void SendCurrTime(string sn)
         {
-            // reset dictionary value for the connected unit to indicate that log is ready to be modified (this is used for a disconnection log entry below)
-            if (clientSockets.Count != 0) // insure that at least one socket has previously been opened
+            //// reset dictionary value for the connected unit to indicate that log is ready to be modified (this is used for a disconnection log entry below)
+            //if (clientSockets.Count != 0) // insure that at least one socket has previously been opened
+            //{
+            //    if (!disclogmod.ContainsKey(handler))
+            //        disclogmod.Add(handler, false);
+            //    else
+            //    {
+            //        disclogmod.Remove(handler);
+            //        disclogmod.Add(handler, false);
+            //    }
+            //}
+
+            //string sernum2 = "";
+            //if (clientSockets.Count != 0) // insure that at least one socket has previously been opened
+            //{
+            //    //for (int a = 0; a < clientSockets.Count; a++)
+            //    for (int a = (clientSockets.Count - 1); a > -1; a--) // loop through sockets in reverse since sockets may be removed from clientSockets list during processing
+            //    //foreach (var s in clientSockets)
+            //    {
+            //        handler = clientSockets[a];
+            //        if ((SocketExtensions.IsConnected(handler))) // check if socket is connected
+            //        {
+            //            try
+            //            {
+            //                // reset dictionary value for the connected unit to indicate that log is ready to be modified (this is used for a disconnection log entry below)
+            //                if (!disclogmod.ContainsKey(handler))
+            //                    disclogmod.Add(handler, false);
+            //                else
+            //                {
+            //                    disclogmod.Remove(handler);
+            //                    disclogmod.Add(handler, false);
+            //                }
+
+            //                if (sernumdict.ContainsKey(handler)) //&& sernum2 != ""))                                                                                                         
+            //                {
+            //                    sernumdict.TryGetValue(handler, out sernum2); // get serial number of connected unit
+            //                }
+            if (sernumdict2.ContainsKey(sn))
             {
-                if (!disclogmod.ContainsKey(handler))
-                    disclogmod.Add(handler, false);
-                else
-                {
-                    disclogmod.Remove(handler);
-                    disclogmod.Add(handler, false);
-                }
+                sernumdict2.TryGetValue(sn, out handler); // get socket associated with serial number of connected unit
+            }
+            Int32 unixTimecurr = (Int32)(DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1))).TotalSeconds; // get current Unix time
+            string hexTimecurr = unixTimecurr.ToString("X");
+            string data = "{VMC01," + sn + ",59,00," + hexTimecurr.ToString() + "}\r\n";
+            Send(handler, data);
+        
+
+            //                //if (sernumdict.ContainsKey(handler)) //&& sernum2 != ""))                                                                                                         
+            //                //{
+            //                //    sernumdict.TryGetValue(handler, out sernum2); // get serial number of connected unit
+
+            //                //    {
+            //                // add log file entry indicating that this unit is still connected
+
+            //                StreamWriter connlog = new StreamWriter(new FileStream("C:\\Users\\gayakawa\\desktop\\TCPServer Log\\" + sernum2 + ".log", FileMode.Append, FileAccess.Write));
+            //                connlog.Write("\r\n" + DateTime.Now + " " + handler.RemoteEndPoint.ToString() + " (Serial Number " + sernum2 + ") connected");
+            //                connlog.Close();
+            //                //    }
+            //                //}
+
+
+            //            }
+            //            catch (Exception e)
+            //            {
+            //                MessageBox.Show(e.ToString());
+            //            }
+
+
+            //        }
+
+                //    else if ((!SocketExtensions.IsConnected(handler))) // check if socket is connected
+                //    {
+                //        // unit has apparently been disconnected
+                //        clientSockets.Remove(handler);
+                //        bool logmod;
+                //        disclogmod.TryGetValue(handler, out logmod); // check if log file entry has been made for this event
+
+                //        if (logmod == false) // if log file entry has not yet been made
+                //        {
+                //            if (sernumdict.ContainsKey(handler)) //&& (sernum2 != ""))
+                //            {
+                //                sernumdict.TryGetValue(handler, out sernum2); // get serial number of disconnected unit
+                //                // add log file entry indicating that this unit has been disconnected
+                //                //StreamWriter disclog = new StreamWriter(new FileStream("C:\\Users\\gayakawa\\desktop\\TCPServer Log\\disconnect.log", FileMode.Append, FileAccess.Write));
+                //                StreamWriter disclog = new StreamWriter(new FileStream("C:\\Users\\gayakawa\\desktop\\TCPServer Log\\" + sernum2 + ".log", FileMode.Append, FileAccess.Write));
+                //                disclog.Write("\r\n" + DateTime.Now + " " + handler.RemoteEndPoint.ToString() + " (Serial Number " + sernum2 + ") disconnection detected");
+                //                //disclog.Write("\r\n" + DateTime.Now + " " + IPAddress.Parse(((IPEndPoint)handler.RemoteEndPoint).Address.ToString()) + " disconnected");
+                //                disclog.Close();
+                //            }
+                //        }
+
+                //        units.Remove(handler);
+                //        sernumdict.Remove(handler);
+                //        //MessageBox.Show("NUMBER OF SOCKETS = " + clientSockets.Count.ToString());
+                //        // set dictionary value indicating that a log entry has been made for this unit's log file
+
+                //        if (!disclogmod.ContainsKey(handler))
+                //            disclogmod.Add(handler, true);
+                //        else
+                //        {
+                //            disclogmod.Remove(handler);
+                //            disclogmod.Add(handler, true);
+                //        }
+
+
+
+
+
+                //    }
+                //}
+
             }
 
-            string sernum2 = "";
-            if (clientSockets.Count != 0) // insure that at least one socket has previously been opened
-            {
-                //for (int a = 0; a < clientSockets.Count; a++)
-                for (int a = (clientSockets.Count - 1); a > -1; a--) // loop through sockets in reverse since sockets may be removed from clientSockets list during processing
-                //foreach (var s in clientSockets)
-                {
-                    handler = clientSockets[a];
-                    if ((SocketExtensions.IsConnected(handler))) // check if socket is connected
-                    {
-                        try
-                        {
-                            // reset dictionary value for the connected unit to indicate that log is ready to be modified (this is used for a disconnection log entry below)
-                            if (!disclogmod.ContainsKey(handler))
-                                disclogmod.Add(handler, false);
-                            else
-                            {
-                                disclogmod.Remove(handler);
-                                disclogmod.Add(handler, false);
-                            }
-
-                            if (sernumdict.ContainsKey(handler)) //&& sernum2 != ""))                                                                                                         
-                            {
-                                sernumdict.TryGetValue(handler, out sernum2); // get serial number of connected unit
-                            }
-                            Int32 unixTimecurr = (Int32)(DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1))).TotalSeconds; // get current Unix time
-                            string hexTimecurr = unixTimecurr.ToString("X");
-                            string data = "{VMC01," + sernum2 + ",59,00," + hexTimecurr.ToString() + "}\r\n";
-                            Send(handler, data);
-
-                            //if (sernumdict.ContainsKey(handler)) //&& sernum2 != ""))                                                                                                         
-                            //{
-                            //    sernumdict.TryGetValue(handler, out sernum2); // get serial number of connected unit
-
-                            //    {
-                            // add log file entry indicating that this unit is still connected
-
-                            StreamWriter connlog = new StreamWriter(new FileStream("C:\\Users\\gayakawa\\desktop\\TCPServer Log\\" + sernum2 + ".log", FileMode.Append, FileAccess.Write));
-                            connlog.Write("\r\n" + DateTime.Now + " " + handler.RemoteEndPoint.ToString() + " (Serial Number " + sernum2 + ") connected");
-                            connlog.Close();
-                            //    }
-                            //}
-
-
-                        }
-                        catch (Exception e)
-                        {
-                            MessageBox.Show(e.ToString());
-                        }
-
-
-                    }
-
-                    else if ((!SocketExtensions.IsConnected(handler))) // check if socket is connected
-                    {
-                        // unit has apparently been disconnected
-                        clientSockets.Remove(handler);
-                        bool logmod;
-                        disclogmod.TryGetValue(handler, out logmod); // check if log file entry has been made for this event
-
-                        if (logmod == false) // if log file entry has not yet been made
-                        {
-                            if (sernumdict.ContainsKey(handler)) //&& (sernum2 != ""))
-                            {
-                                sernumdict.TryGetValue(handler, out sernum2); // get serial number of disconnected unit
-                                // add log file entry indicating that this unit has been disconnected
-                                //StreamWriter disclog = new StreamWriter(new FileStream("C:\\Users\\gayakawa\\desktop\\TCPServer Log\\disconnect.log", FileMode.Append, FileAccess.Write));
-                                StreamWriter disclog = new StreamWriter(new FileStream("C:\\Users\\gayakawa\\desktop\\TCPServer Log\\" + sernum2 + ".log", FileMode.Append, FileAccess.Write));
-                                disclog.Write("\r\n" + DateTime.Now + " " + handler.RemoteEndPoint.ToString() + " (Serial Number " + sernum2 + ") disconnection detected");
-                                //disclog.Write("\r\n" + DateTime.Now + " " + IPAddress.Parse(((IPEndPoint)handler.RemoteEndPoint).Address.ToString()) + " disconnected");
-                                disclog.Close();
-                            }
-                        }
-
-                        units.Remove(handler);
-                        sernumdict.Remove(handler);
-                        //MessageBox.Show("NUMBER OF SOCKETS = " + clientSockets.Count.ToString());
-                        // set dictionary value indicating that a log entry has been made for this unit's log file
-
-                        if (!disclogmod.ContainsKey(handler))
-                            disclogmod.Add(handler, true);
-                        else
-                        {
-                            disclogmod.Remove(handler);
-                            disclogmod.Add(handler, true);
-                        }
-
-
-
-
-
-                    }
-                }
-
-            }
 
 
 
 
 
 
-
-        }
+        //}
 
         public static void CheckConnection()
         {
