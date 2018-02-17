@@ -444,7 +444,8 @@ namespace TCPServer2
                             if (packetid.Length == 1)
                                 packetid = "0" + packetid;
                             //byte[] isoreq = System.Text.Encoding.ASCII.GetBytes("{66," + packetid + ",00}\r\n"); // create request message string using packet id
-                            byte[] isoreq = System.Text.Encoding.ASCII.GetBytes("{VMC01," + sernum + ",66," + packetid + ",00}\r\n"); // create request message string using packet id
+                            string sn = GetSNFromUnitID(unitid);
+                            byte[] isoreq = System.Text.Encoding.ASCII.GetBytes("{VMC01," + sn + ",66," + packetid + ",00}\r\n"); // create request message string using packet id
                             string isoreqstr = System.Text.Encoding.ASCII.GetString(isoreq);
                             Socket handler2 = new Socket(AddressFamily.InterNetwork,
                                 SocketType.Stream, ProtocolType.Tcp); // socket to send message
@@ -484,10 +485,13 @@ namespace TCPServer2
 
 
                             // send request message using socket
-                            if (SocketExtensions.IsConnected(handler2))
-                            {
-                                Send(handler2, isoreqstr);
-                            }
+                            //if (SocketExtensions.IsConnected(handler2))
+                            //{
+                            //Send(handler2, isoreqstr);
+                            //}
+                            AddUnsentMessage(sn, "\r\n" + isoreqstr);
+                            SendCurrTime(sn);
+
 
                             if (!inlogmod2.ContainsKey(handler2))
                                 inlogmod2.Add(handler2, false);
@@ -1242,7 +1246,7 @@ namespace TCPServer2
                 else
                     MessageBox.Show("Configuration file not found");
             }
-            
+
             catch (Exception e)
             {
                 MessageBox.Show(e.ToString());
@@ -1250,7 +1254,7 @@ namespace TCPServer2
 
             FWSendFile2(); // call function to send firmware file
 
-            
+
         }
 
         public static void FWSendFile2() // send firmware file
@@ -1272,14 +1276,14 @@ namespace TCPServer2
                     //{
 
                     //https://stackoverflow.com/questions/3967541/how-to-split-large-files-efficiently
-                    
+
                     //break up file into 512-byte chunks
 
                     //int pos = 1;
                     byte[] buffer = new byte[514]; //set the size of firmware file chunk (includes checksum and footer bytes)
                     byte[] header = new byte[1];
                     header[0] = Convert.ToByte("AA", 16); // firmware header byte
-                    
+
 
 
 
@@ -1305,7 +1309,7 @@ namespace TCPServer2
                         // read next 512 bytes
                         int chunkBytesRead = 0;
                         while (chunkBytesRead < 512)
-                        
+
                         {
                             int bytesRead = fs2.Read(buffer,
                                                        chunkBytesRead,
@@ -1327,7 +1331,7 @@ namespace TCPServer2
                         //MessageBox.Show("a = " + a.ToString() + " " + "read = " + read.ToString()); // + " " + "buffer = " + s);
                         //if (read > 0 && fwstart)
                         if (fwstart && fwackrec) // acknowledgement received; send next chunk
-                        
+
 
 
                         {
@@ -1337,7 +1341,7 @@ namespace TCPServer2
                             //Outgoing("sending chunk\r\n");
 
                             // calculate checksum (https://stackoverflow.com/questions/12942904/calculate-twos-complement-checksum-of-hexadecimal-string)
-                            
+
                             //int chkSum = buffer.Aggregate(0, (s, b) => s += b);
                             //Outgoing("raw byte sum = " + chkSum.ToString());
                             //chkSum = chkSum & 0xff;
@@ -1360,7 +1364,7 @@ namespace TCPServer2
 
                             buffer[512] = Convert.ToByte("55", 16); // add footer byte
                             buffer[513] = chkSumByte; // add checksum byte
-                           
+
 
 
 
@@ -1374,8 +1378,8 @@ namespace TCPServer2
                                                                          //current = DateTime.Now;
                                                                          //MessageBox.Show("current = " + current.ToString());
                                                                          //diffInSeconds = (current - start).TotalSeconds;
-                            //retbuff = retbuff + ByteArrayToString(buffer);
-                            //Outgoing(retbuff);
+                                                                         //retbuff = retbuff + ByteArrayToString(buffer);
+                                                                         //Outgoing(retbuff);
                             fwackwait = true;
                             fwackrec = false;
                             //if (fwackrec) //&& !fwackwait) // acknowledgement received
@@ -1389,7 +1393,7 @@ namespace TCPServer2
                             //MessageBox.Show("fwackrec = " + fwackrec.ToString() + " fwackwait = " + fwackwait.ToString());
                         }
                         else if (!fwackrec && !fwackwait && fwstart) // acknowledgement not received; terminate transfer
-                                                       //a = 0;
+                                                                     //a = 0;
                         {
 
                             //MessageBox.Show("FWACKREC = " + fwackrec.ToString() + " FWACKWAIT = " + fwackwait.ToString());
@@ -1403,8 +1407,8 @@ namespace TCPServer2
                         //    + "fwackrec = " + fwackrec.ToString());
                         //Thread.Sleep(500);
                         //fwackrec = false;
-                    
-                            //fwstart = false;
+
+                        //fwstart = false;
                         //}
                         //else
                         //{
@@ -1413,7 +1417,7 @@ namespace TCPServer2
                         //    fs2.Dispose();
                         //}
                     }
-                    
+
 
                     //}
                 }
@@ -1421,8 +1425,8 @@ namespace TCPServer2
 
             else
                 MessageBox.Show("Firmware update file not found");
-        
-                
+
+
             // add log entry indicating firmware update has been performed
 
             //StreamWriter fwuplog = new StreamWriter(new FileStream("C:\\Users\\gayakawa\\desktop\\TCPServer Log\\" + sernum + ".log", FileMode.Append, FileAccess.Write));
@@ -1433,9 +1437,9 @@ namespace TCPServer2
             //units.Remove(handler);
             //sernumdict.Remove(handler);
             //clientSockets.Remove(handler);
-           
-            
-            
+
+
+
             //handler.SendFile("C:\\Users\\gayakawa\\Desktop\\XML Log\\xmlin.log", null, null, TransmitFileOptions.UseDefaultWorkerThread);
             //handler.SendFile("C:\\Users\\gayakawa\\Desktop\\SL2110028.bin", null, System.Text.Encoding.ASCII.GetBytes("goodbye"), TransmitFileOptions.UseKernelApc);
             //}
@@ -1510,16 +1514,16 @@ namespace TCPServer2
                     content2 = "";
                     content2 = state.sb.ToString();
                     //Incoming(handler, "Raw Incoming " + content2 + "\r\n");
-//#if TEST
-//                    StreamWriter testincominglog = new StreamWriter(new FileStream("C:\\Users\\gayakawa\\desktop\\TCPServer Log\\" + "testincoming.log", FileMode.Append, FileAccess.Write));
-//                    testincominglog.Write("\r\n" + DateTime.Now + " " + handler.RemoteEndPoint.ToString() + " raw incoming " + content2);
-//                    testincominglog.Close();
-//#else
+                    //#if TEST
+                    //                    StreamWriter testincominglog = new StreamWriter(new FileStream("C:\\Users\\gayakawa\\desktop\\TCPServer Log\\" + "testincoming.log", FileMode.Append, FileAccess.Write));
+                    //                    testincominglog.Write("\r\n" + DateTime.Now + " " + handler.RemoteEndPoint.ToString() + " raw incoming " + content2);
+                    //                    testincominglog.Close();
+                    //#else
 
-//                    StreamWriter incominglog = new StreamWriter(new FileStream("C:\\Users\\gayakawa\\desktop\\TCPServer Log\\" + "incoming.log", FileMode.Append, FileAccess.Write));
-//                    incominglog.Write("\r\n" + DateTime.Now + " " + handler.RemoteEndPoint.ToString() + " (Serial Number " + outsernum + ")  " + "raw incoming " + content2);
-//                    incominglog.Close();
-//#endif
+                    //                    StreamWriter incominglog = new StreamWriter(new FileStream("C:\\Users\\gayakawa\\desktop\\TCPServer Log\\" + "incoming.log", FileMode.Append, FileAccess.Write));
+                    //                    incominglog.Write("\r\n" + DateTime.Now + " " + handler.RemoteEndPoint.ToString() + " (Serial Number " + outsernum + ")  " + "raw incoming " + content2);
+                    //                    incominglog.Close();
+                    //#endif
                     //Incoming(null, content);
                     //fm.SetText(content);
                     //if (content2.IndexOf("}\r") > -1)
@@ -1611,49 +1615,49 @@ namespace TCPServer2
                                     {
                                         //if (!units2.ContainsKey(response))  // if unit ID not found in units2 dictionary
                                         //{
-                                            units2.Remove(response);
-                                            units2.Add(response, handler); // add entry for unit ID to units2 dictionary
-                                            //if (!units.ContainsKey(handler))
-                                            units.Remove(handler);
-                                            units.Add(handler, response); // add entry for unit in the dictionary of actively connected units (IP address and unit id)
-                                            //else
-                                            //{
-                                            //    units.Remove(handler);
-                                            //    units.Add(handler, response);
-                                            //}
+                                        units2.Remove(response);
+                                        units2.Add(response, handler); // add entry for unit ID to units2 dictionary
+                                                                       //if (!units.ContainsKey(handler))
+                                        units.Remove(handler);
+                                        units.Add(handler, response); // add entry for unit in the dictionary of actively connected units (IP address and unit id)
+                                                                      //else
+                                                                      //{
+                                                                      //    units.Remove(handler);
+                                                                      //    units.Add(handler, response);
+                                                                      //}
 
-                                            //if (!sernumdict.ContainsKey(handler))
-                                            sernumdict.Remove(handler);
-                                            sernumdict.Add(handler, sernum); // add entry for unit in the dictionary of actively connected units (IP address and unit id)
-                                            //else
-                                            //{
-                                            //    sernumdict.Remove(handler);
-                                            //    sernumdict.Add(handler, sernum);
-                                            //}
-                                            //sernumdict.Add(handler, sernum); // add entry for unit serial number in the dictionary of actively connected units (IP address and serial number)
+                                        //if (!sernumdict.ContainsKey(handler))
+                                        sernumdict.Remove(handler);
+                                        sernumdict.Add(handler, sernum); // add entry for unit in the dictionary of actively connected units (IP address and unit id)
+                                                                         //else
+                                                                         //{
+                                                                         //    sernumdict.Remove(handler);
+                                                                         //    sernumdict.Add(handler, sernum);
+                                                                         //}
+                                                                         //sernumdict.Add(handler, sernum); // add entry for unit serial number in the dictionary of actively connected units (IP address and serial number)
 
-                                            //if (!sernumdict2.ContainsKey(sernum))
-                                            sernumdict2.Remove(sernum);
-                                            sernumdict2.Add(sernum, handler); // add entry for unit in the dictionary of actively connected units (IP address and unit id)
-                                            //else
-                                            //{
-                                            //    sernumdict2.Remove(sernum);
-                                            //    sernumdict2.Add(sernum, handler);
-                                            //}
+                                        //if (!sernumdict2.ContainsKey(sernum))
+                                        sernumdict2.Remove(sernum);
+                                        sernumdict2.Add(sernum, handler); // add entry for unit in the dictionary of actively connected units (IP address and unit id)
+                                                                          //else
+                                                                          //{
+                                                                          //    sernumdict2.Remove(sernum);
+                                                                          //    sernumdict2.Add(sernum, handler);
+                                                                          //}
 
-                                            //sernumdict2.Add(sernum, handler);
+                                        //sernumdict2.Add(sernum, handler);
 
-                                            if (!modesetdict.ContainsKey(response))
-                                                modesetdict.Add(response, false); // add entry to dictionary indicating that mode command has not been sent to this unit
-                                            if (!intervalsetdict.ContainsKey(response))
-                                                intervalsetdict.Add(response, false); // add entry to dictionary indicating that interval command has not been sent to this unit
+                                        if (!modesetdict.ContainsKey(response))
+                                            modesetdict.Add(response, false); // add entry to dictionary indicating that mode command has not been sent to this unit
+                                        if (!intervalsetdict.ContainsKey(response))
+                                            intervalsetdict.Add(response, false); // add entry to dictionary indicating that interval command has not been sent to this unit
 
-                                            content = sernum + "   " + handler.RemoteEndPoint.ToString() + "   " + DateTime.Now.ToShortDateString() + " " + DateTime.Now.ToShortTimeString() + "   " + content2 +"\r\n";
-                                            Incoming(null, content);
+                                        content = sernum + "   " + handler.RemoteEndPoint.ToString() + "   " + DateTime.Now.ToShortDateString() + " " + DateTime.Now.ToShortTimeString() + "   " + content2 + "\r\n";
+                                        Incoming(null, content);
 #if TEST
-                                            StreamWriter testincominglog = new StreamWriter(new FileStream("C:\\Users\\gayakawa\\desktop\\TCPServer Log\\" + "testincoming.log", FileMode.Append, FileAccess.Write));
-                                            testincominglog.Write("\r\n" + DateTime.Now + " " + handler.RemoteEndPoint.ToString() + " raw incoming " + content2);
-                                            testincominglog.Close();
+                                        StreamWriter testincominglog = new StreamWriter(new FileStream("C:\\Users\\gayakawa\\desktop\\TCPServer Log\\" + "testincoming.log", FileMode.Append, FileAccess.Write));
+                                        testincominglog.Write("\r\n" + DateTime.Now + " " + handler.RemoteEndPoint.ToString() + " raw incoming " + content2);
+                                        testincominglog.Close();
 #else
 
                                             StreamWriter incominglog = new StreamWriter(new FileStream("C:\\Users\\gayakawa\\desktop\\TCPServer Log\\" + "incoming.log", FileMode.Append, FileAccess.Write));
@@ -1763,84 +1767,84 @@ namespace TCPServer2
 
                                     if (response2 != response)
 
+                                    {
+
+
+                                        //units.Add(handler, response); // add entry for unit in the dictionary of actively connected units (IP address and unit id)
+                                        //sernumdict.Add(handler, sernum); // add entry for unit serial number in the dictionary of actively connected units (IP address and serial number)
+                                        //sernumdict2.Add(sernum, handler);
+                                        unitid = response;
+
+                                        // add log entry indicating connection has been established
+                                        //StreamWriter connlog = new StreamWriter(new FileStream("C:\\Users\\gayakawa\\desktop\\TCPServer Log\\connect.log", FileMode.Append, FileAccess.Write));
+                                        //StreamWriter connlog = new StreamWriter(new FileStream("C:\\Users\\gayakawa\\desktop\\TCPServer Log\\" + sernum + ".log", FileMode.Append, FileAccess.Write));
+                                        //connlog.Write("\r\n" + DateTime.Now + " " + handler.RemoteEndPoint.ToString() + " (Serial Number " + sernum + ") connection established");
+                                        //connlog.Close();
+
+
+                                        // set current time
+                                        //Int32 unixTimecurr = (Int32)(DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1))).TotalSeconds; // get current Unix time
+                                        //string hexTimecurr = unixTimecurr.ToString("X");
+                                        //string data = "{59,FD," + hexTimecurr.ToString() + "}\r\n";
+                                        //Thread.Sleep(1000);
+                                        //Send(handler, data);
+
+
+
+                                        // query VLinkUnit table to determine operation mode associated with unit ID
+                                        string query2 = "SELECT [Mode] FROM [VLink106466].[dbo].[VLinkUnit] WHERE ([UnitID] = " + response.ToString() + ")";
+
+
+                                        using (SqlConnection conn3 = new SqlConnection(connectionString))
                                         {
-
-
-                                            //units.Add(handler, response); // add entry for unit in the dictionary of actively connected units (IP address and unit id)
-                                            //sernumdict.Add(handler, sernum); // add entry for unit serial number in the dictionary of actively connected units (IP address and serial number)
-                                            //sernumdict2.Add(sernum, handler);
-                                            unitid = response;
-
-                                            // add log entry indicating connection has been established
-                                            //StreamWriter connlog = new StreamWriter(new FileStream("C:\\Users\\gayakawa\\desktop\\TCPServer Log\\connect.log", FileMode.Append, FileAccess.Write));
-                                            //StreamWriter connlog = new StreamWriter(new FileStream("C:\\Users\\gayakawa\\desktop\\TCPServer Log\\" + sernum + ".log", FileMode.Append, FileAccess.Write));
-                                            //connlog.Write("\r\n" + DateTime.Now + " " + handler.RemoteEndPoint.ToString() + " (Serial Number " + sernum + ") connection established");
-                                            //connlog.Close();
-
-
-                                            // set current time
-                                            //Int32 unixTimecurr = (Int32)(DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1))).TotalSeconds; // get current Unix time
-                                            //string hexTimecurr = unixTimecurr.ToString("X");
-                                            //string data = "{59,FD," + hexTimecurr.ToString() + "}\r\n";
-                                            //Thread.Sleep(1000);
-                                            //Send(handler, data);
-
-
-
-                                            // query VLinkUnit table to determine operation mode associated with unit ID
-                                            string query2 = "SELECT [Mode] FROM [VLink106466].[dbo].[VLinkUnit] WHERE ([UnitID] = " + response.ToString() + ")";
-
-
-                                            using (SqlConnection conn3 = new SqlConnection(connectionString))
+                                            using (SqlCommand comm3 = new SqlCommand(query2, conn3))
                                             {
-                                                using (SqlCommand comm3 = new SqlCommand(query2, conn3))
+                                                conn3.Open();
+
+
+                                                try
                                                 {
-                                                    conn3.Open();
+                                                    OpMode = comm3.ExecuteScalar().ToString();
 
-
-                                                    try
-                                                    {
-                                                        OpMode = comm3.ExecuteScalar().ToString();
-
-                                                    }
-                                                    catch (Exception e2)
-                                                    {
-                                                        MessageBox.Show(e2.ToString());
-                                                    }
+                                                }
+                                                catch (Exception e2)
+                                                {
+                                                    MessageBox.Show(e2.ToString());
                                                 }
                                             }
+                                        }
 
-                                            // query VLinkUnit table to determine data transmission interval associated with unit ID
-                                            string query3 = "SELECT [Interval] FROM [VLink106466].[dbo].[VLinkUnit] WHERE ([UnitID] = " + response.ToString() + ")";
+                                        // query VLinkUnit table to determine data transmission interval associated with unit ID
+                                        string query3 = "SELECT [Interval] FROM [VLink106466].[dbo].[VLinkUnit] WHERE ([UnitID] = " + response.ToString() + ")";
 
 
-                                            using (SqlConnection conn4 = new SqlConnection(connectionString))
+                                        using (SqlConnection conn4 = new SqlConnection(connectionString))
+                                        {
+                                            using (SqlCommand comm4 = new SqlCommand(query3, conn4))
                                             {
-                                                using (SqlCommand comm4 = new SqlCommand(query3, conn4))
+                                                conn4.Open();
+
+
+                                                try
                                                 {
-                                                    conn4.Open();
+                                                    Interval = comm4.ExecuteScalar().ToString();
 
-
-                                                    try
-                                                    {
-                                                        Interval = comm4.ExecuteScalar().ToString();
-
-                                                    }
-                                                    catch (Exception e2)
-                                                    {
-                                                        MessageBox.Show(e2.ToString());
-                                                    }
+                                                }
+                                                catch (Exception e2)
+                                                {
+                                                    MessageBox.Show(e2.ToString());
                                                 }
                                             }
-
-
                                         }
 
 
-
                                     }
+
+
+
                                 }
                             }
+                        }
                         //}
 
 
@@ -1862,36 +1866,36 @@ namespace TCPServer2
                         modesetdict.TryGetValue(unitid, out modeset);
                         intervalsetdict.TryGetValue(unitid, out interset);
                         //{
-                            //timeset = true;
+                        //timeset = true;
 
-                            //if (OpMode != "0000" && timeset) // send message if operation mode is not set to default
-                            if (OpMode != "0000" && !modeset) // send message if operation mode is not set to default and mode command has not been previously sent
-                            {
-                                string opmodeset = "{VMC01," + sernum + ",67,FE," + OpMode + "}\r\n";
-                                Thread.Sleep(1000);
-                                Send(handler, opmodeset);
-                                //modeset = true;
-                                modesetdict.Remove(unitid);
-                                modesetdict.Add(unitid, true); // set dictionary value to indicate that mode command has been sent
+                        //if (OpMode != "0000" && timeset) // send message if operation mode is not set to default
+                        if (OpMode != "0000" && !modeset) // send message if operation mode is not set to default and mode command has not been previously sent
+                        {
+                            string opmodeset = "{VMC01," + sernum + ",67,FE," + OpMode + "}\r\n";
+                            Thread.Sleep(1000);
+                            Send(handler, opmodeset);
+                            //modeset = true;
+                            modesetdict.Remove(unitid);
+                            modesetdict.Add(unitid, true); // set dictionary value to indicate that mode command has been sent
 
-                            }
+                        }
 
-                            modesetdict.TryGetValue(unitid, out modeset);
+                        modesetdict.TryGetValue(unitid, out modeset);
 
-                            //if (Interval != "0000" && timeset && !modeset) // send message if transmission interval is not set to default
-                            if (Interval != "0000" && !modeset) // send message if transmission interval is not set to default
+                        //if (Interval != "0000" && timeset && !modeset) // send message if transmission interval is not set to default
+                        if (Interval != "0000" && !modeset) // send message if transmission interval is not set to default
 
-                            {
-                                string intervalset = "{VMC01," + sernum + ",71,FC," + Interval + "}\r\n";
-                                Thread.Sleep(1000);
-                                Send(handler, intervalset);
-                                intervalsetdict.Remove(unitid);
-                                intervalsetdict.Add(unitid, true); // set dictionary value to indicate that interval command has been sent
-                            }
+                        {
+                            string intervalset = "{VMC01," + sernum + ",71,FC," + Interval + "}\r\n";
+                            Thread.Sleep(1000);
+                            Send(handler, intervalset);
+                            intervalsetdict.Remove(unitid);
+                            intervalsetdict.Add(unitid, true); // set dictionary value to indicate that interval command has been sent
+                        }
 
-                            // if in firmware update mode, begin firmware update process
-                            //if (OpMode == "0000" && fwreq && timeset)
-                            //    FWSend();
+                        // if in firmware update mode, begin firmware update process
+                        //if (OpMode == "0000" && fwreq && timeset)
+                        //    FWSend();
                         //}
 
                         string filename = "C:\\ProgramData\\TCPServer\\Unsent_Messages_" + sernum;
@@ -1911,7 +1915,7 @@ namespace TCPServer2
                                     //snunsent = line.Split(',')[1];
                                     //if (snunsent == sernum)
                                     //{
-                                        unsentarr.Add(line);
+                                    unsentarr.Add(line);
                                     //}
                                 }
                                 line = unsentcheck.ReadLine();
@@ -1919,7 +1923,7 @@ namespace TCPServer2
                             }
                             unsentcheck.Close();
                             unsentcheck.Dispose();
-                            
+
 
                             for (int x = 0; x < unsentarr.Count; x++)
                             {
@@ -1992,7 +1996,7 @@ namespace TCPServer2
                             //}
                         }
 
-                        
+
                         //if (content2.Contains("{0A,FF") && fwreq2) // received initial acknowledgement for firmware update request
                         if (content2.Contains("{VMC01," + sernum + ",0A,FF") && fwreq2) // received initial acknowledgement for firmware update request
                         {
@@ -2002,7 +2006,7 @@ namespace TCPServer2
                             nakcount = 0;
                             Thread.Sleep(5000);
                             FWSendFile(); // begin sending firmware file
-                                                    }
+                        }
 
                         //if (content2.Contains("0A,FE") && modeset) // received acknowledgement for mode set command
                         if (content2.Contains("{VMC01," + sernum + ",0A,FE") && fwreq2) // received initial acknowledgement for mode set command
@@ -2020,7 +2024,7 @@ namespace TCPServer2
                                 intervalsetdict.Add(unitid, true); // set dictionary value to indicate that interval command has been sent
                             }
 
-                           
+
                         }
 
 
@@ -2222,7 +2226,7 @@ namespace TCPServer2
                         //if (content2.Contains("{11") && fwreq2 == false && fwackwait == true) // received acknowledgement upon receipt of firmware chunk
                         if (content2.Contains("{VMC01," + sernum + ",11") && fwreq2 == false && fwackwait == true) // received acknowledgement upon receipt of firmware chunk
                         {
-                            
+
                             //MessageBox.Show("Here I am! content2 = " + content2);
                             current = DateTime.Now;
                             diffInSeconds = (current - start).TotalSeconds; // check elapsed time between initial sending of firmware data and receipt of acknowledgement
@@ -2263,7 +2267,7 @@ namespace TCPServer2
                                     fwstart = false;
                             }
 
-                            
+
                         }
 
                         content2 = content2.TrimEnd('\r', '\n');
@@ -2393,41 +2397,41 @@ namespace TCPServer2
                             //MessageBox.Show("Received data packets: " + indatastr + "\r\nwith sensors: " + sensoridintstr + "\r\nwith sensor values: " + sensorvalintstr); //test
                             //if (!initreq)
                             //{
-                                string actupdate;
-                                if (!curraction.ContainsKey(handler))
-                                    curraction.Add(handler, "actisoreq");
+                            string actupdate;
+                            if (!curraction.ContainsKey(handler))
+                                curraction.Add(handler, "actisoreq");
+                            else
+                            {
+                                curraction.Remove(handler);
+                                curraction.Add(handler, "actisoreq");
+                            }
+                            curraction.TryGetValue(handler, out actupdate);
+                            if (actupdate == "actisoreq")
+                            {
+
+                                if (!inlogmod.ContainsKey(handler))
+                                    inlogmod.Add(handler, false);
                                 else
                                 {
-                                    curraction.Remove(handler);
-                                    curraction.Add(handler, "actisoreq");
+                                    inlogmod.Remove(handler);
+                                    inlogmod.Add(handler, false);
                                 }
-                                curraction.TryGetValue(handler, out actupdate);
-                                if (actupdate == "actisoreq")
-                                {
-
-                                    if (!inlogmod.ContainsKey(handler))
-                                        inlogmod.Add(handler, false);
-                                    else
-                                    {
-                                        inlogmod.Remove(handler);
-                                        inlogmod.Add(handler, false);
-                                    }
 
 
-                                    UpdateAction2(actionidreq, "actisoreq"); // update action table entry for action id
-                                                                             //actisoreq = false;
+                                UpdateAction2(actionidreq, "actisoreq"); // update action table entry for action id
+                                                                         //actisoreq = false;
 
-                                }
+                            }
                             //}
 
                             //if (initreq)
                             //{ 
-                                //string disconnstr = "{72,00}\r\n";
-                                //Thread.Sleep(1000);
-                                //Send(handler, disconnstr); // send disconnect message
-                                //initreq = false;
+                            //string disconnstr = "{72,00}\r\n";
+                            //Thread.Sleep(1000);
+                            //Send(handler, disconnstr); // send disconnect message
+                            //initreq = false;
                             //}
-                            
+
 
                             //if (actisoreq)
                             //{
@@ -2828,7 +2832,7 @@ namespace TCPServer2
 
                         catch (Exception e)
                         {
-                            
+
                             MessageBox.Show("problem at 2822\r\n" + e.ToString());
                         }
 
@@ -2876,7 +2880,7 @@ namespace TCPServer2
                             }
                             catch (Exception e)
                             {
-                                
+
                                 MessageBox.Show("problem at 2870\r\n" + e.ToString());
                             }
 
@@ -3127,7 +3131,7 @@ namespace TCPServer2
                                                     }
                                                     catch (Exception e)
                                                     {
-                                                        
+
                                                         MessageBox.Show("problem at 3120\r\n" + e.ToString());
                                                     }
                                                 }
@@ -3249,7 +3253,7 @@ namespace TCPServer2
 
         public static void Send(Socket handler, String data)
         {
-            
+
             // Convert the string data to byte data using ASCII encoding.
             byte[] byteData = Encoding.ASCII.GetBytes(data);
             //int missingunit;
@@ -3262,25 +3266,25 @@ namespace TCPServer2
             {
                 //if (SocketExtensions.IsConnected(handler))
                 //{
-                    handler.BeginSend(byteData, 0, byteData.Length, 0,
-                    new AsyncCallback(SendCallback), handler);
-                    //Outgoing(ipa + " " + DateTime.Now.ToShortDateString() + " " + DateTime.Now.ToShortTimeString() + " " + data);
-                    //Outgoing(handler.RemoteEndPoint.ToString() + "   " + DateTime.Now.ToShortDateString() + " " +
-                    //    DateTime.Now.ToShortTimeString() + "   " + data);
-                    string outsernum = "";
-                    ArrayList senddata = new ArrayList();
-                    senddata.Clear();
-                    senddata.AddRange(data.Split(',')); // split message data string at delimiters and store elements in arraylist
-                    sernum = senddata[1].ToString(); // extract serial number from message
-                    outsernum = senddata[1].ToString(); // extract serial number from message
-                    //sernumdict.TryGetValue(handler, out outsernum);
-                    Outgoing(outsernum + "   " + handler.RemoteEndPoint.ToString() + "   " + DateTime.Now.ToShortDateString() + " " +
-                        DateTime.Now.ToShortTimeString() + "   " + data);
+                handler.BeginSend(byteData, 0, byteData.Length, 0,
+                new AsyncCallback(SendCallback), handler);
+                //Outgoing(ipa + " " + DateTime.Now.ToShortDateString() + " " + DateTime.Now.ToShortTimeString() + " " + data);
+                //Outgoing(handler.RemoteEndPoint.ToString() + "   " + DateTime.Now.ToShortDateString() + " " +
+                //    DateTime.Now.ToShortTimeString() + "   " + data);
+                string outsernum = "";
+                ArrayList senddata = new ArrayList();
+                senddata.Clear();
+                senddata.AddRange(data.Split(',')); // split message data string at delimiters and store elements in arraylist
+                sernum = senddata[1].ToString(); // extract serial number from message
+                outsernum = senddata[1].ToString(); // extract serial number from message
+                                                    //sernumdict.TryGetValue(handler, out outsernum);
+                Outgoing(outsernum + "   " + handler.RemoteEndPoint.ToString() + "   " + DateTime.Now.ToShortDateString() + " " +
+                    DateTime.Now.ToShortTimeString() + "   " + data);
 
 #if TEST
-                    StreamWriter testoutgoinglog = new StreamWriter(new FileStream("C:\\Users\\gayakawa\\desktop\\TCPServer Log\\" + "testoutgoing.log", FileMode.Append, FileAccess.Write));
-                    testoutgoinglog.Write("\r\n" + DateTime.Now + " " + handler.RemoteEndPoint.ToString() + " raw outgoing " + data);
-                    testoutgoinglog.Close();
+                StreamWriter testoutgoinglog = new StreamWriter(new FileStream("C:\\Users\\gayakawa\\desktop\\TCPServer Log\\" + "testoutgoing.log", FileMode.Append, FileAccess.Write));
+                testoutgoinglog.Write("\r\n" + DateTime.Now + " " + handler.RemoteEndPoint.ToString() + " raw outgoing " + data);
+                testoutgoinglog.Close();
 #else
 
                 StreamWriter outgoinglog = new StreamWriter(new FileStream("C:\\Users\\gayakawa\\desktop\\TCPServer Log\\" + "outgoing.log", FileMode.Append, FileAccess.Write));
@@ -3408,7 +3412,7 @@ namespace TCPServer2
             string hexTimecurr = unixTimecurr.ToString("X");
             string data = "{VMC01," + sn + ",59,00," + hexTimecurr.ToString() + "}\r\n";
             Send(handler, data);
-        
+
 
             //                //if (sernumdict.ContainsKey(handler)) //&& sernum2 != ""))                                                                                                         
             //                //{
@@ -3433,48 +3437,48 @@ namespace TCPServer2
 
             //        }
 
-                //    else if ((!SocketExtensions.IsConnected(handler))) // check if socket is connected
-                //    {
-                //        // unit has apparently been disconnected
-                //        clientSockets.Remove(handler);
-                //        bool logmod;
-                //        disclogmod.TryGetValue(handler, out logmod); // check if log file entry has been made for this event
+            //    else if ((!SocketExtensions.IsConnected(handler))) // check if socket is connected
+            //    {
+            //        // unit has apparently been disconnected
+            //        clientSockets.Remove(handler);
+            //        bool logmod;
+            //        disclogmod.TryGetValue(handler, out logmod); // check if log file entry has been made for this event
 
-                //        if (logmod == false) // if log file entry has not yet been made
-                //        {
-                //            if (sernumdict.ContainsKey(handler)) //&& (sernum2 != ""))
-                //            {
-                //                sernumdict.TryGetValue(handler, out sernum2); // get serial number of disconnected unit
-                //                // add log file entry indicating that this unit has been disconnected
-                //                //StreamWriter disclog = new StreamWriter(new FileStream("C:\\Users\\gayakawa\\desktop\\TCPServer Log\\disconnect.log", FileMode.Append, FileAccess.Write));
-                //                StreamWriter disclog = new StreamWriter(new FileStream("C:\\Users\\gayakawa\\desktop\\TCPServer Log\\" + sernum2 + ".log", FileMode.Append, FileAccess.Write));
-                //                disclog.Write("\r\n" + DateTime.Now + " " + handler.RemoteEndPoint.ToString() + " (Serial Number " + sernum2 + ") disconnection detected");
-                //                //disclog.Write("\r\n" + DateTime.Now + " " + IPAddress.Parse(((IPEndPoint)handler.RemoteEndPoint).Address.ToString()) + " disconnected");
-                //                disclog.Close();
-                //            }
-                //        }
+            //        if (logmod == false) // if log file entry has not yet been made
+            //        {
+            //            if (sernumdict.ContainsKey(handler)) //&& (sernum2 != ""))
+            //            {
+            //                sernumdict.TryGetValue(handler, out sernum2); // get serial number of disconnected unit
+            //                // add log file entry indicating that this unit has been disconnected
+            //                //StreamWriter disclog = new StreamWriter(new FileStream("C:\\Users\\gayakawa\\desktop\\TCPServer Log\\disconnect.log", FileMode.Append, FileAccess.Write));
+            //                StreamWriter disclog = new StreamWriter(new FileStream("C:\\Users\\gayakawa\\desktop\\TCPServer Log\\" + sernum2 + ".log", FileMode.Append, FileAccess.Write));
+            //                disclog.Write("\r\n" + DateTime.Now + " " + handler.RemoteEndPoint.ToString() + " (Serial Number " + sernum2 + ") disconnection detected");
+            //                //disclog.Write("\r\n" + DateTime.Now + " " + IPAddress.Parse(((IPEndPoint)handler.RemoteEndPoint).Address.ToString()) + " disconnected");
+            //                disclog.Close();
+            //            }
+            //        }
 
-                //        units.Remove(handler);
-                //        sernumdict.Remove(handler);
-                //        //MessageBox.Show("NUMBER OF SOCKETS = " + clientSockets.Count.ToString());
-                //        // set dictionary value indicating that a log entry has been made for this unit's log file
+            //        units.Remove(handler);
+            //        sernumdict.Remove(handler);
+            //        //MessageBox.Show("NUMBER OF SOCKETS = " + clientSockets.Count.ToString());
+            //        // set dictionary value indicating that a log entry has been made for this unit's log file
 
-                //        if (!disclogmod.ContainsKey(handler))
-                //            disclogmod.Add(handler, true);
-                //        else
-                //        {
-                //            disclogmod.Remove(handler);
-                //            disclogmod.Add(handler, true);
-                //        }
-
-
+            //        if (!disclogmod.ContainsKey(handler))
+            //            disclogmod.Add(handler, true);
+            //        else
+            //        {
+            //            disclogmod.Remove(handler);
+            //            disclogmod.Add(handler, true);
+            //        }
 
 
 
-                //    }
-                //}
 
-            }
+
+            //    }
+            //}
+
+        }
 
 
 
@@ -3506,8 +3510,8 @@ namespace TCPServer2
                             if (sernumdict.ContainsKey(handler2)) //&& (sernum2 != ""))
                             {
                                 sernumdict.TryGetValue(handler2, out sernum2); // get serial number of disconnected unit
-                                                                              // add log file entry indicating that this unit has been disconnected
-                                                                              //StreamWriter disclog = new StreamWriter(new FileStream("C:\\Users\\gayakawa\\desktop\\TCPServer Log\\disconnect.log", FileMode.Append, FileAccess.Write));
+                                                                               // add log file entry indicating that this unit has been disconnected
+                                                                               //StreamWriter disclog = new StreamWriter(new FileStream("C:\\Users\\gayakawa\\desktop\\TCPServer Log\\disconnect.log", FileMode.Append, FileAccess.Write));
                                 StreamWriter disclog = new StreamWriter(new FileStream("C:\\Users\\gayakawa\\desktop\\TCPServer Log\\" + sernum2 + ".log", FileMode.Append, FileAccess.Write));
                                 disclog.Write("\r\n" + DateTime.Now + " " + handler2.RemoteEndPoint.ToString() + " (Serial Number " + sernum2 + ") disconnection detected");
                                 //disclog.Write("\r\n" + DateTime.Now + " " + IPAddress.Parse(((IPEndPoint)handler.RemoteEndPoint).Address.ToString()) + " disconnected");
@@ -3549,12 +3553,92 @@ namespace TCPServer2
         public static void AddUnsentMessage(string sn, string data)
         {
             string filename = "C:\\ProgramData\\TCPServer\\Unsent_Messages_" + sn;
-            StreamWriter unsent = new StreamWriter(new FileStream(filename + ".txt", FileMode.Append, FileAccess.Write));
-            //StreamWriter unsent = new StreamWriter(new FileStream("C:\\ProgramData\\TCPServer\\Unsent_Messages_" + sn + ".txt", FileMode.Append, FileAccess.Write));
-            //unsent.Write("\r\n" + missingunit.ToString() + ";" + data);
-            //unsent.Write("\r\n" + data);
-            unsent.Write(data);
-            unsent.Close();
+            if (!File.Exists(filename + ".txt"))
+            {
+                StreamWriter unsent = new StreamWriter(new FileStream(filename + ".txt", FileMode.Create, FileAccess.Write));
+                unsent.Write("Send Current Time,\r\n" + data);
+                unsent.Close();
+            }
+
+            else if (File.Exists(filename + ".txt"))
+            {
+                StreamWriter unsent2 = new StreamWriter(new FileStream(filename + ".txt", FileMode.Append, FileAccess.Write));
+                //StreamWriter unsent = new StreamWriter(new FileStream("C:\\ProgramData\\TCPServer\\Unsent_Messages_" + sn + ".txt", FileMode.Append, FileAccess.Write));
+                //unsent.Write("\r\n" + missingunit.ToString() + ";" + data);
+                //unsent.Write("\r\n" + data);
+                unsent2.Write(data);
+                unsent2.Close();
+            }
+
+        }
+
+        public static string GetSNFromUnitID(int id)
+        {
+            string SerialNumber = "";
+            // get serial number associated with unit id
+
+            string query2 = "SELECT [SerialNumber] FROM [VLink106466].[dbo].[VLinkUnit] WHERE ([UnitID] = " + id.ToString() + ")";
+
+
+            using (SqlConnection conn3 = new SqlConnection(connectionString))
+            {
+                using (SqlCommand comm3 = new SqlCommand(query2, conn3))
+                {
+                    conn3.Open();
+
+
+                    try
+                    {
+                        SerialNumber = comm3.ExecuteScalar().ToString();
+                    }
+
+
+                    catch (Exception e2)
+                    {
+                        MessageBox.Show(e2.ToString());
+                    }
+                }
+            }
+
+            return SerialNumber;
+        }
+
+
+        public static int GetUnitIDFromSN(string sn)
+        {
+            int unit = 0;
+            string unitstr = "";
+            // get serial number associated with unit id
+
+            string query2 = "SELECT [UnitID] FROM [VLink106466].[dbo].[VLinkUnit] WHERE ([Name] = " + sn.ToString() + ")";
+
+
+            using (SqlConnection conn3 = new SqlConnection(connectionString))
+            {
+                using (SqlCommand comm3 = new SqlCommand(query2, conn3))
+                {
+                    conn3.Open();
+
+
+                    try
+                    {
+                        unitstr = comm3.ExecuteScalar().ToString();
+                    }
+
+
+                    catch (Exception e2)
+                    {
+                        MessageBox.Show(e2.ToString());
+                    }
+                }
+            }
+
+            unit = Convert.ToInt32(unitstr);
+            return unit;
+
+
+
+
 
         }
     }
