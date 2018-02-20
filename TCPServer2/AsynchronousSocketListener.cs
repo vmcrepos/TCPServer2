@@ -99,6 +99,7 @@ namespace TCPServer2
         public static Dictionary<Socket, bool> inlogmod2 = new Dictionary<Socket, bool>();
         //public static Dictionary<IPAddress, string> curraction = new Dictionary<IPAddress, string>();
         public static Dictionary<Socket, string> curraction = new Dictionary<Socket, string>();
+        public static Dictionary<string, string> curraction2 = new Dictionary<string, string>();
         //public static Dictionary<IPAddress, string> sernumdict = new Dictionary<IPAddress, string>();
         public static Dictionary<Socket, string> sernumdict = new Dictionary<Socket, string>();
         public static Dictionary<string, Socket> sernumdict2 = new Dictionary<string, Socket>();
@@ -2301,6 +2302,7 @@ namespace TCPServer2
                                 if (indata[i].ToString().Contains("=")) // get data items in format "sensor id = value"
                                     indata2.Add(indata[i]);             // and store elements in arraylist
                             }
+
                             for (int i = 0; i < indata2.Count; i++)
                             {
                                 indatastr = indatastr + " " + indata2[i].ToString(); //test
@@ -2320,7 +2322,9 @@ namespace TCPServer2
                                     sensorvalint.Add(Convert.ToInt32(sensorval[i].ToString(), 16)); // convert to integer and add to arraylist
                                     intsensorvals.Add(Convert.ToInt32(sensoridint[i]), Convert.ToInt32(sensorvalint[i])); // add sensor id and integer value to dictionary of integer sensor values
 
-                                    units.TryGetValue(handler, out unitid); // get unit id of currently connected unit
+                                    
+                                    unitid = GetUnitIDFromSN(sernum); // get unit id of currently connected unit
+                                    //units.TryGetValue(handler, out unitid); // get unit id of currently connected unit
                                     string query = "EXEC proc_storedatapacket @unitid, @sensor_id, @value1, @value2, @value3, @packetdate";
 
                                     using (SqlConnection conn = new SqlConnection(connectionString))
@@ -2356,7 +2360,8 @@ namespace TCPServer2
                                     sensorvalint.Add(sensorval[i].ToString()); // add unconverted string to arraylist
                                     stringsensorvals.Add(Convert.ToInt32(sensoridint[i]), sensorvalint[i].ToString()); // add sensor id and string value to dictionary of string sensor values
 
-                                    units.TryGetValue(handler, out unitid); // get unit id of currently connected unit
+                                    unitid = GetUnitIDFromSN(sernum); // get unit id of currently connected unit
+                                    //units.TryGetValue(handler, out unitid); // get unit id of currently connected unit
                                     string query = "EXEC proc_storedatapacket @unitid, @sensor_id, @value1, @value2, @value3, @packetdate";
 
                                     using (SqlConnection conn = new SqlConnection(connectionString))
@@ -2400,12 +2405,17 @@ namespace TCPServer2
                             string actupdate;
                             if (!curraction.ContainsKey(handler))
                                 curraction.Add(handler, "actisoreq");
+                            //if (!curraction2.ContainsKey(sernum))
+                            //    curraction2.Add(sernum, "actisoreq");
                             else
                             {
                                 curraction.Remove(handler);
                                 curraction.Add(handler, "actisoreq");
+                                //curraction2.Remove(sernum);
+                                //curraction2.Add(sernum, "actisoreq");
                             }
                             curraction.TryGetValue(handler, out actupdate);
+                            //curraction2.TryGetValue(sernum, out actupdate);
                             if (actupdate == "actisoreq")
                             {
 
@@ -2417,9 +2427,61 @@ namespace TCPServer2
                                     inlogmod.Add(handler, false);
                                 }
 
+                                string actionidreqstr = "";
+                                string query2 = "SELECT [id] FROM [VLink106466].[dbo].[VLinkActions] WHERE ([UnitID] = " + unitid.ToString() + ")" +
+                                    " AND ([ActionType] = '1')";
 
-                                UpdateAction2(actionidreq, "actisoreq"); // update action table entry for action id
-                                                                         //actisoreq = false;
+                                using (SqlConnection conn3 = new SqlConnection(connectionString))
+                                {
+                                    using (SqlCommand comm3 = new SqlCommand(query2, conn3))
+                                    {
+                                        conn3.Open();
+
+
+                                        try
+                                        {
+                                            actionidreqstr = comm3.ExecuteScalar().ToString();
+                                        }
+
+
+                                        catch (Exception e2)
+                                        {
+                                            MessageBox.Show(e2.ToString());
+                                        }
+                                    }
+                                }
+
+                                string comptimestr = "";
+                                string query3 = "SELECT [CompleteTime] FROM [VLink106466].[dbo].[VLinkActions] WHERE ([id] = " + actionidreqstr + ")";
+
+                                using (SqlConnection conn4 = new SqlConnection(connectionString))
+                                {
+                                    using (SqlCommand comm4 = new SqlCommand(query3, conn4))
+                                    {
+                                        conn4.Open();
+
+
+                                        try
+                                        {
+                                            comptimestr = comm4.ExecuteScalar().ToString();
+                                        }
+
+
+                                        catch (Exception e2)
+                                        {
+                                            MessageBox.Show(e2.ToString());
+                                        }
+                                    }
+                                }
+
+                                //MessageBox.Show("action id = " + actionidreqstr);   //TEST
+
+                                //MessageBox.Show("complete time = " + comptimestr);  //TEST
+                                if (comptimestr == "")
+                                {
+                                    actionidreq = Convert.ToInt32(actionidreqstr);
+                                    UpdateAction2(actionidreq, "actisoreq"); // update action table entry for action id
+                                }
 
                             }
                             //}
@@ -3563,9 +3625,6 @@ namespace TCPServer2
             else if (File.Exists(filename + ".txt"))
             {
                 StreamWriter unsent2 = new StreamWriter(new FileStream(filename + ".txt", FileMode.Append, FileAccess.Write));
-                //StreamWriter unsent = new StreamWriter(new FileStream("C:\\ProgramData\\TCPServer\\Unsent_Messages_" + sn + ".txt", FileMode.Append, FileAccess.Write));
-                //unsent.Write("\r\n" + missingunit.ToString() + ";" + data);
-                //unsent.Write("\r\n" + data);
                 unsent2.Write(data);
                 unsent2.Close();
             }
@@ -3608,9 +3667,43 @@ namespace TCPServer2
         {
             int unit = 0;
             string unitstr = "";
+            // get unit id associated with serial number
+
+            string query2 = "SELECT [UnitID] FROM [VLink106466].[dbo].[VLinkUnit] WHERE ([SerialNumber] = " + "'" + sn.ToString() + "')";
+            
+
+            using (SqlConnection conn3 = new SqlConnection(connectionString))
+            {
+                using (SqlCommand comm3 = new SqlCommand(query2, conn3))
+                {
+                    conn3.Open();
+
+
+                    try
+                    {
+                        unitstr = comm3.ExecuteScalar().ToString();
+                        MessageBox.Show("sn = " + sn + "; unitstr = " + unitstr);
+                    }
+
+
+                    catch (Exception e2)
+                    {
+                        MessageBox.Show(e2.ToString());
+                    }                                                                                                     
+                }
+            }
+
+            unit = Convert.ToInt32(unitstr);
+            return unit;
+        }
+
+        public static int GetUnitIDFromActionID(int action)
+        {
+            int unit = 0;
+            string unitstr = "";
             // get serial number associated with unit id
 
-            string query2 = "SELECT [UnitID] FROM [VLink106466].[dbo].[VLinkUnit] WHERE ([Name] = " + sn.ToString() + ")";
+            string query2 = "SELECT [UnitID] FROM [VLink106466].[dbo].[VLinkActions] WHERE ([id] = " + action.ToString() + ")";
 
 
             using (SqlConnection conn3 = new SqlConnection(connectionString))
