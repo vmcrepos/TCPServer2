@@ -173,11 +173,9 @@ namespace TCPServer2
 
         private void timer1_Tick(object sender, EventArgs e)
         {
-            //AsynchronousSocketListener.checkact = true;
-            //if (AsynchronousSocketListener.checkact)
-            //if (!AsynchronousSocketListener.fwreq2)
-            if (!AsynchronousSocketListener.fwstart)
-                AsynchronousSocketListener.CheckActions();
+            
+            //if (!AsynchronousSocketListener.fwstart)
+            //    AsynchronousSocketListener.CheckActions();
                 
 
             

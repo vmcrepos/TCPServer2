@@ -313,13 +313,14 @@ namespace TCPServer2
 
 
 
-        public static void CheckActions()
+        public static void CheckActions(string sn)
         {
-            foreach (KeyValuePair<Socket, int> entry in units)   // IP address and unit IDs of all connected units
-            {
-                // get new action items from action table
-                if (entry.Key != null)
-                    units.TryGetValue(entry.Key, out unitid);   // get unit ID from socket
+            unitid = GetUnitIDFromSN(sn);
+            //foreach (KeyValuePair<Socket, int> entry in units)   // IP address and unit IDs of all connected units
+            //{
+            //    // get new action items from action table
+            //    if (entry.Key != null)
+            //        units.TryGetValue(entry.Key, out unitid);   // get unit ID from socket
                 if (unitid != 0)
 
                 {
@@ -445,43 +446,47 @@ namespace TCPServer2
                             if (packetid.Length == 1)
                                 packetid = "0" + packetid;
                             //byte[] isoreq = System.Text.Encoding.ASCII.GetBytes("{66," + packetid + ",00}\r\n"); // create request message string using packet id
-                            string sn = GetSNFromUnitID(unitid);
+                            //string sn = GetSNFromUnitID(unitid);
                             byte[] isoreq = System.Text.Encoding.ASCII.GetBytes("{VMC01," + sn + ",66," + packetid + ",00}\r\n"); // create request message string using packet id
                             string isoreqstr = System.Text.Encoding.ASCII.GetString(isoreq);
-                            Socket handler2 = new Socket(AddressFamily.InterNetwork,
-                                SocketType.Stream, ProtocolType.Tcp); // socket to send message
-                                                                      //int connectid = Convert.ToInt32(dr["UnitID"]);
 
 
-                            // create array of unit IDs
-                            Dictionary<Socket, int>.ValueCollection valueColl =
-                                units.Values;
-                            int[] unitarray = new int[units.Count];
-                            valueColl.CopyTo(unitarray, 0);
+                            //========THIS SECTION COMMENTED OUT 2-20-18===============================================
+                            //Socket handler2 = new Socket(AddressFamily.InterNetwork,
+                            //    SocketType.Stream, ProtocolType.Tcp); // socket to send message
+                            //                                          //int connectid = Convert.ToInt32(dr["UnitID"]);
 
-                            // create array of sockets
-                            Dictionary<Socket, int>.KeyCollection keyColl =
-                                        units.Keys;
-                            Socket[] addarray = new Socket[units.Count];
-                            keyColl.CopyTo(addarray, 0);
 
-                            for (int x = 0; x < unitarray.Length; x++)
-                            {
-                                // get socket associated with the current unit id
-                                if (unitarray[x] == unitid)
-                                    foundsocket = addarray[x];
+                            //// create array of unit IDs
+                            //Dictionary<Socket, int>.ValueCollection valueColl =
+                            //    units.Values;
+                            //int[] unitarray = new int[units.Count];
+                            //valueColl.CopyTo(unitarray, 0);
 
-                            }
+                            //// create array of sockets
+                            //Dictionary<Socket, int>.KeyCollection keyColl =
+                            //            units.Keys;
+                            //Socket[] addarray = new Socket[units.Count];
+                            //keyColl.CopyTo(addarray, 0);
 
-                            for (int y = 0; y < clientSockets.Count; y++)
-                            {
-                                if (foundsocket.RemoteEndPoint.ToString() == clientSockets[y].RemoteEndPoint.ToString())
-                                {
-                                    // socket associated with IP address of unit id 
-                                    handler2 = clientSockets[y];
-                                }
+                            //for (int x = 0; x < unitarray.Length; x++)
+                            //{
+                            //    // get socket associated with the current unit id
+                            //    if (unitarray[x] == unitid)
+                            //        foundsocket = addarray[x];
 
-                            }
+                            //}
+
+                            //for (int y = 0; y < clientSockets.Count; y++)
+                            //{
+                            //    if (foundsocket.RemoteEndPoint.ToString() == clientSockets[y].RemoteEndPoint.ToString())
+                            //    {
+                            //        // socket associated with IP address of unit id 
+                            //        handler2 = clientSockets[y];
+                            //    }
+
+                            //}
+                            //========THIS SECTION COMMENTED OUT 2-20-18===============================================
 
 
 
@@ -493,23 +498,25 @@ namespace TCPServer2
                             AddUnsentMessage(sn, "\r\n" + isoreqstr);
                             SendCurrTime(sn);
 
+                            //========THIS SECTION COMMENTED OUT 2-20-18===============================================
+                            //if (!inlogmod2.ContainsKey(handler2))
+                            //    inlogmod2.Add(handler2, false);
+                            //else
+                            //{
+                            //    inlogmod2.Remove(handler2);
+                            //    inlogmod2.Add(handler2, false);
+                            //}
 
-                            if (!inlogmod2.ContainsKey(handler2))
-                                inlogmod2.Add(handler2, false);
-                            else
-                            {
-                                inlogmod2.Remove(handler2);
-                                inlogmod2.Add(handler2, false);
-                            }
+                            //if (!curraction.ContainsKey(handler2))
+                            //    curraction.Add(handler2, "actisoreq");
+                            //else
+                            //{
+                            //    curraction.Remove(handler2);
+                            //    curraction.Add(handler2, "actisoreq");
+                            //}
+                            //handler2 = null;
 
-                            if (!curraction.ContainsKey(handler2))
-                                curraction.Add(handler2, "actisoreq");
-                            else
-                            {
-                                curraction.Remove(handler2);
-                                curraction.Add(handler2, "actisoreq");
-                            }
-                            handler2 = null;
+                            //========THIS SECTION COMMENTED OUT 2-20-18===============================================
                             if (!pendingactions.ContainsKey(unitid))
                                 pendingactions.Add(unitid, actionidreq);
                             //if (!curraction.ContainsKey(handler))
@@ -561,63 +568,30 @@ namespace TCPServer2
                                 outcyclereset.Add(actionidsetd, false);
 
 
+                        //========THIS SECTION COMMENTED OUT 2-20-18===============================================
+                        
+                        //Socket handler2 = new Socket(AddressFamily.InterNetwork,
+                        //     SocketType.Stream, ProtocolType.Tcp); // socket to send message
+                        ////int connectid = Convert.ToInt32(dr["UnitID"]);
 
-                            Socket handler2 = new Socket(AddressFamily.InterNetwork,
-                                 SocketType.Stream, ProtocolType.Tcp); // socket to send message
-                            //int connectid = Convert.ToInt32(dr["UnitID"]);
+                        //// create array of unit IDs
+                        //Dictionary<Socket, int>.ValueCollection valueColl =
+                        //    units.Values;
+                        //int[] unitarray = new int[units.Count];
+                        //valueColl.CopyTo(unitarray, 0);
 
-                            // create array of unit IDs
-                            Dictionary<Socket, int>.ValueCollection valueColl =
-                                units.Values;
-                            int[] unitarray = new int[units.Count];
-                            valueColl.CopyTo(unitarray, 0);
-
-                            // create array of sockets
-                            Dictionary<Socket, int>.KeyCollection keyColl =
-                                        units.Keys;
-                            Socket[] addarray = new Socket[units.Count];
-                            keyColl.CopyTo(addarray, 0);
-
-
-
-
-                            //string query3= "SELECT id, unitid FROM [VLink106466].[dbo].VLinkActions";
+                        //// create array of sockets
+                        //Dictionary<Socket, int>.KeyCollection keyColl =
+                        //            units.Keys;
+                        //Socket[] addarray = new Socket[units.Count];
+                        //keyColl.CopyTo(addarray, 0);
+                        
+                        //========THIS SECTION COMMENTED OUT 2-20-18===============================================
 
 
-                            //try
-                            //{
-                            //    using (SqlConnection conn = new SqlConnection(connectionString))
-                            //    {
-                            //        using (SqlCommand comm = new SqlCommand(query3, conn))
-                            //        {
-                            //            conn.Open();
-
-                            //            SqlDataAdapter da = new SqlDataAdapter();
-                            //            DataSet ds = new DataSet();
 
 
-                            //            // create dataset and datatable from returned data
-                            //            da.SelectCommand = comm;
-                            //            da.Fill(ds, "ActionTable");
-                            //            dt = ds.Tables["ActionTable"];
-
-                            //        }
-                            //    }
-
-                            //}
-
-                            //catch (Exception e)
-                            //{
-                            //    MessageBox.Show(e.ToString());
-                            //}
-
-                            //foreach (DataRow dr2 in dt.Rows)
-                            //{
-                            //    if (Convert.ToInt32(dr2[0]) == actionidsetd && Convert.ToInt32(dr2[1]) == unitid)
-                            //        match = true;
-                            //}
-
-                            for (int x = 0; x < unitarray.Length; x++)
+                        for (int x = 0; x < unitarray.Length; x++)
                             {
                                 // get socket associated with the current unit id
                                 if (unitarray[x] == unitid)
@@ -836,7 +810,7 @@ namespace TCPServer2
 
 
                 }
-            }
+            //}
 
         }
 
@@ -1943,6 +1917,8 @@ namespace TCPServer2
 
                             }
 
+                           
+
 
 
                             ////https://stackoverflow.com/questions/668907/how-to-delete-a-line-from-a-text-file-in-c
@@ -1963,13 +1939,15 @@ namespace TCPServer2
                             //File.Delete("C:\\ProgramData\\TCPServer\\Unsent_Messages.txt");
                             //File.Move(tempFile, "C:\\ProgramData\\TCPServer\\Unsent_Messages.txt");
                             File.Delete(filename + ".txt");
+                            
 
 
 
 
                         }
 
-
+                        CheckActions(sernum);
+                        
 
 
 
@@ -2010,7 +1988,7 @@ namespace TCPServer2
                         }
 
                         //if (content2.Contains("0A,FE") && modeset) // received acknowledgement for mode set command
-                        if (content2.Contains("{VMC01," + sernum + ",0A,FE") && fwreq2) // received initial acknowledgement for mode set command
+                        if (content2.Contains("{VMC01," + sernum + ",0A,FE")) // received initial acknowledgement for mode set command
                         {
                             //modeset = false;
 
@@ -3682,7 +3660,7 @@ namespace TCPServer2
                     try
                     {
                         unitstr = comm3.ExecuteScalar().ToString();
-                        MessageBox.Show("sn = " + sn + "; unitstr = " + unitstr);
+                        
                     }
 
 
