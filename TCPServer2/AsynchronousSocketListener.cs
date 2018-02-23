@@ -724,99 +724,113 @@ namespace TCPServer2
                             if (!outcyclereset.ContainsKey(actionidseta))
                                 outcyclereset.Add(actionidseta, false);
 
-                            Socket handler2 = new Socket(AddressFamily.InterNetwork,
-                                SocketType.Stream, ProtocolType.Tcp); // socket to send message
-                                                                      //int connectid = Convert.ToInt32(dr["UnitID"]);
+                        //Socket handler2 = new Socket(AddressFamily.InterNetwork,
+                        //    SocketType.Stream, ProtocolType.Tcp); // socket to send message
+                        //                                          //int connectid = Convert.ToInt32(dr["UnitID"]);
 
-                            // create array of unit IDs
-                            Dictionary<Socket, int>.ValueCollection valueColl =
-                                units.Values;
-                            int[] unitarray = new int[units.Count];
-                            valueColl.CopyTo(unitarray, 0);
+                        //// create array of unit IDs
+                        //Dictionary<Socket, int>.ValueCollection valueColl =
+                        //    units.Values;
+                        //int[] unitarray = new int[units.Count];
+                        //valueColl.CopyTo(unitarray, 0);
 
-                            // create array of sockets
-                            Dictionary<Socket, int>.KeyCollection keyColl =
-                                        units.Keys;
-                            Socket[] addarray = new Socket[units.Count];
-                            keyColl.CopyTo(addarray, 0);
+                        //// create array of sockets
+                        //Dictionary<Socket, int>.KeyCollection keyColl =
+                        //            units.Keys;
+                        //Socket[] addarray = new Socket[units.Count];
+                        //keyColl.CopyTo(addarray, 0);
 
-                            for (int x = 0; x < unitarray.Length; x++)
-                            {
-                                // get socket associated with the current unit id
-                                if (unitarray[x] == unitid)
-                                    foundsocket = addarray[x];
+                        //for (int x = 0; x < unitarray.Length; x++)
+                        //{
+                        //    // get socket associated with the current unit id
+                        //    if (unitarray[x] == unitid)
+                        //        foundsocket = addarray[x];
 
-                            }
+                        //}
 
-                            for (int y = 0; y < clientSockets.Count; y++)
-                            {
-                                if (foundsocket.RemoteEndPoint.ToString() == clientSockets[y].RemoteEndPoint.ToString())
-                                {
-                                    // socket associated with IP address of unit id
-                                    handler2 = clientSockets[y];
+                        //for (int y = 0; y < clientSockets.Count; y++)
+                        //{
+                        //    if (foundsocket.RemoteEndPoint.ToString() == clientSockets[y].RemoteEndPoint.ToString())
+                        //    {
+                        //        // socket associated with IP address of unit id
+                        //        handler2 = clientSockets[y];
 
-                                }
+                        //    }
 
-                            }
+                        //}
 
-                            // send request message using socket
-                            if (SocketExtensions.IsConnected(handler2))
-                            {
-                                //Send(handler2, setaoutputstr);
+                        // send request message using socket
+                        //if (SocketExtensions.IsConnected(handler2))
+                        //{
+                        //    //Send(handler2, setaoutputstr);
 
-                                if (!setoutsentcount.ContainsKey(actionidseta))
-                                {
-                                    setoutsentcount.Add(actionidseta, 0);
-                                }
-                                int outcount = 0;
-                                if (setoutsentcount.ContainsKey(actionidseta))
-                                    setoutsentcount.TryGetValue(actionidseta, out outcount);
-                                int cyclecount2 = 0;
-                                if (outcyclecount.ContainsKey(actionidseta))
-                                    outcyclecount.TryGetValue(actionidseta, out cyclecount2);
-                                if (outcyclereset.ContainsKey(actionidseta))
-                                    outcyclereset[actionidseta] = false;
+                        if (!setoutsentcount.ContainsKey(actionidseta))
+                        {
+                            setoutsentcount.Add(actionidseta, 0);
+                        }
+                        int outcount = 0;
+                        if (setoutsentcount.ContainsKey(actionidseta))
+                            setoutsentcount.TryGetValue(actionidseta, out outcount);
+                        int cyclecount2 = 0;
+                        if (outcyclecount.ContainsKey(actionidseta))
+                            outcyclecount.TryGetValue(actionidseta, out cyclecount2);
+                        if (outcyclereset.ContainsKey(actionidseta))
+                            outcyclereset[actionidseta] = false;
 
-                                if (outcount < 10 && cyclecount2 % 6 == 0)
-                                {
-                                    Send(handler2, setaoutputstr);
-                                    setoutsentcount[actionidseta] = outcount + 1;
-                                }
-                                else if (outcount == 10)
-                                {
-                                    setoutsentcount[actionidseta] = 0;
-                                    string data = "{VMC01," + sernum + ",70,00,REBOOT}\r\n";
-                                    Send(handler2, data);
+                        //    if (outcount < 10 && cyclecount2 % 6 == 0)
+                        //    {
+                        //        Send(handler2, setaoutputstr);
+                        //        setoutsentcount[actionidseta] = outcount + 1;
+                        //    }
 
-                                }
-                            }
+                        if (dr["PendingTime"] == DBNull.Value)
+                        {
+                            AddUnsentMessage(sn, "\r\n" + setaoutputstr);
+                            SendCurrTime(sn);
+                        }
+                        //    else if (outcount == 10)
+                        //    {
+                        //        setoutsentcount[actionidseta] = 0;
+                        //        string data = "{VMC01," + sernum + ",70,00,REBOOT}\r\n";
+                        //        Send(handler2, data);
 
-                            if (!outlogmod2.ContainsKey(handler2))
-                                outlogmod2.Add(handler2, false);
-                            else
-                            {
-                                outlogmod2.Remove(handler2);
-                                outlogmod2.Add(handler2, false);
-                            }
+                        //    }
+                        //}
 
-                            if (!curraction.ContainsKey(handler2))
-                                curraction.Add(handler2, "actsetout");
-                            else
-                            {
-                                curraction.Remove(handler2);
-                                curraction.Add(handler2, "actsetout");
-                            }
-                            handler2 = null;
-                            //actisoreq = true;
-                            //if (!curraction.ContainsKey(handler))
-                            //    curraction.Add(handler, "actsetout");
-                            //else
-                            //{
-                            //    curraction.Remove(handler);
-                            //    curraction.Add(handler, "actsetout");
-                            //}
-                            //actsetout = true; // boolean indicating that a "set output" action is active
-                            actsetoutlist.Add(actionidseta); // add action id to list of active "set output" action ids
+                        //if (!outlogmod2.ContainsKey(handler2))
+                        //    outlogmod2.Add(handler2, false);
+                        //else
+                        //{
+                        //    outlogmod2.Remove(handler2);
+                        //    outlogmod2.Add(handler2, false);
+                        //}
+
+                        //if (!curraction.ContainsKey(handler2))
+                        //    curraction.Add(handler2, "actsetout");
+                        //else
+                        //{
+                        //    curraction.Remove(handler2);
+                        //    curraction.Add(handler2, "actsetout");
+                        //}
+                        //handler2 = null;
+                        //actisoreq = true;
+                        //if (!curraction.ContainsKey(handler))
+                        //    curraction.Add(handler, "actsetout");
+                        //else
+                        //{
+                        //    curraction.Remove(handler);
+                        //    curraction.Add(handler, "actsetout");
+                        //}
+
+                        if (!curraction2.ContainsKey(sn))
+                            curraction2.Add(sn, "actsetout");
+                        else
+                        {
+                            curraction2.Remove(sn);
+                            curraction2.Add(sn, "actsetout");
+                        }
+                        //actsetout = true; // boolean indicating that a "set output" action is active
+                        actsetoutlist.Add(actionidseta); // add action id to list of active "set output" action ids
                             if (!ackaction.ContainsKey(packetid))
                                 ackaction.Add(packetid, actionidseta); // add dictionary item linking packet id with action id
                             UpdateAction(actionidseta, "actsetout"); // update "Pending Time" in database action table
