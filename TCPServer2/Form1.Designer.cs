@@ -182,7 +182,6 @@
             // 
             // timer3
             // 
-            this.timer3.Enabled = true;
             this.timer3.Interval = 60000;
             this.timer3.Tick += new System.EventHandler(this.timer3_Tick);
             // 

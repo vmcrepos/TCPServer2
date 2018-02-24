@@ -42,14 +42,14 @@
     </dependentAssembly>
   </dependency>
   <dependency>
-    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="TCPServer2.exe" size="62464">
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="TCPServer2.exe" size="61952">
       <assemblyIdentity name="TCPServer2" version="1.0.0.0" language="neutral" processorArchitecture="msil" />
       <hash>
         <dsig:Transforms>
           <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
         </dsig:Transforms>
         <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
-        <dsig:DigestValue>o3Vvsuz/CGOEw8AQeanYXo2Nqi2fnf/6XqEgTbwdN80=</dsig:DigestValue>
+        <dsig:DigestValue>0w3TR3TSG0dI+mjUXIcfii3Q2M3e7pfcmZyujyC5XxU=</dsig:DigestValue>
       </hash>
     </dependentAssembly>
   </dependency>

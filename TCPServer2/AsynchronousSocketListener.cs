@@ -155,6 +155,8 @@ namespace TCPServer2
         {
             // throw new NotImplementedException();
 
+
+
         }
 
         private static void AsynchronousSocketListener_Connected(string IPAddress)
@@ -883,172 +885,172 @@ namespace TCPServer2
                 MessageBox.Show(e.ToString());
             }
 
-            if (type == "actisoreq") // action type flag indicating that sensor data has been requested
-            {
+            //if (type == "actisoreq") // action type flag indicating that sensor data has been requested
+            //{
 
-                Socket handler2 = new Socket(AddressFamily.InterNetwork,
-                                SocketType.Stream, ProtocolType.Tcp);
+            //    Socket handler2 = new Socket(AddressFamily.InterNetwork,
+            //                    SocketType.Stream, ProtocolType.Tcp);
 
-                // create array of unit IDs
-                Dictionary<Socket, int>.ValueCollection valueColl =
-                    units.Values;
-                int[] unitarray = new int[units.Count];
-                valueColl.CopyTo(unitarray, 0);
+            //    // create array of unit IDs
+            //    Dictionary<Socket, int>.ValueCollection valueColl =
+            //        units.Values;
+            //    int[] unitarray = new int[units.Count];
+            //    valueColl.CopyTo(unitarray, 0);
 
-                // create array of sockets
-                Dictionary<Socket, int>.KeyCollection keyColl =
-                            units.Keys;
-                Socket[] addarray = new Socket[units.Count];
-                keyColl.CopyTo(addarray, 0);
+            //    // create array of sockets
+            //    Dictionary<Socket, int>.KeyCollection keyColl =
+            //                units.Keys;
+            //    Socket[] addarray = new Socket[units.Count];
+            //    keyColl.CopyTo(addarray, 0);
 
-                for (int x = 0; x < unitarray.Length; x++)
-                {
-                    // get socket associated with the current unit id
-                    if (unitarray[x] == unitid)
-                        foundsocket = addarray[x];
+            //    for (int x = 0; x < unitarray.Length; x++)
+            //    {
+            //        // get socket associated with the current unit id
+            //        if (unitarray[x] == unitid)
+            //            foundsocket = addarray[x];
 
-                }
+            //    }
 
-                for (int y = 0; y < clientSockets.Count; y++)
-                {
-                    if (foundsocket.RemoteEndPoint.ToString() == clientSockets[y].RemoteEndPoint.ToString())
-                    {
-                        // socket associated with IP address of unit id 
-                        handler2 = clientSockets[y];
-                    }
+            //    for (int y = 0; y < clientSockets.Count; y++)
+            //    {
+            //        if (foundsocket.RemoteEndPoint.ToString() == clientSockets[y].RemoteEndPoint.ToString())
+            //        {
+            //            // socket associated with IP address of unit id 
+            //            handler2 = clientSockets[y];
+            //        }
 
-                }
+            //    }
 
-                string sernum2 = "";
-                bool logmod3;
-                //inlogmod2.TryGetValue(handler, out logmod3); // check if log file entry has been made for this action
-                inlogmod2.TryGetValue(handler2, out logmod3); // check if log file entry has been made for this action
+            //    string sernum2 = "";
+            //    bool logmod3;
+            //    //inlogmod2.TryGetValue(handler, out logmod3); // check if log file entry has been made for this action
+            //    inlogmod2.TryGetValue(handler2, out logmod3); // check if log file entry has been made for this action
 
-                //MessageBox.Show("logmod3 = " + logmod3.ToString());
-                if (logmod3 == false) // if log file entry has not yet been made
-                {
-                    //if (sernumdict.ContainsKey((((IPEndPoint)handler.RemoteEndPoint).Address))) //&& (sernum2 != ""))\
-                    //if (sernumdict.ContainsKey(handler)) //&& (sernum2 != ""))
-                    if (sernumdict.ContainsKey(handler2))
-                    {
-                        //sernumdict.TryGetValue((((IPEndPoint)handler.RemoteEndPoint).Address), out sernum2); // get serial number of connected unit
-                        //sernumdict.TryGetValue(handler, out sernum2); // get serial number of connected unit
-                        sernumdict.TryGetValue(handler2, out sernum2); // get serial number of connected unit
+            //    //MessageBox.Show("logmod3 = " + logmod3.ToString());
+            //    if (logmod3 == false) // if log file entry has not yet been made
+            //    {
+            //        //if (sernumdict.ContainsKey((((IPEndPoint)handler.RemoteEndPoint).Address))) //&& (sernum2 != ""))\
+            //        //if (sernumdict.ContainsKey(handler)) //&& (sernum2 != ""))
+            //        if (sernumdict.ContainsKey(handler2))
+            //        {
+            //            //sernumdict.TryGetValue((((IPEndPoint)handler.RemoteEndPoint).Address), out sernum2); // get serial number of connected unit
+            //            //sernumdict.TryGetValue(handler, out sernum2); // get serial number of connected unit
+            //            sernumdict.TryGetValue(handler2, out sernum2); // get serial number of connected unit
 
-                        // add log file entry indicating that sensor data has been received from this unit
-                        //StreamWriter datareclog = new StreamWriter(new FileStream("C:\\Users\\gayakawa\\desktop\\TCPServer Log\\" + sernum2 + ".log", FileMode.Append, FileAccess.Write));
-                        //datareclog.Write("\r\n" + DateTime.Now + " Requested sensor data from " + handler.RemoteEndPoint.ToString() + " (Serial Number " + sernum2 + ")");
-                        //datareclog.Close();
-                        StreamWriter datareclog = new StreamWriter(new FileStream("C:\\Users\\gayakawa\\desktop\\TCPServer Log\\" + sernum2 + ".log", FileMode.Append, FileAccess.Write));
-                        datareclog.Write("\r\n" + DateTime.Now + " Requested sensor data from " + handler2.RemoteEndPoint.ToString() + " (Serial Number " + sernum2 + ")");
-                        datareclog.Close();
-                    }
-                }
-                // set dictionary value indicating that a log entry has been made for this unit's log file
-                //if (!inlogmod2.ContainsKey(handler))
-                //    inlogmod2.Add(handler, true);
-                //else
-                //{
-                //    inlogmod2.Remove(handler);
-                //    inlogmod2.Add(handler, true);
-                //}
+            //            // add log file entry indicating that sensor data has been received from this unit
+            //            //StreamWriter datareclog = new StreamWriter(new FileStream("C:\\Users\\gayakawa\\desktop\\TCPServer Log\\" + sernum2 + ".log", FileMode.Append, FileAccess.Write));
+            //            //datareclog.Write("\r\n" + DateTime.Now + " Requested sensor data from " + handler.RemoteEndPoint.ToString() + " (Serial Number " + sernum2 + ")");
+            //            //datareclog.Close();
+            //            StreamWriter datareclog = new StreamWriter(new FileStream("C:\\Users\\gayakawa\\desktop\\TCPServer Log\\" + sernum2 + ".log", FileMode.Append, FileAccess.Write));
+            //            datareclog.Write("\r\n" + DateTime.Now + " Requested sensor data from " + handler2.RemoteEndPoint.ToString() + " (Serial Number " + sernum2 + ")");
+            //            datareclog.Close();
+            //        }
+            //    }
+            //    // set dictionary value indicating that a log entry has been made for this unit's log file
+            //    //if (!inlogmod2.ContainsKey(handler))
+            //    //    inlogmod2.Add(handler, true);
+            //    //else
+            //    //{
+            //    //    inlogmod2.Remove(handler);
+            //    //    inlogmod2.Add(handler, true);
+            //    //}
 
-                if (!inlogmod2.ContainsKey(handler2))
-                    inlogmod2.Add(handler2, true);
-                else
-                {
-                    inlogmod2.Remove(handler2);
-                    inlogmod2.Add(handler2, true);
-                }
+            //    if (!inlogmod2.ContainsKey(handler2))
+            //        inlogmod2.Add(handler2, true);
+            //    else
+            //    {
+            //        inlogmod2.Remove(handler2);
+            //        inlogmod2.Add(handler2, true);
+            //    }
 
-                ////StreamWriter datareclog = new StreamWriter(new FileStream("C:\\Users\\gayakawa\\desktop\\TCPServer Log\\datarec.log", FileMode.Append, FileAccess.Write));
-                //StreamWriter datareclog = new StreamWriter(new FileStream("C:\\Users\\gayakawa\\desktop\\TCPServer Log\\" + sernum + ".log", FileMode.Append, FileAccess.Write));
-                //datareclog.Write("\r\n" + DateTime.Now + " Received sensor data from " + IPAddress.Parse(((IPEndPoint)handler.RemoteEndPoint).Address.ToString()) + " (Serial Number " + sernum + ")");
-                //datareclog.Close();
-            }
+            //    ////StreamWriter datareclog = new StreamWriter(new FileStream("C:\\Users\\gayakawa\\desktop\\TCPServer Log\\datarec.log", FileMode.Append, FileAccess.Write));
+            //    //StreamWriter datareclog = new StreamWriter(new FileStream("C:\\Users\\gayakawa\\desktop\\TCPServer Log\\" + sernum + ".log", FileMode.Append, FileAccess.Write));
+            //    //datareclog.Write("\r\n" + DateTime.Now + " Received sensor data from " + IPAddress.Parse(((IPEndPoint)handler.RemoteEndPoint).Address.ToString()) + " (Serial Number " + sernum + ")");
+            //    //datareclog.Close();
+            //}
 
-            if (type == "actsetout") // action type flag indicating that setting of an output has been requested
-            {
+            //if (type == "actsetout") // action type flag indicating that setting of an output has been requested
+            //{
 
-                Socket handler2 = new Socket(AddressFamily.InterNetwork,
-                                SocketType.Stream, ProtocolType.Tcp);
+            //    Socket handler2 = new Socket(AddressFamily.InterNetwork,
+            //                    SocketType.Stream, ProtocolType.Tcp);
 
-                // create array of unit IDs
-                Dictionary<Socket, int>.ValueCollection valueColl =
-                    units.Values;
-                int[] unitarray = new int[units.Count];
-                valueColl.CopyTo(unitarray, 0);
+            //    // create array of unit IDs
+            //    Dictionary<Socket, int>.ValueCollection valueColl =
+            //        units.Values;
+            //    int[] unitarray = new int[units.Count];
+            //    valueColl.CopyTo(unitarray, 0);
 
-                // create array of sockets
-                Dictionary<Socket, int>.KeyCollection keyColl =
-                            units.Keys;
-                Socket[] addarray = new Socket[units.Count];
-                keyColl.CopyTo(addarray, 0);
+            //    // create array of sockets
+            //    Dictionary<Socket, int>.KeyCollection keyColl =
+            //                units.Keys;
+            //    Socket[] addarray = new Socket[units.Count];
+            //    keyColl.CopyTo(addarray, 0);
 
-                for (int x = 0; x < unitarray.Length; x++)
-                {
-                    // get socket associated with the current unit id
-                    if (unitarray[x] == unitid)
-                        foundsocket = addarray[x];
+            //    for (int x = 0; x < unitarray.Length; x++)
+            //    {
+            //        // get socket associated with the current unit id
+            //        if (unitarray[x] == unitid)
+            //            foundsocket = addarray[x];
 
-                }
+            //    }
 
-                for (int y = 0; y < clientSockets.Count; y++)
-                {
-                    if (foundsocket.RemoteEndPoint.ToString() == clientSockets[y].RemoteEndPoint.ToString())
-                    {
-                        // socket associated with IP address of unit id 
-                        handler2 = clientSockets[y];
-                    }
+            //    for (int y = 0; y < clientSockets.Count; y++)
+            //    {
+            //        if (foundsocket.RemoteEndPoint.ToString() == clientSockets[y].RemoteEndPoint.ToString())
+            //        {
+            //            // socket associated with IP address of unit id 
+            //            handler2 = clientSockets[y];
+            //        }
 
-                }
+            //    }
 
-                string sernum2 = "";
-                bool logmod3;
+            //    string sernum2 = "";
+            //    bool logmod3;
 
-                outlogmod2.TryGetValue(handler2, out logmod3); // check if log file entry has been made for this action
+            //    outlogmod2.TryGetValue(handler2, out logmod3); // check if log file entry has been made for this action
 
-                if (logmod3 == false) // if log file entry has not yet been made
-                {
-                    //if (sernumdict.ContainsKey((((IPEndPoint)handler.RemoteEndPoint).Address))) //&& (sernum2 != ""))\
-                    //if (sernumdict.ContainsKey(handler)) //&& (sernum2 != ""))
-                    if (sernumdict.ContainsKey(handler2))
-                    {
-                        //sernumdict.TryGetValue((((IPEndPoint)handler.RemoteEndPoint).Address), out sernum2); // get serial number of connected unit
-                        //sernumdict.TryGetValue(handler, out sernum2); // get serial number of connected unit
-                        sernumdict.TryGetValue(handler2, out sernum2); // get serial number of connected unit
+            //    if (logmod3 == false) // if log file entry has not yet been made
+            //    {
+            //        //if (sernumdict.ContainsKey((((IPEndPoint)handler.RemoteEndPoint).Address))) //&& (sernum2 != ""))\
+            //        //if (sernumdict.ContainsKey(handler)) //&& (sernum2 != ""))
+            //        if (sernumdict.ContainsKey(handler2))
+            //        {
+            //            //sernumdict.TryGetValue((((IPEndPoint)handler.RemoteEndPoint).Address), out sernum2); // get serial number of connected unit
+            //            //sernumdict.TryGetValue(handler, out sernum2); // get serial number of connected unit
+            //            sernumdict.TryGetValue(handler2, out sernum2); // get serial number of connected unit
 
-                        // add log file entry indicating that sensor data has been received from this unit
-                        //StreamWriter datareclog = new StreamWriter(new FileStream("C:\\Users\\gayakawa\\desktop\\TCPServer Log\\" + sernum2 + ".log", FileMode.Append, FileAccess.Write));
-                        //datareclog.Write("\r\n" + DateTime.Now + " Requested sensor data from " + handler.RemoteEndPoint.ToString() + " (Serial Number " + sernum2 + ")");
-                        //datareclog.Close();
-                        StreamWriter datareclog = new StreamWriter(new FileStream("C:\\Users\\gayakawa\\desktop\\TCPServer Log\\" + sernum2 + ".log", FileMode.Append, FileAccess.Write));
-                        datareclog.Write("\r\n" + DateTime.Now + " Requested setting of an output from " + handler2.RemoteEndPoint.ToString() + " (Serial Number " + sernum2 + ")");
-                        datareclog.Close();
-                    }
-                }
-                // set dictionary value indicating that a log entry has been made for this unit's log file
-                //if (!inlogmod2.ContainsKey(handler))
-                //    inlogmod2.Add(handler, true);
-                //else
-                //{
-                //    inlogmod2.Remove(handler);
-                //    inlogmod2.Add(handler, true);
-                //}
+            //            // add log file entry indicating that sensor data has been received from this unit
+            //            //StreamWriter datareclog = new StreamWriter(new FileStream("C:\\Users\\gayakawa\\desktop\\TCPServer Log\\" + sernum2 + ".log", FileMode.Append, FileAccess.Write));
+            //            //datareclog.Write("\r\n" + DateTime.Now + " Requested sensor data from " + handler.RemoteEndPoint.ToString() + " (Serial Number " + sernum2 + ")");
+            //            //datareclog.Close();
+            //            StreamWriter datareclog = new StreamWriter(new FileStream("C:\\Users\\gayakawa\\desktop\\TCPServer Log\\" + sernum2 + ".log", FileMode.Append, FileAccess.Write));
+            //            datareclog.Write("\r\n" + DateTime.Now + " Requested setting of an output from " + handler2.RemoteEndPoint.ToString() + " (Serial Number " + sernum2 + ")");
+            //            datareclog.Close();
+            //        }
+            //    }
+            //    // set dictionary value indicating that a log entry has been made for this unit's log file
+            //    //if (!inlogmod2.ContainsKey(handler))
+            //    //    inlogmod2.Add(handler, true);
+            //    //else
+            //    //{
+            //    //    inlogmod2.Remove(handler);
+            //    //    inlogmod2.Add(handler, true);
+            //    //}
 
-                if (!outlogmod2.ContainsKey(handler2))
-                    outlogmod2.Add(handler2, true);
-                else
-                {
-                    outlogmod2.Remove(handler2);
-                    outlogmod2.Add(handler2, true);
-                }
+            //    if (!outlogmod2.ContainsKey(handler2))
+            //        outlogmod2.Add(handler2, true);
+            //    else
+            //    {
+            //        outlogmod2.Remove(handler2);
+            //        outlogmod2.Add(handler2, true);
+            //    }
 
-                ////StreamWriter datareclog = new StreamWriter(new FileStream("C:\\Users\\gayakawa\\desktop\\TCPServer Log\\datarec.log", FileMode.Append, FileAccess.Write));
-                //StreamWriter datareclog = new StreamWriter(new FileStream("C:\\Users\\gayakawa\\desktop\\TCPServer Log\\" + sernum + ".log", FileMode.Append, FileAccess.Write));
-                //datareclog.Write("\r\n" + DateTime.Now + " Received sensor data from " + IPAddress.Parse(((IPEndPoint)handler.RemoteEndPoint).Address.ToString()) + " (Serial Number " + sernum + ")");
-                //datareclog.Close();
-            }
+            //    ////StreamWriter datareclog = new StreamWriter(new FileStream("C:\\Users\\gayakawa\\desktop\\TCPServer Log\\datarec.log", FileMode.Append, FileAccess.Write));
+            //    //StreamWriter datareclog = new StreamWriter(new FileStream("C:\\Users\\gayakawa\\desktop\\TCPServer Log\\" + sernum + ".log", FileMode.Append, FileAccess.Write));
+            //    //datareclog.Write("\r\n" + DateTime.Now + " Received sensor data from " + IPAddress.Parse(((IPEndPoint)handler.RemoteEndPoint).Address.ToString()) + " (Serial Number " + sernum + ")");
+            //    //datareclog.Close();
+            //}
 
 
 
@@ -1109,89 +1111,89 @@ namespace TCPServer2
             if (actisoreqlist.Count == 0)
                 actisoreq = false; // if list is empty, set boolean to false (no active "Sensor Data Request" action items)
 
-            if (type == "actsetout") // action type flag indicating that an output has been set
-            {
-                string sernum2 = "";
-                bool logmod2;
-                outlogmod.TryGetValue(handler, out logmod2); // check if log file entry has been made for this action
-                if (logmod2 == false) // if log file entry has not yet been made
-                {
-                    //if (sernumdict.ContainsKey((((IPEndPoint)handler.RemoteEndPoint).Address))) //&& (sernum2 != ""))
-                    if (sernumdict.ContainsKey(handler))
-                    {
-                        //sernumdict.TryGetValue((((IPEndPoint)handler.RemoteEndPoint).Address), out sernum2); // get serial number of connected unit
-                        sernumdict.TryGetValue(handler, out sernum2); // get serial number of connected unit
-                        // add log file entry indicating that an output has been set by this unit
-                        //StreamWriter setoutlog = new StreamWriter(new FileStream("C:\\Users\\gayakawa\\desktop\\TCPServer Log\\setout.log", FileMode.Append, FileAccess.Write));
-                        //StreamWriter setoutlog = new StreamWriter(new FileStream("C:\\Users\\gayakawa\\desktop\\TCPServer Log\\" + sernum2 + ".log", FileMode.Append, FileAccess.Write));
-                        //setoutlog.Write("\r\n" + DateTime.Now + " Output set by " + IPAddress.Parse(((IPEndPoint)handler.RemoteEndPoint).Address.ToString()) + " (Serial Number " + sernum2 + ")");
-                        //setoutlog.Close();
-                        StreamWriter setoutlog = new StreamWriter(new FileStream("C:\\Users\\gayakawa\\desktop\\TCPServer Log\\" + sernum2 + ".log", FileMode.Append, FileAccess.Write));
-                        setoutlog.Write("\r\n" + DateTime.Now + " Output set by " + handler.RemoteEndPoint.ToString() + " (Serial Number " + sernum2 + ")");
-                        setoutlog.Close();
-                    }
-                }
+            //if (type == "actsetout") // action type flag indicating that an output has been set
+            //{
+            //    string sernum2 = "";
+            //    bool logmod2;
+            //    outlogmod.TryGetValue(handler, out logmod2); // check if log file entry has been made for this action
+            //    if (logmod2 == false) // if log file entry has not yet been made
+            //    {
+            //        //if (sernumdict.ContainsKey((((IPEndPoint)handler.RemoteEndPoint).Address))) //&& (sernum2 != ""))
+            //        if (sernumdict.ContainsKey(handler))
+            //        {
+            //            //sernumdict.TryGetValue((((IPEndPoint)handler.RemoteEndPoint).Address), out sernum2); // get serial number of connected unit
+            //            sernumdict.TryGetValue(handler, out sernum2); // get serial number of connected unit
+            //            // add log file entry indicating that an output has been set by this unit
+            //            //StreamWriter setoutlog = new StreamWriter(new FileStream("C:\\Users\\gayakawa\\desktop\\TCPServer Log\\setout.log", FileMode.Append, FileAccess.Write));
+            //            //StreamWriter setoutlog = new StreamWriter(new FileStream("C:\\Users\\gayakawa\\desktop\\TCPServer Log\\" + sernum2 + ".log", FileMode.Append, FileAccess.Write));
+            //            //setoutlog.Write("\r\n" + DateTime.Now + " Output set by " + IPAddress.Parse(((IPEndPoint)handler.RemoteEndPoint).Address.ToString()) + " (Serial Number " + sernum2 + ")");
+            //            //setoutlog.Close();
+            //            StreamWriter setoutlog = new StreamWriter(new FileStream("C:\\Users\\gayakawa\\desktop\\TCPServer Log\\" + sernum2 + ".log", FileMode.Append, FileAccess.Write));
+            //            setoutlog.Write("\r\n" + DateTime.Now + " Output set by " + handler.RemoteEndPoint.ToString() + " (Serial Number " + sernum2 + ")");
+            //            setoutlog.Close();
+            //        }
+            //    }
 
-                // set dictionary value indicating that a log entry has been made for this unit's log file
-                if (!outlogmod.ContainsKey(handler))
-                    outlogmod.Add(handler, true);
-                else
-                {
-                    outlogmod.Remove(handler);
-                    outlogmod.Add(handler, true);
-                }
-                ////StreamWriter setoutlog = new StreamWriter(new FileStream("C:\\Users\\gayakawa\\desktop\\TCPServer Log\\setout.log", FileMode.Append, FileAccess.Write));
-                //StreamWriter setoutlog = new StreamWriter(new FileStream("C:\\Users\\gayakawa\\desktop\\TCPServer Log\\" + sernum + ".log", FileMode.Append, FileAccess.Write));
-                //setoutlog.Write("\r\n" + DateTime.Now + " Output set by " + IPAddress.Parse(((IPEndPoint)handler.RemoteEndPoint).Address.ToString()) + " (Serial Number " + sernum + ")");
-                //setoutlog.Close();
-            }
+            //    // set dictionary value indicating that a log entry has been made for this unit's log file
+            //    if (!outlogmod.ContainsKey(handler))
+            //        outlogmod.Add(handler, true);
+            //    else
+            //    {
+            //        outlogmod.Remove(handler);
+            //        outlogmod.Add(handler, true);
+            //    }
+            //    ////StreamWriter setoutlog = new StreamWriter(new FileStream("C:\\Users\\gayakawa\\desktop\\TCPServer Log\\setout.log", FileMode.Append, FileAccess.Write));
+            //    //StreamWriter setoutlog = new StreamWriter(new FileStream("C:\\Users\\gayakawa\\desktop\\TCPServer Log\\" + sernum + ".log", FileMode.Append, FileAccess.Write));
+            //    //setoutlog.Write("\r\n" + DateTime.Now + " Output set by " + IPAddress.Parse(((IPEndPoint)handler.RemoteEndPoint).Address.ToString()) + " (Serial Number " + sernum + ")");
+            //    //setoutlog.Close();
+            //}
 
-            if (type == "actisoreq") // action type flag indicating that sensor data has been requested and received
-            {
-                //MessageBox.Show("got to 1038", "handler = " + handler.RemoteEndPoint.ToString());      
-                string sernum2 = "";
-                bool logmod3;
-                inlogmod.TryGetValue(handler, out logmod3); // check if log file entry has been made for this action
-                if (logmod3 == false) // if log file entry has not yet been made
-                {
-                    //if (sernumdict.ContainsKey((((IPEndPoint)handler.RemoteEndPoint).Address))) //&& (sernum2 != ""))\
-                    if (sernumdict.ContainsKey(handler)) //&& (sernum2 != ""))
-                    {
+            //if (type == "actisoreq") // action type flag indicating that sensor data has been requested and received
+            //{
+            //    //MessageBox.Show("got to 1038", "handler = " + handler.RemoteEndPoint.ToString());      
+            //    string sernum2 = "";
+            //    bool logmod3;
+            //    inlogmod.TryGetValue(handler, out logmod3); // check if log file entry has been made for this action
+            //    if (logmod3 == false) // if log file entry has not yet been made
+            //    {
+            //        //if (sernumdict.ContainsKey((((IPEndPoint)handler.RemoteEndPoint).Address))) //&& (sernum2 != ""))\
+            //        if (sernumdict.ContainsKey(handler)) //&& (sernum2 != ""))
+            //        {
 
-                        //sernumdict.TryGetValue((((IPEndPoint)handler.RemoteEndPoint).Address), out sernum2); // get serial number of connected unit
-                        sernumdict.TryGetValue(handler, out sernum2); // get serial number of connected unit
-                        // add log file entry indicating that sensor data has been received from this unit
-                        //StreamWriter datareclog = new StreamWriter(new FileStream("C:\\Users\\gayakawa\\desktop\\TCPServer Log\\datarec.log", FileMode.Append, FileAccess.Write));
-                        //StreamWriter datareclog = new StreamWriter(new FileStream("C:\\Users\\gayakawa\\desktop\\TCPServer Log\\" + sernum2 + ".log", FileMode.Append, FileAccess.Write));
-                        //datareclog.Write("\r\n" + DateTime.Now + " Received sensor data from " + IPAddress.Parse(((IPEndPoint)handler.RemoteEndPoint).Address.ToString()) + " (Serial Number " + sernum2 + ")");
-                        //datareclog.Close();
-                        StreamWriter datareclog = new StreamWriter(new FileStream("C:\\Users\\gayakawa\\desktop\\TCPServer Log\\" + sernum2 + ".log", FileMode.Append, FileAccess.Write));
-                        datareclog.Write("\r\n" + DateTime.Now + " Received sensor data from " + handler.RemoteEndPoint.ToString() + " (Serial Number " + sernum2 + ")" + "  Data = " + content2 + "}");
-                        datareclog.Close();
-                    }
-                }
-                // set dictionary value indicating that a log entry has been made for this unit's log file
-                if (!inlogmod.ContainsKey(handler))
-                    inlogmod.Add(handler, true);
-                else
-                {
-                    inlogmod.Remove(handler);
-                    inlogmod.Add(handler, true);
-                }
-
-
-                ////StreamWriter datareclog = new StreamWriter(new FileStream("C:\\Users\\gayakawa\\desktop\\TCPServer Log\\datarec.log", FileMode.Append, FileAccess.Write));
-                //StreamWriter datareclog = new StreamWriter(new FileStream("C:\\Users\\gayakawa\\desktop\\TCPServer Log\\" + sernum + ".log", FileMode.Append, FileAccess.Write));
-                //datareclog.Write("\r\n" + DateTime.Now + " Received sensor data from " + IPAddress.Parse(((IPEndPoint)handler.RemoteEndPoint).Address.ToString()) + " (Serial Number " + sernum + ")");
-                //datareclog.Close();
-            }
+            //            //sernumdict.TryGetValue((((IPEndPoint)handler.RemoteEndPoint).Address), out sernum2); // get serial number of connected unit
+            //            sernumdict.TryGetValue(handler, out sernum2); // get serial number of connected unit
+            //            // add log file entry indicating that sensor data has been received from this unit
+            //            //StreamWriter datareclog = new StreamWriter(new FileStream("C:\\Users\\gayakawa\\desktop\\TCPServer Log\\datarec.log", FileMode.Append, FileAccess.Write));
+            //            //StreamWriter datareclog = new StreamWriter(new FileStream("C:\\Users\\gayakawa\\desktop\\TCPServer Log\\" + sernum2 + ".log", FileMode.Append, FileAccess.Write));
+            //            //datareclog.Write("\r\n" + DateTime.Now + " Received sensor data from " + IPAddress.Parse(((IPEndPoint)handler.RemoteEndPoint).Address.ToString()) + " (Serial Number " + sernum2 + ")");
+            //            //datareclog.Close();
+            //            StreamWriter datareclog = new StreamWriter(new FileStream("C:\\Users\\gayakawa\\desktop\\TCPServer Log\\" + sernum2 + ".log", FileMode.Append, FileAccess.Write));
+            //            datareclog.Write("\r\n" + DateTime.Now + " Received sensor data from " + handler.RemoteEndPoint.ToString() + " (Serial Number " + sernum2 + ")" + "  Data = " + content2 + "}");
+            //            datareclog.Close();
+            //        }
+            //    }
+            //    // set dictionary value indicating that a log entry has been made for this unit's log file
+            //    if (!inlogmod.ContainsKey(handler))
+            //        inlogmod.Add(handler, true);
+            //    else
+            //    {
+            //        inlogmod.Remove(handler);
+            //        inlogmod.Add(handler, true);
+            //    }
 
 
-            if (pendingactions.ContainsKey(unitid))
-            {
-                pendingactions.Remove(unitid);
-                //MessageBox.Show("Removed action");
-            }
+            //    ////StreamWriter datareclog = new StreamWriter(new FileStream("C:\\Users\\gayakawa\\desktop\\TCPServer Log\\datarec.log", FileMode.Append, FileAccess.Write));
+            //    //StreamWriter datareclog = new StreamWriter(new FileStream("C:\\Users\\gayakawa\\desktop\\TCPServer Log\\" + sernum + ".log", FileMode.Append, FileAccess.Write));
+            //    //datareclog.Write("\r\n" + DateTime.Now + " Received sensor data from " + IPAddress.Parse(((IPEndPoint)handler.RemoteEndPoint).Address.ToString()) + " (Serial Number " + sernum + ")");
+            //    //datareclog.Close();
+            //}
+
+
+            //if (pendingactions.ContainsKey(unitid))
+            //{
+            //    pendingactions.Remove(unitid);
+            //    //MessageBox.Show("Removed action");
+            //}
 
 
         }
@@ -1662,16 +1664,16 @@ namespace TCPServer2
 
                                         content = sernum + "   " + handler.RemoteEndPoint.ToString() + "   " + DateTime.Now.ToShortDateString() + " " + DateTime.Now.ToShortTimeString() + "   " + content2 + "\r\n";
                                         Incoming(null, content);
-#if TEST
-                                        StreamWriter testincominglog = new StreamWriter(new FileStream("C:\\Users\\gayakawa\\desktop\\TCPServer Log\\" + "testincoming.log", FileMode.Append, FileAccess.Write));
-                                        testincominglog.Write("\r\n" + DateTime.Now + " " + handler.RemoteEndPoint.ToString() + " raw incoming " + content2);
-                                        testincominglog.Close();
-#else
+//#if TEST
+                                        StreamWriter incominglog = new StreamWriter(new FileStream("C:\\Users\\gayakawa\\desktop\\TCPServer Log\\" + sernum + " incoming.log", FileMode.Append, FileAccess.Write));
+                                        incominglog.Write("\r\n" + DateTime.Now + " " + " raw incoming " + content2);
+                                        incominglog.Close();
+//#else
 
-                                            StreamWriter incominglog = new StreamWriter(new FileStream("C:\\Users\\gayakawa\\desktop\\TCPServer Log\\" + "incoming.log", FileMode.Append, FileAccess.Write));
-                                            incominglog.Write("\r\n" + DateTime.Now + " " + handler.RemoteEndPoint.ToString() + " (Serial Number " + sernum + ")  " + "raw incoming " + content2);
-                                            incominglog.Close();
-#endif
+                                            //StreamWriter incominglog = new StreamWriter(new FileStream("C:\\Users\\gayakawa\\desktop\\TCPServer Log\\" + "incoming.log", FileMode.Append, FileAccess.Write));
+                                            //incominglog.Write("\r\n" + DateTime.Now + " " + handler.RemoteEndPoint.ToString() + " (Serial Number " + sernum + ")  " + "raw incoming " + content2);
+                                            //incominglog.Close();
+//#endif
 
                                         //}
 
@@ -3465,17 +3467,16 @@ namespace TCPServer2
                                                     //sernumdict.TryGetValue(handler, out outsernum);
                 Outgoing(outsernum + "   " + handler.RemoteEndPoint.ToString() + "   " + DateTime.Now.ToShortDateString() + " " +
                     DateTime.Now.ToShortTimeString() + "   " + data);
-
-#if TEST
-                StreamWriter testoutgoinglog = new StreamWriter(new FileStream("C:\\Users\\gayakawa\\desktop\\TCPServer Log\\" + "testoutgoing.log", FileMode.Append, FileAccess.Write));
-                testoutgoinglog.Write("\r\n" + DateTime.Now + " " + handler.RemoteEndPoint.ToString() + " raw outgoing " + data);
-                testoutgoinglog.Close();
-#else
-
-                StreamWriter outgoinglog = new StreamWriter(new FileStream("C:\\Users\\gayakawa\\desktop\\TCPServer Log\\" + "outgoing.log", FileMode.Append, FileAccess.Write));
-                outgoinglog.Write("\r\n" + DateTime.Now + " " + handler.RemoteEndPoint.ToString() + " (Serial Number " + outsernum + ")  " + "raw outgoing " + data);
+//#if TEST
+                StreamWriter outgoinglog = new StreamWriter(new FileStream("C:\\Users\\gayakawa\\desktop\\TCPServer Log\\" + sernum + " outgoing.log", FileMode.Append, FileAccess.Write));
+                outgoinglog.Write(DateTime.Now + " " + " raw outgoing " + data);
                 outgoinglog.Close();
-#endif
+//#else
+
+                //StreamWriter outgoinglog = new StreamWriter(new FileStream("C:\\Users\\gayakawa\\desktop\\TCPServer Log\\" + "outgoing.log", FileMode.Append, FileAccess.Write));
+                //outgoinglog.Write("\r\n" + DateTime.Now + " " + handler.RemoteEndPoint.ToString() + " (Serial Number " + outsernum + ")  " + "raw outgoing " + data);
+                //outgoinglog.Close();
+//#endif
 
                 //}
             }
@@ -3483,6 +3484,8 @@ namespace TCPServer2
             {
                 //MessageBox.Show("got to 3176");
                 AddUnsentMessage(sernum, "\r\n" + data);
+
+                
                 //if (File.Exists("C:\\ProgramData\\TCPServer\\Unsent_Messages.txt"))
                 //{
                 //    StreamWriter unsent = new StreamWriter(new FileStream("C:\\ProgramData\\TCPServer\\Unsent_Messages.txt", FileMode.Append, FileAccess.Write));
@@ -3751,6 +3754,10 @@ namespace TCPServer2
                 unsent2.Write(data);
                 unsent2.Close();
             }
+
+            StreamWriter outgoinglog = new StreamWriter(new FileStream("C:\\Users\\gayakawa\\desktop\\TCPServer Log\\" + sn + " outgoing.log", FileMode.Append, FileAccess.Write));
+            outgoinglog.Write("*** MESSAGE BELOW WAS NOT SENT SUCCESSFULLY ***\r\n");
+            outgoinglog.Close();
 
         }
 

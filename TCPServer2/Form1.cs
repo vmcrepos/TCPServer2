@@ -209,22 +209,22 @@ namespace TCPServer2
         {
             
             
-            AsynchronousSocketListener.CheckConnection(); // check if disconnection has occurred
+            //AsynchronousSocketListener.CheckConnection(); // check if disconnection has occurred
 
-            for (int x = 0; x < dataGridView1.RowCount; x++)
-            {
-                // if socket connected (serial number still included in dictionary), display serial number in datagridview list
-                // using bold and italic font
-                if (AsynchronousSocketListener.sernumdict.ContainsValue(dataGridView1.Rows[x].Cells[0].Value.ToString()))
-                    dataGridView1.Rows[x].Cells[0].Style.Font = new Font(dataGridView1.DefaultCellStyle.Font, FontStyle.Bold | FontStyle.Italic);
+            //for (int x = 0; x < dataGridView1.RowCount; x++)
+            //{
+            //    // if socket connected (serial number still included in dictionary), display serial number in datagridview list
+            //    // using bold and italic font
+            //    if (AsynchronousSocketListener.sernumdict.ContainsValue(dataGridView1.Rows[x].Cells[0].Value.ToString()))
+            //        dataGridView1.Rows[x].Cells[0].Style.Font = new Font(dataGridView1.DefaultCellStyle.Font, FontStyle.Bold | FontStyle.Italic);
 
-                // if socket disconnected (serial number no longer included in dictionary), display serial number in datagridview
-                // list using regular font
-                else if (!AsynchronousSocketListener.sernumdict.ContainsValue(dataGridView1.Rows[x].Cells[0].Value.ToString()))
-                    dataGridView1.Rows[x].Cells[0].Style.Font = new Font(dataGridView1.DefaultCellStyle.Font, FontStyle.Regular);
+            //    // if socket disconnected (serial number no longer included in dictionary), display serial number in datagridview
+            //    // list using regular font
+            //    else if (!AsynchronousSocketListener.sernumdict.ContainsValue(dataGridView1.Rows[x].Cells[0].Value.ToString()))
+            //        dataGridView1.Rows[x].Cells[0].Style.Font = new Font(dataGridView1.DefaultCellStyle.Font, FontStyle.Regular);
 
                 
-            }
+            //}
             
         }
 
@@ -397,23 +397,23 @@ namespace TCPServer2
                 MessageBox.Show(ex.ToString());
             }
 
-            AsynchronousSocketListener.CheckConnection(); // check if disconnection has occurred
+            //AsynchronousSocketListener.CheckConnection(); // check if disconnection has occurred
 
-            for (int x = 0; x < dataGridView1.RowCount; x++)
-            {
-                // if socket connected (serial number still included in dictionary), display serial number in datagridview list
-                // using bold and italic font
-                if (AsynchronousSocketListener.sernumdict.ContainsValue(dataGridView1.Rows[x].Cells[0].Value.ToString()))
-                    dataGridView1.Rows[x].Cells[0].Style.Font = new Font(dataGridView1.DefaultCellStyle.Font, FontStyle.Bold | FontStyle.Italic);
+            //for (int x = 0; x < dataGridView1.RowCount; x++)
+            //{
+            //    // if socket connected (serial number still included in dictionary), display serial number in datagridview list
+            //    // using bold and italic font
+            //    if (AsynchronousSocketListener.sernumdict.ContainsValue(dataGridView1.Rows[x].Cells[0].Value.ToString()))
+            //        dataGridView1.Rows[x].Cells[0].Style.Font = new Font(dataGridView1.DefaultCellStyle.Font, FontStyle.Bold | FontStyle.Italic);
 
               
-                // if socket disconnected (serial number no longer included in dictionary), display serial number in datagridview
-                // list using regular font
-                else if (!AsynchronousSocketListener.sernumdict.ContainsValue(dataGridView1.Rows[x].Cells[0].Value.ToString()))
-                    dataGridView1.Rows[x].Cells[0].Style.Font = new Font(dataGridView1.DefaultCellStyle.Font, FontStyle.Regular);
+            //    // if socket disconnected (serial number no longer included in dictionary), display serial number in datagridview
+            //    // list using regular font
+            //    else if (!AsynchronousSocketListener.sernumdict.ContainsValue(dataGridView1.Rows[x].Cells[0].Value.ToString()))
+            //        dataGridView1.Rows[x].Cells[0].Style.Font = new Font(dataGridView1.DefaultCellStyle.Font, FontStyle.Regular);
 
                 
-            }
+            //}
 
            
 
