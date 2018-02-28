@@ -132,6 +132,7 @@ namespace TCPServer2
         static Dictionary<int, int> outcyclecount = new Dictionary<int, int>();
         static Dictionary<int, bool> outcyclereset = new Dictionary<int, bool>();
         static ArrayList unsentarr = new ArrayList();
+        public static ArrayList sernumlist = new ArrayList();
 
 
 
@@ -2527,30 +2528,30 @@ namespace TCPServer2
                             //MessageBox.Show("Received data packets: " + indatastr + "\r\nwith sensors: " + sensoridintstr + "\r\nwith sensor values: " + sensorvalintstr); //test
                             //if (!initreq)
                             //{
-                            string actupdate;
-                            if (!curraction.ContainsKey(handler))
-                                curraction.Add(handler, "actisoreq");
-                            //if (!curraction2.ContainsKey(sernum))
-                            //    curraction2.Add(sernum, "actisoreq");
-                            else
-                            {
-                                curraction.Remove(handler);
-                                curraction.Add(handler, "actisoreq");
-                                //curraction2.Remove(sernum);
-                                //curraction2.Add(sernum, "actisoreq");
-                            }
-                            curraction.TryGetValue(handler, out actupdate);
-                            //curraction2.TryGetValue(sernum, out actupdate);
-                            if (actupdate == "actisoreq")
-                            {
+                            //string actupdate;
+                            //if (!curraction.ContainsKey(handler))
+                            //    curraction.Add(handler, "actisoreq");
+                            ////if (!curraction2.ContainsKey(sernum))
+                            ////    curraction2.Add(sernum, "actisoreq");
+                            //else
+                            //{
+                            //    curraction.Remove(handler);
+                            //    curraction.Add(handler, "actisoreq");
+                            //    //curraction2.Remove(sernum);
+                            //    //curraction2.Add(sernum, "actisoreq");
+                            //}
+                            //curraction.TryGetValue(handler, out actupdate);
+                            ////curraction2.TryGetValue(sernum, out actupdate);
+                            //if (actupdate == "actisoreq")
+                            //{
 
-                                if (!inlogmod.ContainsKey(handler))
-                                    inlogmod.Add(handler, false);
-                                else
-                                {
-                                    inlogmod.Remove(handler);
-                                    inlogmod.Add(handler, false);
-                                }
+                            //    if (!inlogmod.ContainsKey(handler))
+                            //        inlogmod.Add(handler, false);
+                            //    else
+                            //    {
+                            //        inlogmod.Remove(handler);
+                            //        inlogmod.Add(handler, false);
+                            //    }
 
                                 string actionidreqstr = "";
                                 string query2 = "SELECT [id] FROM [VLink106466].[dbo].[VLinkActions] WHERE ([UnitID] = " + unitid.ToString() + ")" +
@@ -2608,7 +2609,7 @@ namespace TCPServer2
                                     UpdateAction2(actionidreq, "actisoreq"); // update action table entry for action id
                                 }
 
-                            }
+                            //}
                             //}
 
                             //if (initreq)

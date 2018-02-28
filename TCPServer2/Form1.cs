@@ -12,6 +12,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Drawing;
 using System.Net.Sockets;
+using System.Linq;
 
 namespace TCPServer2
 {
@@ -383,10 +384,12 @@ namespace TCPServer2
 
                             // create datatable containing all available units
                             bSource.DataSource = dt;
-
+                            
                             dataGridView1.DataSource = bSource;
                             bSource.Sort = "SerialNumber"; // sort serial numbers alphabetically
-                        }
+
+                            for (int x = 0; x < dataGridView1.RowCount; x++)
+                                AsynchronousSocketListener.sernumlist.Add(dataGridView1.Rows[x].Cells[0].Value);
                     }
 
                 }
