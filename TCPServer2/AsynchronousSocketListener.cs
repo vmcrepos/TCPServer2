@@ -1882,6 +1882,7 @@ namespace TCPServer2
                             {
                                 SendCurrTime(sernum); // send set time message
 
+
                             }
 
                             if (content2.Contains("{VMC01," + sernum + ",0A") && fwreq2 == false && fwackwait == false)
@@ -1989,23 +1990,11 @@ namespace TCPServer2
                         //}
 
 
-                        //if (content2.Contains("{03,") && verrqstd && count != 6) // received incorrectly formatted version response
-                        //{
-                        //    Outgoing("count = " + count.ToString() + "\r\n"); //TEST
-                        //    //MessageBox.Show("content2 = " + content2 + "; count = " + count.ToString()); //test
-                        //    // Resend version request
-                        //    byte[] verreq = System.Text.Encoding.ASCII.GetBytes("{53,01}" + "\r\n");
-                        //    verreqstr = System.Text.Encoding.ASCII.GetString(verreq);
-                        //    verrqstd = true;
-                        //    if (SocketExtensions.IsConnected(handler))
-                        //        Send(handler, verreqstr);
-
-
-                        //}
+                      
 
                         //if (content2.Contains("{08,FD") && fwstart == false) // received date and time acknowledgement for initial time set message
-                        modesetdict.TryGetValue(unitid, out modeset);
-                        intervalsetdict.TryGetValue(unitid, out interset);
+                        //modesetdict.TryGetValue(unitid, out modeset);
+                        //intervalsetdict.TryGetValue(unitid, out interset);
                         //{
                         //timeset = true;
 
@@ -2177,202 +2166,6 @@ namespace TCPServer2
 
                             }
 
-
-                            //if (content2.Contains("{0A,FC") && interset) // received acknowledgement for interval set command
-                            //{
-                            //    interset = false;
-
-
-                            //}
-
-                            //if (content2.Contains("{0A,") && actisoreq) // acknowledgement of sensor data request ("request measurement") message
-                            //if (content2.Contains("{0A,"))
-
-                            // received acknowledgement not associated with a firmware update
-                            //if (content2.Contains("{0A,") && fwreq2 == false && fwackwait == false)
-                            //if (content2.Contains("{VMC01," + sernum + ",0A") && fwreq2 == false && fwackwait == false)
-                            //{
-                            //    bool match2 = false;
-                            //    string actupdate;
-
-                            //    // get action type from dictionary associating type of action with unit IP address
-                            //    // (only one type of action [setting an output] will now generate an acknowledgement -- sensor
-                            //    // data requests no longer do)
-                            //    curraction.TryGetValue(handler, out actupdate);
-                            //    //if (actupdate2 == "actisoreq")
-
-
-                            //    //{
-                            //    //    int unitid3 = 0;
-                            //    //    units.TryGetValue((((IPEndPoint)handler.RemoteEndPoint).Address), out unitid3);
-                            //    //    string packid = content2.Split(',')[1];
-
-                            //    //    if (ackaction.ContainsKey(packid)) // check if packet id of acknowledgement matches a previously sent "request measurement" message
-                            //    //    {
-                            //    //        int actionid = 0;
-                            //    //        ackaction.TryGetValue(packid, out actionid);
-                            //    //        string query = "SELECT id, unitid FROM [VLink106466].[dbo].VLinkActions";
-
-
-                            //    //        try
-                            //    //        {
-                            //    //            using (SqlConnection conn = new SqlConnection(connectionString))
-                            //    //            {
-                            //    //                using (SqlCommand comm = new SqlCommand(query, conn))
-                            //    //                {
-                            //    //                    conn.Open();
-
-                            //    //                    SqlDataAdapter da = new SqlDataAdapter();
-                            //    //                    DataSet ds = new DataSet();
-
-
-                            //    //                    // create dataset and datatable from returned data
-                            //    //                    dt6.Clear();
-                            //    //                    da.SelectCommand = comm;
-                            //    //                    da.Fill(ds, "ActionTable");
-                            //    //                    dt6 = ds.Tables["ActionTable"];
-
-                            //    //                }
-                            //    //            }
-
-                            //    //        }
-
-                            //    //        catch (Exception e)
-                            //    //        {
-                            //    //            MessageBox.Show(e.ToString());
-                            //    //        }
-
-                            //    //        //foreach (DataRow dr in dt6.Rows)
-                            //    //        for (int d = 0; d < dt6.Rows.Count; d++)
-                            //    //        {
-                            //    //            //if (Convert.ToInt32(dr["id"]) == actionid && Convert.ToInt32(dr["unitid"]) == unitid3)
-                            //    //            if (Convert.ToInt32(dt6.Rows[d]["id"]) == actionid && Convert.ToInt32(dt6.Rows[d]["unitid"]) == unitid3)
-                            //    //            {
-                            //    //                match2 = true;
-                            //    //                break;
-                            //    //            }
-                            //    //        }
-
-                            //    //        //MessageBox.Show("match2 = " + match2.ToString());
-
-                            //    //    }
-
-                            //    //    if (content2.Contains("00}") && match2) // positive acknowledgement
-                            //    //    {
-                            //    //        //int actiontoupdate = 0;
-                            //    //        ackaction.TryGetValue(content2.Split(',')[1], out actiontoupdate); // find action id corresponding to packet id of acknowledgement message
-                            //    //        //MessageBox.Show("action to update = " + actiontoupdate.ToString());
-                            //    //        UpdateAction(actiontoupdate); // update action database table for appropriate action id
-                            //    //        //actsetdout.RemoveAt(0);
-                            //    //        //MessageBox.Show(actsetdout.Count.ToString() + " set digital actions");
-                            //    //        //UpdateAction2(actionidsetd);
-                            //    //        match2 = false;
-                            //    //    }
-
-
-
-                            //    //    }
-
-
-                            //    //if (content2.Contains("{0A,") && actsetout) // acknowledgement of "set output" request
-                            //    if (actupdate == "actsetout") // set output action
-                            //    {
-                            //        int unitid2 = 0;
-                            //        // get unit ID from dictionary
-                            //        //units.TryGetValue(handler, out unitid2);
-                            //        unitid2 = GetUnitIDFromSN(sernum);
-                            //        //MessageBox.Show("unitid = " + unitid2.ToString());
-
-                            //        string packid = content2.Split(',')[1]; // get packet id from acknowledgement message
-                            //        //if (packid.StartsWith("0"))
-                            //        //    packid = packid.TrimStart('0');
-                            //        //if (content2.Split(',')[1].StartsWith("0"))
-                            //        //    content2.Split(',')[1] = content2.Split(',')[1].TrimStart('0');
-
-                            //        //if (ackaction.ContainsKey(content2.Split(',')[1])) // check if packet id of acknowledgement matches a previously sent "set output" message
-                            //        if (ackaction.ContainsKey(packid)) // check if packet id of acknowledgement matches a previously sent "set output" message
-                            //        {
-                            //            int actionid = 0;
-                            //            //ackaction.TryGetValue(content2.Split(',')[1], out actionid);
-                            //            ackaction.TryGetValue(packid, out actionid); // get action id from dictionary relating packet id with action id
-                            //            //MessageBox.Show("actionid = " + actionid.ToString());
-                            //            string query = "SELECT id, unitid FROM [VLink106466].[dbo].VLinkActions";
-
-
-                            //            try
-                            //            {
-                            //                using (SqlConnection conn = new SqlConnection(connectionString))
-                            //                {
-                            //                    using (SqlCommand comm = new SqlCommand(query, conn))
-                            //                    {
-                            //                        conn.Open();
-
-                            //                        SqlDataAdapter da = new SqlDataAdapter();
-                            //                        DataSet ds = new DataSet();
-                            //                        //DataTable dt5 = new DataTable();
-
-
-                            //                        // create dataset and datatable from returned data
-                            //                        dt5.Clear();
-                            //                        da.SelectCommand = comm;
-                            //                        da.Fill(ds, "ActionTable");
-                            //                        dt5 = ds.Tables["ActionTable"];
-
-                            //                    }
-                            //                }
-
-                            //            }
-
-                            //            catch (Exception e)
-                            //            {
-                            //                MessageBox.Show(e.ToString());
-                            //            }
-
-                            //            //MessageBox.Show("dt contains " + dt5.Rows.Count.ToString() + " rows");
-                            //            //MessageBox.Show("ACTIONID = " + actionid.ToString() + " UNITID = " + unitid2.ToString());
-                            //            //foreach (DataRow dr in dt.Rows)
-                            //            for (int d = 0; d < dt5.Rows.Count; d++)
-                            //            {
-
-                            //                //MessageBox.Show("actionid = " + dr["id"].ToString() + " unitid = " + dr["unitid"].ToString());
-                            //                //if (Convert.ToInt32(dr["id"]) == actionid && Convert.ToInt32(dr["unitid"]) == unitid)
-
-                            //                // find action id and unit id that match action
-                            //                if (Convert.ToInt32(dt5.Rows[d]["id"]) == actionid && Convert.ToInt32(dt5.Rows[d]["unitid"]) == unitid2)
-                            //                //if (Convert.ToInt32(dt5.Rows[d]["id"]) == 101 && Convert.ToInt32(dt5.Rows[d]["unitid"]) == 25)
-                            //                {
-                            //                    match2 = true;
-                            //                    //MessageBox.Show("row " + d.ToString() + " is true");
-                            //                    break;
-                            //                }
-                            //            }
-
-                            //            //MessageBox.Show("match2 = " + match2.ToString());
-
-                            //        }
-                            //        if (content2.Contains("00}") && match2) // positive acknowledgement
-                            //        {
-                            //            // update dictionary object to indicate that the appropriate log file has not been updated 
-                            //            if (!outlogmod.ContainsKey(handler))
-                            //                outlogmod.Add(handler, false);
-                            //            else
-                            //            {
-                            //                outlogmod.Remove(handler);
-                            //                outlogmod.Add(handler, false);
-                            //            }
-                            //            //int actiontoupdate = 0;
-                            //            ackaction.TryGetValue(content2.Split(',')[1], out actiontoupdate); // find action id corresponding to packet id of acknowledgement message
-                            //            UpdateAction2(actiontoupdate, "actsetout"); // update action database table for appropriate action id
-                            //            match2 = false;
-                            //        }
-
-
-
-                            //    }
-
-
-
-                            //}
 
                             //if (content2.Contains("{11") && fwreq2 == false && fwackwait == true) // received acknowledgement upon receipt of firmware chunk
                             if (content2.Contains("{VMC01," + sernum + ",11") && fwreq2 == false && fwackwait == true) // received acknowledgement upon receipt of firmware chunk
@@ -2578,6 +2371,7 @@ namespace TCPServer2
                                 //    }
 
                                 string actionidreqstr = "";
+                                string comptimestr = "";
                                 string query2 = "SELECT [id] FROM [VLink106466].[dbo].[VLinkActions] WHERE ([UnitID] = " + unitid.ToString() + ")" +
                                     " AND ([ActionType] = '1')";
 
@@ -2590,7 +2384,8 @@ namespace TCPServer2
 
                                         try
                                         {
-                                            actionidreqstr = comm3.ExecuteScalar().ToString();
+                                            if (comm3.ExecuteScalar() != null)
+                                                actionidreqstr = comm3.ExecuteScalar().ToString();
                                         }
 
 
@@ -2601,38 +2396,41 @@ namespace TCPServer2
                                     }
                                 }
 
-                                string comptimestr = "";
-                                string query3 = "SELECT [CompleteTime] FROM [VLink106466].[dbo].[VLinkActions] WHERE ([id] = " + actionidreqstr + ")";
-
-                                using (SqlConnection conn4 = new SqlConnection(connectionString))
+                                if (actionidreqstr != "")
                                 {
-                                    using (SqlCommand comm4 = new SqlCommand(query3, conn4))
+                                    //comptimestr = "";
+                                    string query3 = "SELECT [CompleteTime] FROM [VLink106466].[dbo].[VLinkActions] WHERE ([id] = " + actionidreqstr + ")";
+
+                                    using (SqlConnection conn4 = new SqlConnection(connectionString))
                                     {
-                                        conn4.Open();
-
-
-                                        try
+                                        using (SqlCommand comm4 = new SqlCommand(query3, conn4))
                                         {
-                                            comptimestr = comm4.ExecuteScalar().ToString();
-                                        }
+                                            conn4.Open();
 
 
-                                        catch (Exception e2)
-                                        {
-                                            MessageBox.Show(e2.ToString());
+                                            try
+                                            {
+                                                comptimestr = comm4.ExecuteScalar().ToString();
+                                            }
+
+
+                                            catch (Exception e2)
+                                            {
+                                                MessageBox.Show(e2.ToString());
+                                            }
                                         }
                                     }
+
+
+                                    //MessageBox.Show("action id = " + actionidreqstr);   //TEST
+
+                                    //MessageBox.Show("complete time = " + comptimestr);  //TEST
+                                    if (comptimestr == "")
+                                    {
+                                        actionidreq = Convert.ToInt32(actionidreqstr);
+                                        UpdateAction2(actionidreq, "actisoreq"); // update action table entry for action id
+                                    }
                                 }
-
-                                //MessageBox.Show("action id = " + actionidreqstr);   //TEST
-
-                                //MessageBox.Show("complete time = " + comptimestr);  //TEST
-                                if (comptimestr == "")
-                                {
-                                    actionidreq = Convert.ToInt32(actionidreqstr);
-                                    UpdateAction2(actionidreq, "actisoreq"); // update action table entry for action id
-                                }
-
                                 //}
                                 //}
 
