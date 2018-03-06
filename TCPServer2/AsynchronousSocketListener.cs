@@ -224,7 +224,7 @@ namespace TCPServer2
             try
             {
                 listener.Bind(localEndPoint);
-                listener.Listen(100);
+                listener.Listen(2000);
 
 
 
@@ -273,10 +273,10 @@ namespace TCPServer2
             //Socket handler = listener.EndAccept(ar);
             handler = listener.EndAccept(ar);
             handler.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.NoDelay, true);
-            if (clientSockets.Contains(handler))
-                clientSockets.Remove(handler);
+            //if (clientSockets.Contains(handler))
+            //    clientSockets.Remove(handler);
 
-            clientSockets.Add(handler); // list of connected sockets
+            //clientSockets.Add(handler); // list of connected sockets
             Thread.Sleep(1000);
 
             //for (int x = 0; x < clientSockets.Count; x++)
@@ -1508,10 +1508,10 @@ namespace TCPServer2
                 
                 if (errorCode != SocketError.Success)
                 {
-                 bytesRead = 0;
+                    bytesRead = 0;
                 }
 
-                //MessageBox.Show("bytes read = " + bytesRead.ToString());//TEST
+                //MessageBox.Show("bytes read = " + bytesRead.ToString());    //TEST
                 if (bytesRead > 0)
                 {
                     // There might be more data, so store the data received so far.
@@ -1528,6 +1528,7 @@ namespace TCPServer2
                     //content = sernum + "   " + DateTime.Now.ToShortDateString() + " " + DateTime.Now.ToShortTimeString() + "   " + state.sb.ToString();
                     content2 = "";
                     content2 = state.sb.ToString();
+                    //MessageBox.Show(content2);
                     //Incoming(handler, "Raw Incoming " + content2 + "\r\n");
                     //#if TEST
                     //                    StreamWriter testincominglog = new StreamWriter(new FileStream("C:\\Users\\gayakawa\\desktop\\TCPServer Log\\" + "testincoming.log", FileMode.Append, FileAccess.Write));
@@ -1611,7 +1612,7 @@ namespace TCPServer2
                                 {
 
                                     sernum = "";
-                                    clientSockets.Remove(handler);
+                                    //clientSockets.Remove(handler);
                                     handler.Shutdown(SocketShutdown.Both); // disconnect
 
                                 }
@@ -1635,7 +1636,7 @@ namespace TCPServer2
                                 //{
 
                                 response = GetUnitIDFromSN(sernum);
-                                MessageBox.Show("sernum = " + response.ToString() + "\n handler = " + handler.RemoteEndPoint.ToString());
+                                //MessageBox.Show("sernum = " + response.ToString() + "\n handler = " + handler.RemoteEndPoint.ToString());
                                 units2.Remove(response);
                                 units2.Add(response, handler); // add entry for unit ID to units2 dictionary
                                                                //if (!units.ContainsKey(handler))
@@ -2158,7 +2159,7 @@ namespace TCPServer2
 
                                 units.TryGetValue(handler, out unitid); // get unit id of currently connected unit
                                                                         //MessageBox.Show("About to check alarms for unit " + unitid.ToString());
-                                CheckAlarms(unitid);
+                                //CheckAlarms(unitid);
 
                             }
 
@@ -2847,13 +2848,19 @@ namespace TCPServer2
 
                             }
                         //}
-                        else
-                        {
-                            // Not all data received. Get more.
-                            handler.BeginReceive(state.buffer, 0, StateObject.BufferSize, 0,
-                            new AsyncCallback(ReadCallback), state);
-                        }
+                        //else
+                        //{
+                        //    // Not all data received. Get more.
+                        //    handler.BeginReceive(state.buffer, 0, StateObject.BufferSize, 0,
+                        //    new AsyncCallback(ReadCallback), state);
+                        //}
 
+                    }
+                    else
+                    {
+                        // Not all data received. Get more.
+                        handler.BeginReceive(state.buffer, 0, StateObject.BufferSize, 0,
+                        new AsyncCallback(ReadCallback), state);
                     }
                 }
             }

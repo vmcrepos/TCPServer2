@@ -154,14 +154,14 @@ namespace TCPServer2
 
         private void btnStop_Click(object sender, EventArgs e)
         {
-            if (AsynchronousSocketListener.clientSockets.Count != 0)
+            //if (AsynchronousSocketListener.clientSockets.Count != 0)
                 AsynchronousSocketListener.CloseSocket();
             System.Diagnostics.Process.GetCurrentProcess().Kill();
         }
 
         private void OnApplicationExit(object sender, EventArgs e)
         {
-            if (AsynchronousSocketListener.clientSockets.Count != 0)
+            //if (AsynchronousSocketListener.clientSockets.Count != 0)
                 AsynchronousSocketListener.CloseSocket();
             System.Diagnostics.Process.GetCurrentProcess().Kill();
         }
