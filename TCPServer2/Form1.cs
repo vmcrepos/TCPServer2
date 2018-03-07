@@ -196,13 +196,13 @@ namespace TCPServer2
 
         private void button1_Click(object sender, EventArgs e)
         {
-            for (int x = 0; x < dataGridView1.RowCount; x++)
-            {
+            //for (int x = 0; x < dataGridView1.RowCount; x++)
+            //{
                
-                if (AsynchronousSocketListener.sernumdict.ContainsValue(dataGridView1.Rows[x].Cells[0].Value.ToString()))
-                    dataGridView1.Rows[x].Cells[0].Style.Font = new Font(dataGridView1.DefaultCellStyle.Font, FontStyle.Bold | FontStyle.Italic);
+            //    if (AsynchronousSocketListener.sernumdict.ContainsValue(dataGridView1.Rows[x].Cells[0].Value.ToString()))
+            //        dataGridView1.Rows[x].Cells[0].Style.Font = new Font(dataGridView1.DefaultCellStyle.Font, FontStyle.Bold | FontStyle.Italic);
                
-            }
+            //}
         }
 
 
@@ -230,43 +230,43 @@ namespace TCPServer2
         }
 
         // this function returns the socket associated with the serial number selected in the datagridview object
-        private Socket getSocket()
-        {
-            string foundsernum = "";
-            foundsocket = null;
+        //private Socket getSocket()
+        //{
+        //    string foundsernum = "";
+        //    foundsocket = null;
                    
 
-            if (AsynchronousSocketListener.sernumdict.ContainsValue(selid))
-            {
-                // create array of serial numbers
-                Dictionary<Socket, string>.ValueCollection valueColl =
-                    AsynchronousSocketListener.sernumdict.Values;
-                string[] sernumarray = new string[AsynchronousSocketListener.sernumdict.Count];
-                valueColl.CopyTo(sernumarray, 0);
+        //    if (AsynchronousSocketListener.sernumdict.ContainsValue(selid))
+        //    {
+        //        // create array of serial numbers
+        //        Dictionary<Socket, string>.ValueCollection valueColl =
+        //            AsynchronousSocketListener.sernumdict.Values;
+        //        string[] sernumarray = new string[AsynchronousSocketListener.sernumdict.Count];
+        //        valueColl.CopyTo(sernumarray, 0);
 
-                // create array of sockets
-                Dictionary<Socket, string>.KeyCollection keyColl =
-                            AsynchronousSocketListener.sernumdict.Keys;
-                Socket[] sockarray = new Socket[AsynchronousSocketListener.sernumdict.Count];
-                keyColl.CopyTo(sockarray, 0);
+        //        // create array of sockets
+        //        Dictionary<Socket, string>.KeyCollection keyColl =
+        //                    AsynchronousSocketListener.sernumdict.Keys;
+        //        Socket[] sockarray = new Socket[AsynchronousSocketListener.sernumdict.Count];
+        //        keyColl.CopyTo(sockarray, 0);
 
 
 
-                for (int x = 0; x < sernumarray.Length; x++)
-                {
-                    // get socket associated with the selected serial number string
-                    if (sernumarray[x] == selid)
-                    {
-                        foundsernum = sernumarray[x];
-                        foundsocket = sockarray[x];
-                    }
-                }
+        //        for (int x = 0; x < sernumarray.Length; x++)
+        //        {
+        //            // get socket associated with the selected serial number string
+        //            if (sernumarray[x] == selid)
+        //            {
+        //                foundsernum = sernumarray[x];
+        //                foundsocket = sockarray[x];
+        //            }
+        //        }
 
                 
-            }
+        //    }
 
-            return foundsocket;
-        }
+        //    return foundsocket;
+        //}
 
         private void btnSendTime_Click(object sender, EventArgs e) // send a "set time" message to the unit whose serial number is selected in the datagridview object
         {

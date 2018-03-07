@@ -38,7 +38,7 @@ namespace TCPServer2
         //public static string connectionString = @"Server=VMCIS\SQLEXPRESS; Initial Catalog=VLink; User=VLink; Password='TestVlink'; Integrated Security=True";
         //public static string connectionString = @"Server=207.198.117.37\VMCIS\SQLEXPRESS; Initial Catalog=VLink; User=VLink; Password='TestVlink'; Integrated Security=True";
         public static Int32 unitid;
-        public static Dictionary<Socket, Int32> units = new Dictionary<Socket, int>();
+        //public static Dictionary<Socket, Int32> units = new Dictionary<Socket, int>();
         public static Dictionary<Int32, Socket> units2 = new Dictionary<int, Socket>();
         public static Dictionary<int, int> intsensorvals = new Dictionary<int, int>();
         public static Dictionary<int, string> stringsensorvals = new Dictionary<int, string>();
@@ -100,8 +100,7 @@ namespace TCPServer2
         //public static Dictionary<IPAddress, string> curraction = new Dictionary<IPAddress, string>();
         public static Dictionary<Socket, string> curraction = new Dictionary<Socket, string>();
         public static Dictionary<string, string> curraction2 = new Dictionary<string, string>();
-        //public static Dictionary<IPAddress, string> sernumdict = new Dictionary<IPAddress, string>();
-        public static Dictionary<Socket, string> sernumdict = new Dictionary<Socket, string>();
+        //public static Dictionary<Socket, string> sernumdict = new Dictionary<Socket, string>();
         public static Dictionary<string, Socket> sernumdict2 = new Dictionary<string, Socket>();
         public static Dictionary<int, bool> modesetdict = new Dictionary<int, bool>();
         public static Dictionary<int, bool> intervalsetdict = new Dictionary<int, bool>();
@@ -277,7 +276,7 @@ namespace TCPServer2
             //    clientSockets.Remove(handler);
 
             //clientSockets.Add(handler); // list of connected sockets
-            Thread.Sleep(1000);
+            //Thread.Sleep(1000);
 
             //for (int x = 0; x < clientSockets.Count; x++)
             //    MessageBox.Show(clientSockets[x].RemoteEndPoint.ToString());
@@ -1618,7 +1617,7 @@ namespace TCPServer2
                                 }
                                 catch (ObjectDisposedException e)
                                 {
-                                    MessageBox.Show(e.ToString());
+                                    MessageBox.Show("1621 " + e.ToString());
                                 }
                                 //try
                                 //{
@@ -1640,8 +1639,8 @@ namespace TCPServer2
                                 units2.Remove(response);
                                 units2.Add(response, handler); // add entry for unit ID to units2 dictionary
                                                                //if (!units.ContainsKey(handler))
-                                units.Remove(handler);
-                                units.Add(handler, response); // add entry for unit in the dictionary of actively connected units (IP address and unit id)
+                                //units.Remove(handler);
+                                //units.Add(handler, response); // add entry for unit in the dictionary of actively connected units (IP address and unit id)
                                                               //else
                                                               //{
                                                               //    units.Remove(handler);
@@ -1649,8 +1648,8 @@ namespace TCPServer2
                                                               //}
 
                                 //if (!sernumdict.ContainsKey(handler))
-                                sernumdict.Remove(handler);
-                                sernumdict.Add(handler, sernum); // add entry for unit in the dictionary of actively connected units (IP address and unit id)
+                                //sernumdict.Remove(handler);
+                                //sernumdict.Add(handler, sernum); // add entry for unit in the dictionary of actively connected units (IP address and unit id)
                                                                  //else
                                                                  //{
                                                                  //    sernumdict.Remove(handler);
@@ -1667,7 +1666,7 @@ namespace TCPServer2
                                                                   //    sernumdict2.Add(sernum, handler);
                                                                   //}
 
-                                //sernumdict2.Add(sernum, handler);
+                                //sernumdict2.Add(sernum, handler);    
 
                                 if (!modesetdict.ContainsKey(response))
                                     modesetdict.Add(response, false); // add entry to dictionary indicating that mode command has not been sent to this unit
@@ -1745,7 +1744,7 @@ namespace TCPServer2
                                             }
                                             catch (Exception e2)
                                             {
-                                                MessageBox.Show(e2.ToString());
+                                                 MessageBox.Show("1748 " + e2.ToString());
                                             }
                                         }
                                     }
@@ -1778,7 +1777,7 @@ namespace TCPServer2
                                             }
                                             catch (Exception e2)
                                             {
-                                                MessageBox.Show(e2.ToString());
+                                                MessageBox.Show("1781 " + e2.ToString());
                                             }
                                         }
                                     }
@@ -1858,7 +1857,7 @@ namespace TCPServer2
 
                                         catch (Exception e)
                                         {
-                                            MessageBox.Show(e.ToString());
+                                            MessageBox.Show("1861 " + e.ToString());
                                         }
 
 
@@ -1981,7 +1980,7 @@ namespace TCPServer2
                                                 }
                                                 catch (Exception e)
                                                 {
-                                                    MessageBox.Show(e.ToString());
+                                                    MessageBox.Show("1984 " + e.ToString());
                                                 }
                                             }
                                         }
@@ -2020,7 +2019,7 @@ namespace TCPServer2
                                                 }
                                                 catch (Exception e)
                                                 {
-                                                    MessageBox.Show(e.ToString());
+                                                    MessageBox.Show("2023 " + e.ToString());
                                                 }
                                             }
                                         }
@@ -2081,7 +2080,7 @@ namespace TCPServer2
 
                                         catch (Exception e2)
                                         {
-                                            MessageBox.Show(e2.ToString());
+                                            MessageBox.Show("2084 " + e2.ToString());
                                         }
                                     }
                                 }
@@ -2106,7 +2105,7 @@ namespace TCPServer2
 
                                             catch (Exception e2)
                                             {
-                                                MessageBox.Show(e2.ToString());
+                                                MessageBox.Show("2109 " + e2.ToString());
                                             }
                                         }
                                     }
@@ -2157,8 +2156,8 @@ namespace TCPServer2
 
                                 //}
 
-                                units.TryGetValue(handler, out unitid); // get unit id of currently connected unit
-                                                                        //MessageBox.Show("About to check alarms for unit " + unitid.ToString());
+                                //units.TryGetValue(handler, out unitid); // get unit id of currently connected unit
+                                unitid = GetUnitIDFromSN (sernum);  
                                 //CheckAlarms(unitid);
 
                             }
@@ -2201,7 +2200,7 @@ namespace TCPServer2
                                 }
                                 catch (Exception e)
                                 {
-                                    MessageBox.Show(e.ToString());
+                                    MessageBox.Show("2204 " + e.ToString());
                                 }
                             }
                         }
@@ -2779,7 +2778,8 @@ namespace TCPServer2
                                         sensorvalint.Add(Convert.ToInt32(sensorval[i].ToString(), 16)); // convert to integer and add to arraylist
                                         intsensorvals.Add(Convert.ToInt32(sensoridint[i]), Convert.ToInt32(sensorvalint[i])); // add sensor id and integer value to dictionary of integer sensor values
 
-                                        units.TryGetValue(handler, out unitid);
+                                        //units.TryGetValue(handler, out unitid);
+                                        unitid = GetUnitIDFromSN(sernum);
                                         string query = "EXEC proc_storedatapacket @unitid, @sensor_id, @value1, @value2, @value3, @packetdate";
 
                                         using (SqlConnection conn = new SqlConnection(connectionString))
@@ -2801,7 +2801,7 @@ namespace TCPServer2
                                                 }
                                                 catch (Exception e)
                                                 {
-                                                    MessageBox.Show(e.ToString());
+                                                    MessageBox.Show("2803 " + e.ToString());
                                                 }
                                             }
                                         }
@@ -2811,7 +2811,8 @@ namespace TCPServer2
                                         sensorvalint.Add(sensorval[i].ToString()); // add unconverted string to arraylist
                                         stringsensorvals.Add(Convert.ToInt32(sensoridint[i]), sensorvalint[i].ToString()); // add sensor id and string value to dictionary of string sensor values
 
-                                        units.TryGetValue(handler, out unitid);
+                                        //units.TryGetValue(handler, out unitid);
+                                        unitid = GetUnitIDFromSN(sernum);
                                         string query = "EXEC proc_storedatapacket @unitid, @sensor_id, @value1, @value2, @value3, @packetdate";
 
                                         using (SqlConnection conn = new SqlConnection(connectionString))
@@ -2833,7 +2834,7 @@ namespace TCPServer2
                                                 }
                                                 catch (Exception e)
                                                 {
-                                                    MessageBox.Show(e.ToString());
+                                                    MessageBox.Show("2836 " + e.ToString());
                                                 }
                                             }
                                         }
@@ -2867,7 +2868,7 @@ namespace TCPServer2
 
             catch (Exception e)
             {
-                MessageBox.Show(e.ToString());
+                MessageBox.Show("2870 " + e.ToString());
 
             }
         
@@ -3737,24 +3738,24 @@ namespace TCPServer2
 
                     if (!SocketExtensions.IsConnected(handler2)) // if socket is disconnected
                     {
-                        clientSockets.Remove(handler2);
+                        //clientSockets.Remove(handler2);
 
-                        bool logmod;
-                        disclogmod.TryGetValue(handler2, out logmod); // check if log file entry has been made for this event
+                        //bool logmod;
+                        //disclogmod.TryGetValue(handler2, out logmod); // check if log file entry has been made for this event
 
-                        if (logmod == false) // if log file entry has not yet been made
-                        {
-                            if (sernumdict.ContainsKey(handler2)) //&& (sernum2 != ""))
-                            {
-                                sernumdict.TryGetValue(handler2, out sernum2); // get serial number of disconnected unit
-                                                                               // add log file entry indicating that this unit has been disconnected
-                                                                               //StreamWriter disclog = new StreamWriter(new FileStream("C:\\Users\\gayakawa\\desktop\\TCPServer Log\\disconnect.log", FileMode.Append, FileAccess.Write));
-                                StreamWriter disclog = new StreamWriter(new FileStream("C:\\Users\\gayakawa\\desktop\\TCPServer Log\\" + sernum2 + ".log", FileMode.Append, FileAccess.Write));
-                                disclog.Write("\r\n" + DateTime.Now + " " + handler2.RemoteEndPoint.ToString() + " (Serial Number " + sernum2 + ") disconnection detected");
-                                //disclog.Write("\r\n" + DateTime.Now + " " + IPAddress.Parse(((IPEndPoint)handler.RemoteEndPoint).Address.ToString()) + " disconnected");
-                                disclog.Close();
-                            }
-                        }
+                        //if (logmod == false) // if log file entry has not yet been made
+                        //{
+                        //    if (sernumdict.ContainsKey(handler2)) //&& (sernum2 != ""))
+                        //    {
+                        //        sernumdict.TryGetValue(handler2, out sernum2); // get serial number of disconnected unit
+                        //                                                       // add log file entry indicating that this unit has been disconnected
+                        //                                                       //StreamWriter disclog = new StreamWriter(new FileStream("C:\\Users\\gayakawa\\desktop\\TCPServer Log\\disconnect.log", FileMode.Append, FileAccess.Write));
+                        //        StreamWriter disclog = new StreamWriter(new FileStream("C:\\Users\\gayakawa\\desktop\\TCPServer Log\\" + sernum2 + ".log", FileMode.Append, FileAccess.Write));
+                        //        disclog.Write("\r\n" + DateTime.Now + " " + handler2.RemoteEndPoint.ToString() + " (Serial Number " + sernum2 + ") disconnection detected");
+                        //        //disclog.Write("\r\n" + DateTime.Now + " " + IPAddress.Parse(((IPEndPoint)handler.RemoteEndPoint).Address.ToString()) + " disconnected");
+                        //        disclog.Close();
+                        //    }
+                        //}
 
 
 
@@ -3768,10 +3769,10 @@ namespace TCPServer2
                             disclogmod.Add(handler2, true);
                         }
 
-                        if (sernumdict.ContainsKey(handler2))
-                            sernumdict.Remove(handler2);
-                        if (units.ContainsKey(handler2))
-                            units.Remove(handler2);
+                        //if (sernumdict.ContainsKey(handler2))
+                        //    sernumdict.Remove(handler2);
+                        //if (units.ContainsKey(handler2))
+                        //    units.Remove(handler2);
 
                     }
                 }
