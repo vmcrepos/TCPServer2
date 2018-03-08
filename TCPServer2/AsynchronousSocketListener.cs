@@ -1636,42 +1636,52 @@ namespace TCPServer2
 
                                 response = GetUnitIDFromSN(sernum);
                                 //MessageBox.Show("sernum = " + response.ToString() + "\n handler = " + handler.RemoteEndPoint.ToString());
-                                units2.Remove(response);
-                                units2.Add(response, handler); // add entry for unit ID to units2 dictionary
-                                                               //if (!units.ContainsKey(handler))
-                                //units.Remove(handler);
-                                //units.Add(handler, response); // add entry for unit in the dictionary of actively connected units (IP address and unit id)
-                                                              //else
-                                                              //{
-                                                              //    units.Remove(handler);
-                                                              //    units.Add(handler, response);
-                                                              //}
+                                try
+                                {
+                                    units2.Remove(response);
+                                    units2.Add(response, handler); // add entry for unit ID to units2 dictionary
+                                                                   //if (!units.ContainsKey(handler))
+                                                                   //units.Remove(handler);
+                                                                   //units.Add(handler, response); // add entry for unit in the dictionary of actively connected units (IP address and unit id)
+                                                                   //else
+                                                                   //{
+                                                                   //    units.Remove(handler);
+                                                                   //    units.Add(handler, response);
+                                                                   //}
 
-                                //if (!sernumdict.ContainsKey(handler))
-                                //sernumdict.Remove(handler);
-                                //sernumdict.Add(handler, sernum); // add entry for unit in the dictionary of actively connected units (IP address and unit id)
-                                                                 //else
-                                                                 //{
-                                                                 //    sernumdict.Remove(handler);
-                                                                 //    sernumdict.Add(handler, sernum);
-                                                                 //}
-                                                                 //sernumdict.Add(handler, sernum); // add entry for unit serial number in the dictionary of actively connected units (IP address and serial number)
+                                    //if (!sernumdict.ContainsKey(handler))
+                                    //sernumdict.Remove(handler);
+                                    //sernumdict.Add(handler, sernum); // add entry for unit in the dictionary of actively connected units (IP address and unit id)
+                                    //else
+                                    //{
+                                    //    sernumdict.Remove(handler);
+                                    //    sernumdict.Add(handler, sernum);
+                                    //}
+                                    //sernumdict.Add(handler, sernum); // add entry for unit serial number in the dictionary of actively connected units (IP address and serial number)
 
-                                //if (!sernumdict2.ContainsKey(sernum))
-                                sernumdict2.Remove(sernum);
-                                sernumdict2.Add(sernum, handler); // add entry for unit in the dictionary of actively connected units (IP address and unit id)
-                                                                  //else
-                                                                  //{
-                                                                  //    sernumdict2.Remove(sernum);
-                                                                  //    sernumdict2.Add(sernum, handler);
-                                                                  //}
+                                    //if (!sernumdict2.ContainsKey(sernum))
+                                    sernumdict2.Remove(sernum);
+                                    sernumdict2.Add(sernum, handler); // add entry for unit in the dictionary of actively connected units (IP address and unit id)
+                                                                      //else
+                                                                      //{
+                                                                      //    sernumdict2.Remove(sernum);
+                                                                      //    sernumdict2.Add(sernum, handler);
+                                                                      //}
 
-                                //sernumdict2.Add(sernum, handler);    
+                                    //sernumdict2.Add(sernum, handler);    
 
-                                if (!modesetdict.ContainsKey(response))
-                                    modesetdict.Add(response, false); // add entry to dictionary indicating that mode command has not been sent to this unit
-                                if (!intervalsetdict.ContainsKey(response))
-                                    intervalsetdict.Add(response, false); // add entry to dictionary indicating that interval command has not been sent to this unit
+
+
+                                    if (!modesetdict.ContainsKey(response))
+                                        modesetdict.Add(response, false); // add entry to dictionary indicating that mode command has not been sent to this unit
+                                    if (!intervalsetdict.ContainsKey(response))
+                                        intervalsetdict.Add(response, false); // add entry to dictionary indicating that interval command has not been sent to this unit
+                                }
+
+                                catch (Exception e)
+                                {
+                                    MessageBox.Show("1682 " + e.ToString());
+                                }
 
                                 content = sernum + "   " + handler.RemoteEndPoint.ToString() + "   " + DateTime.Now.ToShortDateString() + " " + DateTime.Now.ToShortTimeString() + "   " + content2 + "\r\n";
                                 Incoming(null, content);
@@ -1790,7 +1800,7 @@ namespace TCPServer2
 
                             //}
                             //}
-
+                            CheckUnsentMessages(sernum);
                             //if (content2.Contains("{VMC01," + sernum + ",09,")) // received date and time request
                             if (content2.Contains("VMC01," + sernum + ",09,")) // received date and time request
                             {
@@ -1879,17 +1889,25 @@ namespace TCPServer2
                                         if (content2.Contains("00}") && match2) // positive acknowledgement
                                         {
                                             // update dictionary object to indicate that the appropriate log file has not been updated 
-                                            if (!outlogmod.ContainsKey(handler))
-                                                outlogmod.Add(handler, false);
-                                            else
+                                            try
                                             {
-                                                outlogmod.Remove(handler);
-                                                outlogmod.Add(handler, false);
+                                                if (!outlogmod.ContainsKey(handler))
+                                                    outlogmod.Add(handler, false);
+                                                else
+                                                {
+                                                    outlogmod.Remove(handler);
+                                                    outlogmod.Add(handler, false);
+                                                }
+
+                                                ackaction.TryGetValue(content2.Split(',')[3], out actiontoupdate); // find action id corresponding to packet id of acknowledgement message
+                                                UpdateAction2(actiontoupdate, "actsetout"); // update action database table for appropriate action id
+                                                match2 = false;
                                             }
 
-                                            ackaction.TryGetValue(content2.Split(',')[3], out actiontoupdate); // find action id corresponding to packet id of acknowledgement message
-                                            UpdateAction2(actiontoupdate, "actsetout"); // update action database table for appropriate action id
-                                            match2 = false;
+                                            catch (Exception e)
+                                            {
+                                                MessageBox.Show("1910 " + e.ToString());
+                                            }
                                         }
 
 
@@ -1951,9 +1969,16 @@ namespace TCPServer2
 
                                     if (IsHex(sensorval[i].ToString())) // string is hex 
                                     {
-                                        sensorvalint.Add(Convert.ToInt32(sensorval[i].ToString(), 16)); // convert to integer and add to arraylist
-                                        intsensorvals.Add(Convert.ToInt32(sensoridint[i]), Convert.ToInt32(sensorvalint[i])); // add sensor id and integer value to dictionary of integer sensor values
+                                        try
+                                        {
+                                            sensorvalint.Add(Convert.ToInt32(sensorval[i].ToString(), 16)); // convert to integer and add to arraylist
+                                            intsensorvals.Add(Convert.ToInt32(sensoridint[i]), Convert.ToInt32(sensorvalint[i])); // add sensor id and integer value to dictionary of integer sensor values
+                                        }
 
+                                        catch (Exception e)
+                                        {
+                                            MessageBox.Show("1980 " + e.ToString());
+                                        }
 
                                         unitid = GetUnitIDFromSN(sernum); // get unit id of currently connected unit
                                                                           //units.TryGetValue(handler, out unitid); // get unit id of currently connected unit
@@ -1989,8 +2014,16 @@ namespace TCPServer2
                                     }
                                     else
                                     {
-                                        sensorvalint.Add(sensorval[i].ToString()); // add unconverted string to arraylist
-                                        stringsensorvals.Add(Convert.ToInt32(sensoridint[i]), sensorvalint[i].ToString()); // add sensor id and string value to dictionary of string sensor values
+                                        try
+                                        {
+                                            sensorvalint.Add(sensorval[i].ToString()); // add unconverted string to arraylist
+                                            stringsensorvals.Add(Convert.ToInt32(sensoridint[i]), sensorvalint[i].ToString()); // add sensor id and string value to dictionary of string sensor values
+                                        }
+
+                                        catch (Exception e)
+                                        {
+                                            MessageBox.Show("2018 " + e.ToString());
+                                        }
 
                                         unitid = GetUnitIDFromSN(sernum); // get unit id of currently connected unit
                                                                           //units.TryGetValue(handler, out unitid); // get unit id of currently connected unit
@@ -2218,12 +2251,20 @@ namespace TCPServer2
                         //if (OpMode != "0000" && timeset) // send message if operation mode is not set to default
                         if (OpMode != "0000" && sernum != "" & !modeset) // send message if operation mode is not set to default and mode command has not been previously sent
                         {
-                            string opmodeset = "{VMC01," + sernum + ",67,FE," + OpMode + "}\r\n";
-                            Thread.Sleep(1000);
-                            Send(handler, opmodeset);
-                            //modeset = true;
-                            modesetdict.Remove(unitid);
-                            modesetdict.Add(unitid, true); // set dictionary value to indicate that mode command has been sent
+                            try
+                            {
+                                string opmodeset = "{VMC01," + sernum + ",67,FE," + OpMode + "}\r\n";
+                                Thread.Sleep(1000);
+                                Send(handler, opmodeset);
+                                //modeset = true;
+                                modesetdict.Remove(unitid);
+                                modesetdict.Add(unitid, true); // set dictionary value to indicate that mode command has been sent
+                            }
+
+                            catch (Exception e)
+                            {
+                                MessageBox.Show("2251 " + e.ToString());
+                            }
 
                         }
 
@@ -2233,11 +2274,21 @@ namespace TCPServer2
                         if (Interval != "0000" && !modeset) // send message if transmission interval is not set to default
 
                         {
-                            string intervalset = "{VMC01," + sernum + ",71,FC," + Interval + "}\r\n";
-                            Thread.Sleep(1000);
-                            Send(handler, intervalset);
-                            intervalsetdict.Remove(unitid);
-                            intervalsetdict.Add(unitid, true); // set dictionary value to indicate that interval command has been sent
+                            try
+                            {
+                                string intervalset = "{VMC01," + sernum + ",71,FC," + Interval + "}\r\n";
+                                Thread.Sleep(1000);
+                                Send(handler, intervalset);
+                                intervalsetdict.Remove(unitid);
+                                intervalsetdict.Add(unitid, true); // set dictionary value to indicate that interval command has been sent
+                            }
+
+                            catch (Exception e)
+                            {
+                                MessageBox.Show("2273 " + e.ToString());
+                            }
+
+                        
                         }
 
                         // if in firmware update mode, begin firmware update process
@@ -2247,81 +2298,84 @@ namespace TCPServer2
                         //if (sernum != "")
                         //{
                             CheckActions(sernum);
-                            string filename = "C:\\ProgramData\\TCPServer\\Unsent_Messages_" + sernum;
-                            //if (File.Exists("C:\\ProgramData\\TCPServer\\Unsent_Messages.txt"))
-                            if (File.Exists(filename + ".txt"))
-                            {
-                                //StreamReader unsentcheck = new StreamReader(new FileStream("C:\\ProgramData\\TCPServer\\Unsent_Messages.txt", FileMode.Open, FileAccess.Read));
-                                StreamReader unsentcheck = new StreamReader(new FileStream(filename + ".txt", FileMode.Open, FileAccess.Read));
-                                string line = unsentcheck.ReadLine();
-                                //string snunsent = String.Empty;
-                                //while (line != null && line.Length > 0)
-                                unsentarr.Clear();
-                                while (line != null)
-                                {
-                                    if (line.Contains(","))
-                                    {
-                                        //snunsent = line.Split(',')[1];
-                                        //if (snunsent == sernum)
-                                        //{
-                                        unsentarr.Add(line);
-                                        //}
-                                    }
-                                    line = unsentcheck.ReadLine();
+                            //string filename = "C:\\ProgramData\\TCPServer\\Unsent_Messages_" + sernum;
+                            ////if (File.Exists("C:\\ProgramData\\TCPServer\\Unsent_Messages.txt"))
+                            //if (File.Exists(filename + ".txt"))
+                            //{
+                            //    //StreamReader unsentcheck = new StreamReader(new FileStream("C:\\ProgramData\\TCPServer\\Unsent_Messages.txt", FileMode.Open, FileAccess.Read));
+                            //    StreamReader unsentcheck = new StreamReader(new FileStream(filename + ".txt", FileMode.Open, FileAccess.Read));
+                            //    string line = unsentcheck.ReadLine();
+                            //    //string snunsent = String.Empty;
+                            //    //while (line != null && line.Length > 0)
+                            //    unsentarr.Clear();
+                            //    while (line != null)
+                            //    {
+                            //        if (line.Contains(","))
+                            //        {
+                            //            //snunsent = line.Split(',')[1];
+                            //            //if (snunsent == sernum)
+                            //            //{
+                            //            unsentarr.Add(line);
+                            //            //}
+                            //        }
+                            //        line = unsentcheck.ReadLine();
 
-                                }
-                                unsentcheck.Close();
-                                unsentcheck.Dispose();
-
-
-
-
-                                for (int x = 0; x < unsentarr.Count; x++)
-                                {
-                                    if (unsentarr[x].ToString().Contains("Send Current Time,"))
-                                        SendCurrTime(sernum);
-                                    else
-                                    {
-                                        if (unsentarr[x].ToString().Contains("64,FF"))
-                                        {
-                                            fwreq2 = true;
-                                            pos = 0;
-                                        }
-                                        Send(handler, unsentarr[x].ToString() + "\r\n");
-                                    }
-                                    Thread.Sleep(2000);
-
-                                }
+                            //    }
+                            //    unsentcheck.Close();
+                            //    unsentcheck.Dispose();
 
 
 
 
+                            //    for (int x = 0; x < unsentarr.Count; x++)
+                            //    {
+                            //        if (unsentarr[x].ToString().Contains("Send Current Time,"))
+                            //            SendCurrTime(sernum);
+                            //        else
+                            //        {
+                            //            if (unsentarr[x].ToString().Contains("64,FF"))
+                            //            {
+                            //                fwreq2 = true;
+                            //                pos = 0;
+                            //            }
 
-                                ////https://stackoverflow.com/questions/668907/how-to-delete-a-line-from-a-text-file-in-c
-                                //string tempFile = Path.GetTempFileName();
+                            //            Socket handler2 = null;
+                            //            sernumdict2.TryGetValue(sernum, out handler2);  
+                            //            Send(handler2, unsentarr[x].ToString() + "\r\n");
+                            //        }
+                            //        Thread.Sleep(2000);
 
-                                //using (var sr = new StreamReader("C:\\ProgramData\\TCPServer\\Unsent_Messages.txt"))
-                                //using (var sw = new StreamWriter(tempFile))
-                                //{
-                                //    string line2;
-
-                                //    while ((line2 = sr.ReadLine()) != null)
-                                //    {
-                                //        if (!(line2.Contains("," + sernum + ",")))
-                                //            sw.WriteLine(line2);
-                                //    }
-                                //}
-
-                                //File.Delete("C:\\ProgramData\\TCPServer\\Unsent_Messages.txt");
-                                //File.Move(tempFile, "C:\\ProgramData\\TCPServer\\Unsent_Messages.txt");
-                                File.Delete(filename + ".txt");
+                            //    }
 
 
 
 
 
+                            //    ////https://stackoverflow.com/questions/668907/how-to-delete-a-line-from-a-text-file-in-c
+                            //    //string tempFile = Path.GetTempFileName();
 
-                            }
+                            //    //using (var sr = new StreamReader("C:\\ProgramData\\TCPServer\\Unsent_Messages.txt"))
+                            //    //using (var sw = new StreamWriter(tempFile))
+                            //    //{
+                            //    //    string line2;
+
+                            //    //    while ((line2 = sr.ReadLine()) != null)
+                            //    //    {
+                            //    //        if (!(line2.Contains("," + sernum + ",")))
+                            //    //            sw.WriteLine(line2);
+                            //    //    }
+                            //    //}
+
+                            //    //File.Delete("C:\\ProgramData\\TCPServer\\Unsent_Messages.txt");
+                            //    //File.Move(tempFile, "C:\\ProgramData\\TCPServer\\Unsent_Messages.txt");
+                            //    File.Delete(filename + ".txt");
+
+
+
+
+
+
+                            //}
 
                         //CheckActions(sernum);
 
@@ -2372,13 +2426,21 @@ namespace TCPServer2
                                 //if (Interval != "0000" && timeset) // send message if transmission interval is not set to default
                                 if (Interval != "0000") // send message if transmission interval is not set to default
                                 {
-                                    string intervalset = "{VMC01," + sernum + ",71,FC," + Interval + "}\r\n";
-                                    Thread.Sleep(1000);
-                                    Send(handler, intervalset);
-                                    //interset = true;
-                                    intervalsetdict.Remove(unitid);
-                                    intervalsetdict.Add(unitid, true); // set dictionary value to indicate that interval command has been sent
-                                }
+                                    try
+                                    {
+                                        string intervalset = "{VMC01," + sernum + ",71,FC," + Interval + "}\r\n";
+                                        Thread.Sleep(1000);
+                                        Send(handler, intervalset);
+                                        //interset = true;
+                                        intervalsetdict.Remove(unitid);
+                                        intervalsetdict.Add(unitid, true); // set dictionary value to indicate that interval command has been sent
+                                    }
+
+                                    catch (Exception e)
+                                    {
+                                        MessageBox.Show("2426 " + e.ToString());
+                                    }
+                            }
 
 
                             }
@@ -2775,11 +2837,18 @@ namespace TCPServer2
 
                                     if (IsHex(sensorval[i].ToString())) // string is hex 
                                     {
+                                        try
+                                        {
                                         sensorvalint.Add(Convert.ToInt32(sensorval[i].ToString(), 16)); // convert to integer and add to arraylist
                                         intsensorvals.Add(Convert.ToInt32(sensoridint[i]), Convert.ToInt32(sensorvalint[i])); // add sensor id and integer value to dictionary of integer sensor values
+                                        }
 
-                                        //units.TryGetValue(handler, out unitid);
-                                        unitid = GetUnitIDFromSN(sernum);
+                                        catch (Exception e)
+                                        {
+                                            MessageBox.Show("2841 " + e.ToString());
+                                        }
+                                    //units.TryGetValue(handler, out unitid);
+                                    unitid = GetUnitIDFromSN(sernum);
                                         string query = "EXEC proc_storedatapacket @unitid, @sensor_id, @value1, @value2, @value3, @packetdate";
 
                                         using (SqlConnection conn = new SqlConnection(connectionString))
@@ -2808,11 +2877,18 @@ namespace TCPServer2
                                     }
                                     else
                                     {
+                                        try
+                                        {
                                         sensorvalint.Add(sensorval[i].ToString()); // add unconverted string to arraylist
                                         stringsensorvals.Add(Convert.ToInt32(sensoridint[i]), sensorvalint[i].ToString()); // add sensor id and string value to dictionary of string sensor values
+                                        }
 
-                                        //units.TryGetValue(handler, out unitid);
-                                        unitid = GetUnitIDFromSN(sernum);
+                                        catch (Exception e)
+                                        {
+                                            MessageBox.Show("2881 " + e.ToString());
+                                        }
+                                    //units.TryGetValue(handler, out unitid);
+                                    unitid = GetUnitIDFromSN(sernum);
                                         string query = "EXEC proc_storedatapacket @unitid, @sensor_id, @value1, @value2, @value3, @packetdate";
 
                                         using (SqlConnection conn = new SqlConnection(connectionString))
@@ -2876,7 +2952,62 @@ namespace TCPServer2
         }
 
 
+        private static void CheckUnsentMessages(string sn)
+        {
+            string filename = "C:\\ProgramData\\TCPServer\\Unsent_Messages_" + sn;
+            //if (File.Exists("C:\\ProgramData\\TCPServer\\Unsent_Messages.txt"))
+            if (File.Exists(filename + ".txt"))
+            {
+                //StreamReader unsentcheck = new StreamReader(new FileStream("C:\\ProgramData\\TCPServer\\Unsent_Messages.txt", FileMode.Open, FileAccess.Read));
+                StreamReader unsentcheck = new StreamReader(new FileStream(filename + ".txt", FileMode.Open, FileAccess.Read));
+                string line = unsentcheck.ReadLine();
+                //string snunsent = String.Empty;
+                //while (line != null && line.Length > 0)
+                unsentarr.Clear();
+                while (line != null)
+                {
+                    if (line.Contains(","))
+                    {
+                        //snunsent = line.Split(',')[1];
+                        //if (snunsent == sernum)
+                        //{
+                        unsentarr.Add(line);
+                        //}
+                    }
+                    line = unsentcheck.ReadLine();
 
+                }
+                unsentcheck.Close();
+                unsentcheck.Dispose();
+
+
+
+
+                for (int x = 0; x < unsentarr.Count; x++)
+                {
+                    if (unsentarr[x].ToString().Contains("Send Current Time,"))
+                        SendCurrTime(sn);
+                    else
+                    {
+                        if (unsentarr[x].ToString().Contains("64,FF"))
+                        {
+                            fwreq2 = true;
+                            pos = 0;
+                        }
+
+                        Socket handler2 = null;
+                        sernumdict2.TryGetValue(sn, out handler2);
+                        Send(handler2, unsentarr[x].ToString() + "\r\n");
+                    }
+                    Thread.Sleep(2000);
+
+                }
+
+                File.Delete(filename + ".txt");
+
+
+            }
+        }
     
         public static void CheckAlarms(int Unit)
         {
