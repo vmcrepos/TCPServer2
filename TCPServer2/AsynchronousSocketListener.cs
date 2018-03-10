@@ -132,6 +132,7 @@ namespace TCPServer2
         static Dictionary<int, bool> outcyclereset = new Dictionary<int, bool>();
         static ArrayList unsentarr = new ArrayList();
         public static ArrayList sernumlist = new ArrayList();
+        static bool packproc = true;
 
 
 
@@ -1686,9 +1687,24 @@ namespace TCPServer2
                                 content = sernum + "   " + handler.RemoteEndPoint.ToString() + "   " + DateTime.Now.ToShortDateString() + " " + DateTime.Now.ToShortTimeString() + "   " + content2 + "\r\n";
                                 Incoming(null, content);
                                 //#if TEST
-                                StreamWriter incominglog = new StreamWriter(new FileStream("C:\\Users\\gayakawa\\desktop\\TCPServer Log\\" + sernum + " incoming.log", FileMode.Append, FileAccess.Write));
-                                incominglog.Write("\r\n" + DateTime.Now + " " + " raw incoming " + content2);
-                                incominglog.Close();
+
+                                string infilename = "C:\\Users\\gayakawa\\desktop\\TCPServer Log\\" + sernum + " incoming.log";
+
+                                try
+                                {
+                                    StreamWriter incominglog = new StreamWriter(new FileStream(infilename, FileMode.Append, FileAccess.Write));
+                                    incominglog.Write("\r\n" + DateTime.Now + " " + " raw incoming " + content2);
+                                    incominglog.Close();
+                                }
+
+                                catch (Exception e)
+                                {
+                                    Outgoing("Incoming log not updated with the following: " + content2 + "\r\n");
+                                }
+
+                                //StreamWriter incominglog = new StreamWriter(new FileStream("C:\\Users\\gayakawa\\desktop\\TCPServer Log\\" + sernum + " incoming.log", FileMode.Append, FileAccess.Write));
+                                //incominglog.Write("\r\n" + DateTime.Now + " " + " raw incoming " + content2);
+                                //incominglog.Close();
                                 //#else
 
                                 //StreamWriter incominglog = new StreamWriter(new FileStream("C:\\Users\\gayakawa\\desktop\\TCPServer Log\\" + "incoming.log", FileMode.Append, FileAccess.Write));
@@ -1924,8 +1940,12 @@ namespace TCPServer2
                             //string sensorstart = "{VMC01," + sernum + ",01";
                             string sensorstart = "VMC01," + sernum + ",01";
                             //if (content2A.StartsWith(sensorstart) && content2A.EndsWith("}")) // received sensor data packet with proper structure
-                            if (content2A.Contains(sensorstart))
+                            if (content2A.Contains(sensorstart) && packproc)
+                            {
+                                packproc = false;
                                 ProcessDataPacket(content2A);
+                                
+                            }
                             //if (content2A.Contains(sensorstart) && content2A.EndsWith("}")) // received sensor data packet with proper structure
 
                             //{
@@ -2966,6 +2986,7 @@ namespace TCPServer2
             //if (packet.Contains(sensorstart) && packet.EndsWith("}")) // received sensor data packet with proper structure
             if (packet.Contains(sensorstart) && packet.Contains("}")) // received sensor data packet with proper structure
             {
+                //Outgoing (packet + "\r\n");
                 //MessageBox.Show("Got to 2968"); // TEST
                 string packetid = packet.Split(',')[3];
                 DateTime packettime = DateTime.Now;
@@ -2983,9 +3004,14 @@ namespace TCPServer2
 
                 indata.Clear();
                 indata.AddRange(packet.Split(',')); // split response at delimiters and store elements in arraylist
+                indata2.Clear();
                 sensorvalint.Clear();
                 intsensorvals.Clear();
                 stringsensorvals.Clear();
+                sensorid.Clear();
+                sensorval.Clear();
+                sensoridint.Clear();
+
                 for (int i = 0; i < indata.Count; i++)
                 {
                     if (indata[i].ToString().Contains("=")) // get data items in format "sensor id = value"
@@ -3019,7 +3045,7 @@ namespace TCPServer2
 
                         catch (Exception e)
                         {
-                            MessageBox.Show("1980 " + e.ToString());
+                            MessageBox.Show("1980 " + sensoridintstr + "\r\n" + e.ToString());
                         }
 
                         unitid = GetUnitIDFromSN(sernum); // get unit id of currently connected unit
@@ -3105,10 +3131,10 @@ namespace TCPServer2
 
                 sensorvalintstr = sensorvalintstr + " " + sensorvalint[i].ToString();   // test
 
-
+                
             }
+            
 
-               
 
 
             string actionidreqstr = "";
@@ -3172,12 +3198,13 @@ namespace TCPServer2
                     //UpdateAction2(actionidreq, "actisoreq"); // update action table entry for action id   TEMPORARILY REMOVED
                 }
             }
-            
-            unitid = GetUnitIDFromSN(sernum);
-            //CheckAlarms(unitid);
-            return;
+                
+                unitid = GetUnitIDFromSN(sernum);
+                //CheckAlarms(unitid);
+                
             }
 
+            
             // if a packet of returned sensor data does not have the proper structure, reset the "pending time"
             // in the database action table to trigger new requests for sensor data
 
@@ -3219,11 +3246,15 @@ namespace TCPServer2
                     MessageBox.Show("2204 " + e.ToString());
                 }
             }
-        
+
+            packproc = true;
+            //MessageBox.Show("packproc = " + packproc.ToString());
 
 
-    }
-    private static void CheckUnsentMessages(string sn)
+
+        }
+
+        private static void CheckUnsentMessages(string sn)
         {
             string filename = "C:\\ProgramData\\TCPServer\\Unsent_Messages_" + sn;
             //if (File.Exists("C:\\ProgramData\\TCPServer\\Unsent_Messages.txt"))
@@ -3920,9 +3951,26 @@ namespace TCPServer2
                 Outgoing(outsernum + "   " + handler.RemoteEndPoint.ToString() + "   " + DateTime.Now.ToShortDateString() + " " +
                     DateTime.Now.ToShortTimeString() + "   " + data);
 //#if TEST
-                StreamWriter outgoinglog = new StreamWriter(new FileStream("C:\\Users\\gayakawa\\desktop\\TCPServer Log\\" + sernum + " outgoing.log", FileMode.Append, FileAccess.Write));
-                outgoinglog.Write(DateTime.Now + " " + " raw outgoing " + data);
-                outgoinglog.Close();
+                string outfilename = "C:\\Users\\gayakawa\\desktop\\TCPServer Log\\" + sernum + " outgoing.log";
+                //FileInfo outfile = new FileInfo(outfilename);
+                //StreamWriter outgoinglog = new StreamWriter(new FileStream(outfilename, FileMode.Append, FileAccess.Write));
+                //if (!IsFileLocked(outfile))
+                //{
+                //    Outgoing("false");
+                try
+                {
+                    StreamWriter outgoinglog = new StreamWriter(new FileStream(outfilename, FileMode.Append, FileAccess.Write));
+                    outgoinglog.Write(DateTime.Now + " " + " raw outgoing " + data);
+                    outgoinglog.Close();
+                }
+
+                catch (Exception e)
+                {
+                    Outgoing("Outgoing log not updated with the following: " + data);
+                }
+                //}
+                //else
+                //    Outgoing("true");
 //#else
 
                 //StreamWriter outgoinglog = new StreamWriter(new FileStream("C:\\Users\\gayakawa\\desktop\\TCPServer Log\\" + "outgoing.log", FileMode.Append, FileAccess.Write));
@@ -4207,9 +4255,24 @@ namespace TCPServer2
                 unsent2.Close();
             }
 
-            StreamWriter outgoinglog = new StreamWriter(new FileStream("C:\\Users\\gayakawa\\desktop\\TCPServer Log\\" + sn + " outgoing.log", FileMode.Append, FileAccess.Write));
-            outgoinglog.Write("*** MESSAGE BELOW WAS NOT SENT SUCCESSFULLY ***\r\n");
-            outgoinglog.Close();
+            string outfilename = "C:\\Users\\gayakawa\\desktop\\TCPServer Log\\" + sn + " outgoing.log";
+
+            try
+            {
+                StreamWriter outgoinglog = new StreamWriter(new FileStream(outfilename, FileMode.Append, FileAccess.Write));
+                outgoinglog.Write("*** MESSAGE BELOW WAS NOT SENT SUCCESSFULLY ***\r\n");
+                outgoinglog.Close();
+            }
+
+            catch (Exception e)
+            {
+                Outgoing("Outgoing log not updated with the following: " + "*** MESSAGE BELOW WAS NOT SENT SUCCESSFULLY ***" +"\r\n");
+            }
+
+                //StreamWriter outgoinglog = new StreamWriter(new FileStream("C:\\Users\\gayakawa\\desktop\\TCPServer Log\\" + sn + " outgoing.log", FileMode.Append, FileAccess.Write));
+                //outgoinglog.Write("*** MESSAGE BELOW WAS NOT SENT SUCCESSFULLY ***\r\n");
+                //
+                //outgoinglog.Close();
 
         }
 
@@ -4316,7 +4379,34 @@ namespace TCPServer2
 
 
         }
+
+        public static bool IsFileLocked(FileInfo file)
+        {
+            FileStream stream = null;
+
+            try
+            {
+                stream = file.Open(FileMode.Open, FileAccess.Read, FileShare.None);
+            }
+            catch (IOException)
+            {
+                //the file is unavailable because it is:
+                //still being written to
+                //or being processed by another thread
+                //or does not exist (has already been processed)
+                return true;
+            }
+            finally
+            {
+                if (stream != null)
+                    stream.Close();
+            }
+
+            //file is not locked
+            return false;
+        }
     }
+
 
     static class SocketExtensions
     {
