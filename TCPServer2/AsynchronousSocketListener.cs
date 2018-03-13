@@ -133,6 +133,7 @@ namespace TCPServer2
         static ArrayList unsentarr = new ArrayList();
         public static ArrayList sernumlist = new ArrayList();
         static bool packproc = true;
+        static IAsyncResult currAsyncResult;
 
 
 
@@ -288,7 +289,7 @@ namespace TCPServer2
             // Create the state object.
             StateObject state = new StateObject();
             state.workSocket = handler;
-            handler.BeginReceive(state.buffer, 0, StateObject.BufferSize, 0,
+            currAsyncResult = handler.BeginReceive(state.buffer, 0, StateObject.BufferSize, 0,
                 new AsyncCallback(ReadCallback), state);
            
             
@@ -1060,11 +1061,10 @@ namespace TCPServer2
                                 {
                                     MessageBox.Show("1682 " + e.ToString());
                                 }
-// ********* CONTINUE CLEANUP FROM HERE ********************
+
                                 content = sernum + "   " + handler.RemoteEndPoint.ToString() + "   " + DateTime.Now.ToShortDateString() + " " + DateTime.Now.ToShortTimeString() + "   " + content2 + "\r\n";
                                 Incoming(null, content);
-                                //#if TEST
-
+                                
                                 string infilename = "C:\\Users\\gayakawa\\desktop\\TCPServer Log\\" + sernum + " incoming.log";
 
                                 try
@@ -1076,20 +1076,8 @@ namespace TCPServer2
 
                                 catch (Exception e)
                                 {
-                                    Outgoing("===============\r\nIncoming log not updated with the following: " + DateTime.Now + " " + " raw incoming " + content2 + "===============\r\n");
+                                    Incoming(null, "===============\r\nIncoming log not updated with the following: " + DateTime.Now + " " + " raw incoming " + content2 + "===============\r\n");
                                 }
-
-                                //StreamWriter incominglog = new StreamWriter(new FileStream("C:\\Users\\gayakawa\\desktop\\TCPServer Log\\" + sernum + " incoming.log", FileMode.Append, FileAccess.Write));
-                                //incominglog.Write("\r\n" + DateTime.Now + " " + " raw incoming " + content2);
-                                //incominglog.Close();
-                                //#else
-
-                                //StreamWriter incominglog = new StreamWriter(new FileStream("C:\\Users\\gayakawa\\desktop\\TCPServer Log\\" + "incoming.log", FileMode.Append, FileAccess.Write));
-                                //incominglog.Write("\r\n" + DateTime.Now + " " + handler.RemoteEndPoint.ToString() + " (Serial Number " + sernum + ")  " + "raw incoming " + content2);
-                                //incominglog.Close();
-                                //#endif
-
-                                //}
 
 
                             }
@@ -1100,29 +1088,11 @@ namespace TCPServer2
 
                             {
 
-
-                                //units.Add(handler, response); // add entry for unit in the dictionary of actively connected units (IP address and unit id)
-                                //sernumdict.Add(handler, sernum); // add entry for unit serial number in the dictionary of actively connected units (IP address and serial number)
-                                //sernumdict2.Add(sernum, handler);
                                 unitid = response;
 
-                                // add log entry indicating connection has been established
-                                //StreamWriter connlog = new StreamWriter(new FileStream("C:\\Users\\gayakawa\\desktop\\TCPServer Log\\connect.log", FileMode.Append, FileAccess.Write));
-                                //StreamWriter connlog = new StreamWriter(new FileStream("C:\\Users\\gayakawa\\desktop\\TCPServer Log\\" + sernum + ".log", FileMode.Append, FileAccess.Write));
-                                //connlog.Write("\r\n" + DateTime.Now + " " + handler.RemoteEndPoint.ToString() + " (Serial Number " + sernum + ") connection established");
-                                //connlog.Close();
-
-
-                                // set current time
-                                //Int32 unixTimecurr = (Int32)(DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1))).TotalSeconds; // get current Unix time
-                                //string hexTimecurr = unixTimecurr.ToString("X");
-                                //string data = "{59,FD," + hexTimecurr.ToString() + "}\r\n";
-                                //Thread.Sleep(1000);
-                                //Send(handler, data);
-
-
-                                modesetdict.TryGetValue(unitid, out modeset);
-                                if (!modeset)
+                                
+                                modesetdict.TryGetValue(unitid, out modeset); // check if operation mode has previously been checked for this unit
+                                if (!modeset) // operation mode has not previously been checked 
                                 {
                                     // query VLinkUnit table to determine operation mode associated with unit ID
                                     string query2 = "SELECT [Mode] FROM [VLink106466].[dbo].[VLinkUnit] WHERE ([UnitID] = " + response.ToString() + ")";
@@ -1153,8 +1123,8 @@ namespace TCPServer2
                                     }
                                 }
 
-                                intervalsetdict.TryGetValue(unitid, out interset);
-                                if (!interset)
+                                intervalsetdict.TryGetValue(unitid, out interset);  // check if interval value has previously been checked for this unit 
+                                if (!interset)  // interval value has not previously been checked
                                 {
                                     // query VLinkUnit table to determine data transmission interval associated with unit ID
                                     string query3 = "SELECT [Interval] FROM [VLink106466].[dbo].[VLinkUnit] WHERE ([UnitID] = " + response.ToString() + ")";
@@ -1191,10 +1161,8 @@ namespace TCPServer2
 
 
 
-                            //}
-                            //}
-                            CheckUnsentMessages(sernum);
-                            //if (content2.Contains("{VMC01," + sernum + ",09,")) // received date and time request
+                            
+                            CheckUnsentMessages(sernum);    // check for unsent messages for this unit
                             if (content2.Contains("VMC01," + sernum + ",09,")) // received date and time request
                             {
                                 SendCurrTime(sernum); // send set time message
@@ -1202,7 +1170,7 @@ namespace TCPServer2
 
                             }
 
-                            if (content2.Contains("{VMC01," + sernum + ",0A") && fwreq2 == false && fwackwait == false)
+                            if (content2.Contains("{VMC01," + sernum + ",0A") && fwreq2 == false && fwackwait == false) // received acknowledgement message for action message
                             {
                                 bool match2 = false;
                                 string actupdate;
@@ -1216,10 +1184,9 @@ namespace TCPServer2
                                 {
 
                                     int unitid2 = 0;
-                                    // get unit ID from dictionary
-                                    //units.TryGetValue(handler, out unitid2);
+                                    // get unit ID from database table
                                     unitid2 = GetUnitIDFromSN(sernum);
-                                    //MessageBox.Show("unitid = " + unitid2.ToString());
+                                    
 
                                     string packid = content2.Split(',')[3]; // get packet id from acknowledgement message
 
@@ -1228,9 +1195,8 @@ namespace TCPServer2
                                     if (ackaction.ContainsKey(packid)) // check if packet id of acknowledgement matches a previously sent "set output" message
                                     {
                                         int actionid = 0;
-                                        //ackaction.TryGetValue(content2.Split(',')[1], out actionid);
+                                        
                                         ackaction.TryGetValue(packid, out actionid); // get action id from dictionary relating packet id with action id
-                                                                                     //MessageBox.Show("actionid = " + actionid.ToString());
                                         string query = "SELECT id, unitid FROM [VLink106466].[dbo].VLinkActions";
 
 
@@ -1244,7 +1210,7 @@ namespace TCPServer2
 
                                                     SqlDataAdapter da = new SqlDataAdapter();
                                                     DataSet ds = new DataSet();
-                                                    //DataTable dt5 = new DataTable();
+                                                    
 
 
                                                     // create dataset and datatable from returned data
@@ -1271,7 +1237,6 @@ namespace TCPServer2
                                             {
                                                 {
                                                     match2 = true;
-                                                    //MessageBox.Show("row " + d.ToString() + " is true");
                                                     break;
                                                 }
                                             }
@@ -1313,341 +1278,15 @@ namespace TCPServer2
                             }
 
                             string content2A = content2.TrimEnd('\r', '\n');
-                            //if (content2.StartsWith("{01,") && content2.EndsWith("}")) // received sensor data packet with proper structure
-                            //string sensorstart = "{VMC01," + sernum + ",01";
                             string sensorstart = "VMC01," + sernum + ",01";
-                            //if (content2A.StartsWith(sensorstart) && content2A.EndsWith("}")) // received sensor data packet with proper structure
-                            if (content2A.Contains(sensorstart) && packproc)
+                            
+                            if (content2A.Contains(sensorstart) && packproc) // received sensor data packet; previous packet has completed processing
                             {
                                 packproc = false;
-                                ProcessDataPacket(content2A);
+                                ProcessDataPacket(content2A); // process sensor data packet
                                 
                             }
-                            //if (content2A.Contains(sensorstart) && content2A.EndsWith("}")) // received sensor data packet with proper structure
-
-                            //{
-                            //    //MessageBox.Show("CONTENT2 = " + content2); //test
-                            //    string packetid = content2A.Split(',')[3];
-                            //    DateTime packettime = DateTime.Now;
-                            //    content2A = content2A.Replace("}", ""); // remove "}"
-                            //                                            //content2 = content2.Replace("\r\n", ""); // remove CRLF 
-                            //    String indatastr = String.Empty;
-                            //    ArrayList sensorid = new ArrayList();
-                            //    ArrayList sensorval = new ArrayList();
-                            //    String sensoridstr = String.Empty;
-                            //    String sensorvalstr = String.Empty;
-                            //    String sensoridintstr = String.Empty;
-                            //    String sensorvalintstr = String.Empty;
-                            //    ArrayList sensoridint = new ArrayList();
-                            //    ArrayList sensorvalint = new ArrayList();
-
-                            //    indata.Clear();
-                            //    indata.AddRange(content2A.Split(',')); // split response at delimiters and store elements in arraylist
-                            //    sensorvalint.Clear();
-                            //    intsensorvals.Clear();
-                            //    stringsensorvals.Clear();
-                            //    for (int i = 0; i < indata.Count; i++)
-                            //    {
-                            //        if (indata[i].ToString().Contains("=")) // get data items in format "sensor id = value"
-                            //            indata2.Add(indata[i]);             // and store elements in arraylist
-                            //    }
-
-                            //    for (int i = 0; i < indata2.Count; i++)
-                            //    {
-                            //        indatastr = indatastr + " " + indata2[i].ToString(); //test
-                            //        sensorid.Add(indata2[i].ToString().Substring(0, indata2[i].ToString().IndexOf("="))); // add sensor id to arraylist
-                            //        sensorval.Add(indata2[i].ToString().Substring(indata2[i].ToString().IndexOf("=") + 1)); // add sensor value to arraylist
-                            //        sensoridstr = sensoridstr + " " + sensorid[i].ToString(); // test
-                            //        if (IsHex(sensorid[i].ToString())) // value string is hex
-                            //            sensoridint.Add(Convert.ToInt32(sensorid[i].ToString(), 16)); // convert to integer and add to arraylist
-                            //        else
-                            //            sensoridint.Add(sensorid[i].ToString()); // add unconverted string to arraylist
-
-                            //        sensoridintstr = sensoridintstr + " " + sensoridint[i].ToString(); // test
-                            //        sensorvalstr = sensorvalstr + " " + sensorval[i].ToString(); // test
-
-                            //        if (IsHex(sensorval[i].ToString())) // string is hex 
-                            //        {
-                            //            try
-                            //            {
-                            //                sensorvalint.Add(Convert.ToInt32(sensorval[i].ToString(), 16)); // convert to integer and add to arraylist
-                            //                intsensorvals.Add(Convert.ToInt32(sensoridint[i]), Convert.ToInt32(sensorvalint[i])); // add sensor id and integer value to dictionary of integer sensor values
-                            //            }
-
-                            //            catch (Exception e)
-                            //            {
-                            //                MessageBox.Show("1980 " + e.ToString());
-                            //            }
-
-                            //            unitid = GetUnitIDFromSN(sernum); // get unit id of currently connected unit
-                            //                                              //units.TryGetValue(handler, out unitid); // get unit id of currently connected unit
-                            //            string query = "EXEC proc_storedatapacket @unitid, @sensor_id, @value1, @value2, @value3, @packetdate";
-
-                            //            using (SqlConnection conn = new SqlConnection(connectionString))
-                            //            {
-                            //                // call stored procedure to update data packets database table (hex data converted to integer)
-                            //                using (SqlCommand comm = new SqlCommand(query, conn))
-                            //                {
-                            //                    conn.Open();
-                            //                    comm.Parameters.AddWithValue("@unitid", unitid);
-                            //                    comm.Parameters.AddWithValue("@sensor_id", sensoridint[i]);
-                            //                    comm.Parameters.AddWithValue("@value1", sensorvalint[i]);
-                            //                    comm.Parameters.AddWithValue("@value2", DBNull.Value);
-                            //                    comm.Parameters.AddWithValue("@value3", DBNull.Value);
-                            //                    comm.Parameters.AddWithValue("@packetdate", packettime);
-
-                            //                    try
-                            //                    {
-                            //                        Int32 response3 = Convert.ToInt32(comm.ExecuteScalar());
-                            //                        //MessageBox.Show(response.ToString());
-
-                            //                    }
-                            //                    catch (Exception e)
-                            //                    {
-                            //                        MessageBox.Show("1984 " + e.ToString());
-                            //                    }
-                            //                }
-                            //            }
-
-
-                            //        }
-                            //        else
-                            //        {
-                            //            try
-                            //            {
-                            //                sensorvalint.Add(sensorval[i].ToString()); // add unconverted string to arraylist
-                            //                stringsensorvals.Add(Convert.ToInt32(sensoridint[i]), sensorvalint[i].ToString()); // add sensor id and string value to dictionary of string sensor values
-                            //            }
-
-                            //            catch (Exception e)
-                            //            {
-                            //                MessageBox.Show("2018 " + e.ToString());
-                            //            }
-
-                            //            unitid = GetUnitIDFromSN(sernum); // get unit id of currently connected unit
-                            //                                              //units.TryGetValue(handler, out unitid); // get unit id of currently connected unit
-                            //            string query = "EXEC proc_storedatapacket @unitid, @sensor_id, @value1, @value2, @value3, @packetdate";
-
-                            //            using (SqlConnection conn = new SqlConnection(connectionString))
-                            //            {
-                            //                // call stored procedure to update data packets database table (string data)
-                            //                using (SqlCommand comm = new SqlCommand(query, conn))
-                            //                {
-                            //                    conn.Open();
-                            //                    comm.Parameters.AddWithValue("@unitid", unitid);
-                            //                    comm.Parameters.AddWithValue("@sensor_id", sensoridint[i]);
-                            //                    comm.Parameters.AddWithValue("@value1", DBNull.Value);
-                            //                    comm.Parameters.AddWithValue("@value2", DBNull.Value);
-                            //                    comm.Parameters.AddWithValue("@value3", sensorvalint[i]);
-                            //                    comm.Parameters.AddWithValue("@packetdate", packettime);
-
-                            //                    try
-                            //                    {
-                            //                        Int32 response4 = Convert.ToInt32(comm.ExecuteScalar());
-                            //                        //MessageBox.Show(response.ToString());
-
-
-
-                            //                    }
-                            //                    catch (Exception e)
-                            //                    {
-                            //                        MessageBox.Show("2023 " + e.ToString());
-                            //                    }
-                            //                }
-                            //            }
-
-
-                            //        }
-
-                            //        sensorvalintstr = sensorvalintstr + " " + sensorvalint[i].ToString();   // test
-
-
-                            //    }
-                            //    //MessageBox.Show("Received data packets: " + indatastr + "\r\nwith sensors: " + sensoridintstr + "\r\nwith sensor values: " + sensorvalintstr); //test
-                            //    //if (!initreq)
-                            //    //{
-                            //    //string actupdate;
-                            //    //if (!curraction.ContainsKey(handler))
-                            //    //    curraction.Add(handler, "actisoreq");
-                            //    ////if (!curraction2.ContainsKey(sernum))
-                            //    ////    curraction2.Add(sernum, "actisoreq");
-                            //    //else
-                            //    //{
-                            //    //    curraction.Remove(handler);
-                            //    //    curraction.Add(handler, "actisoreq");
-                            //    //    //curraction2.Remove(sernum);
-                            //    //    //curraction2.Add(sernum, "actisoreq");
-                            //    //}
-                            //    //curraction.TryGetValue(handler, out actupdate);
-                            //    ////curraction2.TryGetValue(sernum, out actupdate);
-                            //    //if (actupdate == "actisoreq")
-                            //    //{
-
-                            //    //    if (!inlogmod.ContainsKey(handler))
-                            //    //        inlogmod.Add(handler, false);
-                            //    //    else
-                            //    //    {
-                            //    //        inlogmod.Remove(handler);
-                            //    //        inlogmod.Add(handler, false);
-                            //    //    }
-
-                            //    string actionidreqstr = "";
-                            //    string comptimestr = "";
-                            //    string query2 = "SELECT [id] FROM [VLink106466].[dbo].[VLinkActions] WHERE ([UnitID] = " + unitid.ToString() + ")" +
-                            //        " AND ([ActionType] = '1')";
-
-                            //    using (SqlConnection conn3 = new SqlConnection(connectionString))
-                            //    {
-                            //        using (SqlCommand comm3 = new SqlCommand(query2, conn3))
-                            //        {
-                            //            conn3.Open();
-
-
-                            //            try
-                            //            {
-                            //                if (comm3.ExecuteScalar() != null)
-                            //                    actionidreqstr = comm3.ExecuteScalar().ToString();
-                            //            }
-
-
-                            //            catch (Exception e2)
-                            //            {
-                            //                MessageBox.Show("2084 " + e2.ToString());
-                            //            }
-                            //        }
-                            //    }
-
-                            //    if (actionidreqstr != "")
-                            //    {
-                            //        //comptimestr = "";
-                            //        string query3 = "SELECT [CompleteTime] FROM [VLink106466].[dbo].[VLinkActions] WHERE ([id] = " + actionidreqstr + ")";
-
-                            //        using (SqlConnection conn4 = new SqlConnection(connectionString))
-                            //        {
-                            //            using (SqlCommand comm4 = new SqlCommand(query3, conn4))
-                            //            {
-                            //                conn4.Open();
-
-
-                            //                try
-                            //                {
-                            //                    comptimestr = comm4.ExecuteScalar().ToString();
-                            //                }
-
-
-                            //                catch (Exception e2)
-                            //                {
-                            //                    MessageBox.Show("2109 " + e2.ToString());
-                            //                }
-                            //            }
-                            //        }
-
-
-                            //        //MessageBox.Show("action id = " + actionidreqstr);   //TEST
-
-                            //        //MessageBox.Show("complete time = " + comptimestr);  //TEST
-                            //        if (comptimestr == "")
-                            //        {
-                            //            actionidreq = Convert.ToInt32(actionidreqstr);
-                            //            UpdateAction2(actionidreq, "actisoreq"); // update action table entry for action id
-                            //        }
-                            //    }
-                            //    //}
-                            //    //}
-
-                            //    //if (initreq)
-                            //    //{ 
-                            //    //string disconnstr = "{72,00}\r\n";
-                            //    //Thread.Sleep(1000);
-                            //    //Send(handler, disconnstr); // send disconnect message
-                            //    //initreq = false;
-                            //    //}
-
-
-                            //    //if (actisoreq)
-                            //    //{
-                            //    // acknowledgements not sent for sensor data requests -- this section no longer required
-                            //    //if (ackaction.ContainsKey(content2.Split(',')[1])) // check if packet id of acknowledgement matches a previously sent "request measurement" message
-                            //    //{
-
-                            //    //    if (!inlogmod.ContainsKey(handler))
-                            //    //        inlogmod.Add(handler, false);
-                            //    //    else
-                            //    //    {
-                            //    //        inlogmod.Remove(handler);
-                            //    //        inlogmod.Add(handler, false);
-                            //    //    }
-                            //    //    ackaction.TryGetValue(packetid, out actionidreq); // find action id corresponding to packet id
-                            //    //    //ackaction.TryGetValue(content2.Split(',')[1], out actiontoupdate); // find action id corresponding to packet id of acknowledgement message
-
-                            //    //    //UpdateAction(actionidreq); // update action database table for appropriate action id
-                            //    //    UpdateAction2(actionidreq, "actisoreq"); // update action table entry for action id
-                            //    //                                             //actisoreq = false;
-
-                            //    //}
-
-                            //    //}
-
-                            //    //units.TryGetValue(handler, out unitid); // get unit id of currently connected unit
-                            //    unitid = GetUnitIDFromSN(sernum);
-                            //    //CheckAlarms(unitid);
-
-                            //}
-
-
-
-                            //// if a packet of returned sensor data does not have the proper structure, reset the "pending time"
-                            //// in the database action table to trigger new requests for sensor data
-
-                            ////else if (content2.StartsWith("{01,") && !content2.EndsWith("}"))
-                            //else if (content2A.StartsWith(sensorstart) && !content2A.EndsWith("}"))
-                            //{
-
-                            //    //MessageBox.Show("this is a bad packet; action to update = " + actiontoupdate.ToString());
-                            //    string query = "EXEC proc_updateaction @id, @pending, @complete";
-
-                            //    DateTime pending = DateTime.Parse("1-1-1970 00:00:00"); // reset pending time
-
-                            //    try
-                            //    {
-                            //        using (SqlConnection conn = new SqlConnection(connectionString))
-                            //        {
-                            //            using (SqlCommand comm = new SqlCommand(query, conn))
-                            //            {
-
-                            //                conn.Open();
-                            //                comm.Parameters.AddWithValue("@id", actiontoupdate);
-                            //                comm.Parameters.AddWithValue("@pending", pending);
-                            //                comm.Parameters.AddWithValue("@complete", DBNull.Value);
-
-                            //                try
-                            //                {
-                            //                    Int32 response5 = Convert.ToInt32(comm.ExecuteScalar());
-                            //                    //MessageBox.Show("response = " + response.ToString());
-                            //                }
-                            //                catch (Exception e)
-                            //                {
-                            //                    MessageBox.Show(e.ToString());
-                            //                }
-                            //            }
-                            //        }
-                            //    }
-                            //    catch (Exception e)
-                            //    {
-                            //        MessageBox.Show("2204 " + e.ToString());
-                            //    }
-                            //}
-                            ////}
-
-
-
-
-
-                            //if (content2.Contains("{08,FD") && fwstart == false) // received date and time acknowledgement for initial time set message
-                            //modesetdict.TryGetValue(unitid, out modeset);
-                            //intervalsetdict.TryGetValue(unitid, out interset);
-                            //{
-                            //timeset = true;
+                            
 
                             //if (OpMode != "0000" && timeset) // send message if operation mode is not set to default
                             if (OpMode != "0000" && sernum != "" & !modeset) // send message if operation mode is not set to default and mode command has not been previously sent
@@ -1692,123 +1331,10 @@ namespace TCPServer2
 
                             }
 
-                            // if in firmware update mode, begin firmware update process
-                            //if (OpMode == "0000" && fwreq && timeset)
-                            //    FWSend();
-                            //}
-                            //if (sernum != "")
-                            //{
-                            CheckActions(sernum);
-                            //string filename = "C:\\ProgramData\\TCPServer\\Unsent_Messages_" + sernum;
-                            ////if (File.Exists("C:\\ProgramData\\TCPServer\\Unsent_Messages.txt"))
-                            //if (File.Exists(filename + ".txt"))
-                            //{
-                            //    //StreamReader unsentcheck = new StreamReader(new FileStream("C:\\ProgramData\\TCPServer\\Unsent_Messages.txt", FileMode.Open, FileAccess.Read));
-                            //    StreamReader unsentcheck = new StreamReader(new FileStream(filename + ".txt", FileMode.Open, FileAccess.Read));
-                            //    string line = unsentcheck.ReadLine();
-                            //    //string snunsent = String.Empty;
-                            //    //while (line != null && line.Length > 0)
-                            //    unsentarr.Clear();
-                            //    while (line != null)
-                            //    {
-                            //        if (line.Contains(","))
-                            //        {
-                            //            //snunsent = line.Split(',')[1];
-                            //            //if (snunsent == sernum)
-                            //            //{
-                            //            unsentarr.Add(line);
-                            //            //}
-                            //        }
-                            //        line = unsentcheck.ReadLine();
+                            
+                            CheckActions(sernum); // check action table to see if configured actions exist for this unit
+                            
 
-                            //    }
-                            //    unsentcheck.Close();
-                            //    unsentcheck.Dispose();
-
-
-
-
-                            //    for (int x = 0; x < unsentarr.Count; x++)
-                            //    {
-                            //        if (unsentarr[x].ToString().Contains("Send Current Time,"))
-                            //            SendCurrTime(sernum);
-                            //        else
-                            //        {
-                            //            if (unsentarr[x].ToString().Contains("64,FF"))
-                            //            {
-                            //                fwreq2 = true;
-                            //                pos = 0;
-                            //            }
-
-                            //            Socket handler2 = null;
-                            //            sernumdict2.TryGetValue(sernum, out handler2);  
-                            //            Send(handler2, unsentarr[x].ToString() + "\r\n");
-                            //        }
-                            //        Thread.Sleep(2000);
-
-                            //    }
-
-
-
-
-
-                            //    ////https://stackoverflow.com/questions/668907/how-to-delete-a-line-from-a-text-file-in-c
-                            //    //string tempFile = Path.GetTempFileName();
-
-                            //    //using (var sr = new StreamReader("C:\\ProgramData\\TCPServer\\Unsent_Messages.txt"))
-                            //    //using (var sw = new StreamWriter(tempFile))
-                            //    //{
-                            //    //    string line2;
-
-                            //    //    while ((line2 = sr.ReadLine()) != null)
-                            //    //    {
-                            //    //        if (!(line2.Contains("," + sernum + ",")))
-                            //    //            sw.WriteLine(line2);
-                            //    //    }
-                            //    //}
-
-                            //    //File.Delete("C:\\ProgramData\\TCPServer\\Unsent_Messages.txt");
-                            //    //File.Move(tempFile, "C:\\ProgramData\\TCPServer\\Unsent_Messages.txt");
-                            //    File.Delete(filename + ".txt");
-
-
-
-
-
-
-                            //}
-
-                            //CheckActions(sernum);
-
-
-
-
-
-
-
-
-                            //if (content2.Contains("{09,")) // received date and time request
-                            //    if (content2.Contains("{VMC01," + sernum + ",09,")) // received date and time request
-                            //    {
-                            //        SendCurrTime(sernum); // send set time message
-
-                            //        //try
-                            //        //{
-                            //        //    //DateTime currtime = DateTime.Now;
-                            //        //    Int32 unixTimecurr = (Int32)(DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1))).TotalSeconds;
-                            //        //    string data = "{59,00," + unixTimecurr.ToString() + "}\r\n";
-                            //        //    Send(handler, data);
-
-                            //        //}
-
-                            //        //catch (Exception e){
-                            //        //{
-                            //        //    MessageBox.Show(e.ToString());
-                            //        //}
-                            //    }
-
-
-                            //if (content2.Contains("{0A,FF") && fwreq2) // received initial acknowledgement for firmware update request
                             if (content2.Contains("{VMC01," + sernum + ",0A,FF") && fwreq2) // received initial acknowledgement for firmware update request
                             {
                                 fwreq2 = false;
@@ -1819,7 +1345,7 @@ namespace TCPServer2
                                 FWSendFile(); // begin sending firmware file
                             }
 
-                            //if (content2.Contains("0A,FE") && modeset) // received acknowledgement for mode set command
+                            
                             if (content2.Contains("{VMC01," + sernum + ",0A,FE")) // received initial acknowledgement for mode set command
                             {
                                 //modeset = false;
@@ -1847,11 +1373,10 @@ namespace TCPServer2
                             }
 
 
-                            //if (content2.Contains("{11") && fwreq2 == false && fwackwait == true) // received acknowledgement upon receipt of firmware chunk
+                            
                             if (content2.Contains("{VMC01," + sernum + ",11") && fwreq2 == false && fwackwait == true) // received acknowledgement upon receipt of firmware chunk
                             {
 
-                                //MessageBox.Show("Here I am! content2 = " + content2);
                                 current = DateTime.Now;
                                 diffInSeconds = (current - start).TotalSeconds; // check elapsed time between initial sending of firmware data and receipt of acknowledgement
                                 if (content2.Contains("00}") && diffInSeconds >= 0 && diffInSeconds < 20) // positive acknowledgement received within 20 seconds
@@ -1866,12 +1391,9 @@ namespace TCPServer2
                                     Outgoing(sernum + "   " + ipa + " " + DateTime.Now.ToShortDateString() + " " + DateTime.Now.ToShortTimeString() + "  Sent " + (pos + 512).ToString() + " bytes\r\n");
                                     fwackrec = true;
                                     fwackwait = false;
-                                    //MessageBox.Show("elapsed time = " + diffInSeconds.ToString());
-                                    //MessageBox.Show("fwackrec = " + fwackrec.ToString() + " fwackwait = " + fwackwait.ToString());
                                     content2 = "";
                                     diffInSeconds = -1;
                                     pos += 512;
-                                    //FWSendFile(); // send next firmware chunk
                                     FWSendFile2(); // send next firmware chunk
                                 }
 
@@ -1894,308 +1416,7 @@ namespace TCPServer2
 
                             }
 
-                            //content2 = content2.TrimEnd('\r', '\n');
-                            ////if (content2.StartsWith("{01,") && content2.EndsWith("}")) // received sensor data packet with proper structure
-                            //string sensorstart = "{VMC01," + sernum + ",01";
-                            //if (content2.StartsWith(sensorstart) && content2.EndsWith("}")) // received sensor data packet with proper structure
-                            //                                                                //if (content2.Contains("{01,")) // received sensor data packet
-                            //{
-                            //    //MessageBox.Show("CONTENT2 = " + content2); //test
-                            //    string packetid = content2.Split(',')[3];
-                            //    DateTime packettime = DateTime.Now;
-                            //    content2 = content2.Replace("}", ""); // remove "}"
-                            //                                          //content2 = content2.Replace("\r\n", ""); // remove CRLF 
-                            //    String indatastr = String.Empty;
-                            //    ArrayList sensorid = new ArrayList();
-                            //    ArrayList sensorval = new ArrayList();
-                            //    String sensoridstr = String.Empty;
-                            //    String sensorvalstr = String.Empty;
-                            //    String sensoridintstr = String.Empty;
-                            //    String sensorvalintstr = String.Empty;
-                            //    ArrayList sensoridint = new ArrayList();
-                            //    ArrayList sensorvalint = new ArrayList();
-
-                            //    indata.Clear();
-                            //    indata.AddRange(content2.Split(',')); // split response at delimiters and store elements in arraylist
-                            //    sensorvalint.Clear();
-                            //    intsensorvals.Clear();
-                            //    stringsensorvals.Clear();
-                            //    for (int i = 0; i < indata.Count; i++)
-                            //    {
-                            //        if (indata[i].ToString().Contains("=")) // get data items in format "sensor id = value"
-                            //            indata2.Add(indata[i]);             // and store elements in arraylist
-                            //    }
-
-                            //    for (int i = 0; i < indata2.Count; i++)
-                            //    {
-                            //        indatastr = indatastr + " " + indata2[i].ToString(); //test
-                            //        sensorid.Add(indata2[i].ToString().Substring(0, indata2[i].ToString().IndexOf("="))); // add sensor id to arraylist
-                            //        sensorval.Add(indata2[i].ToString().Substring(indata2[i].ToString().IndexOf("=") + 1)); // add sensor value to arraylist
-                            //        sensoridstr = sensoridstr + " " + sensorid[i].ToString(); // test
-                            //        if (IsHex(sensorid[i].ToString())) // value string is hex
-                            //            sensoridint.Add(Convert.ToInt32(sensorid[i].ToString(), 16)); // convert to integer and add to arraylist
-                            //        else
-                            //            sensoridint.Add(sensorid[i].ToString()); // add unconverted string to arraylist
-
-                            //        sensoridintstr = sensoridintstr + " " + sensoridint[i].ToString(); // test
-                            //        sensorvalstr = sensorvalstr + " " + sensorval[i].ToString(); // test
-
-                            //        if (IsHex(sensorval[i].ToString())) // string is hex 
-                            //        {
-                            //            sensorvalint.Add(Convert.ToInt32(sensorval[i].ToString(), 16)); // convert to integer and add to arraylist
-                            //            intsensorvals.Add(Convert.ToInt32(sensoridint[i]), Convert.ToInt32(sensorvalint[i])); // add sensor id and integer value to dictionary of integer sensor values
-
-
-                            //            unitid = GetUnitIDFromSN(sernum); // get unit id of currently connected unit
-                            //                                              //units.TryGetValue(handler, out unitid); // get unit id of currently connected unit
-                            //            string query = "EXEC proc_storedatapacket @unitid, @sensor_id, @value1, @value2, @value3, @packetdate";
-
-                            //            using (SqlConnection conn = new SqlConnection(connectionString))
-                            //            {
-                            //                // call stored procedure to update data packets database table (hex data converted to integer)
-                            //                using (SqlCommand comm = new SqlCommand(query, conn))
-                            //                {
-                            //                    conn.Open();
-                            //                    comm.Parameters.AddWithValue("@unitid", unitid);
-                            //                    comm.Parameters.AddWithValue("@sensor_id", sensoridint[i]);
-                            //                    comm.Parameters.AddWithValue("@value1", sensorvalint[i]);
-                            //                    comm.Parameters.AddWithValue("@value2", DBNull.Value);
-                            //                    comm.Parameters.AddWithValue("@value3", DBNull.Value);
-                            //                    comm.Parameters.AddWithValue("@packetdate", packettime);
-
-                            //                    try
-                            //                    {
-                            //                        Int32 response = Convert.ToInt32(comm.ExecuteScalar());
-                            //                        //MessageBox.Show(response.ToString());
-
-                            //                    }
-                            //                    catch (Exception e)
-                            //                    {
-                            //                        MessageBox.Show(e.ToString());
-                            //                    }
-                            //                }
-                            //            }
-
-
-                            //        }
-                            //        else
-                            //        {
-                            //            sensorvalint.Add(sensorval[i].ToString()); // add unconverted string to arraylist
-                            //            stringsensorvals.Add(Convert.ToInt32(sensoridint[i]), sensorvalint[i].ToString()); // add sensor id and string value to dictionary of string sensor values
-
-                            //            unitid = GetUnitIDFromSN(sernum); // get unit id of currently connected unit
-                            //                                              //units.TryGetValue(handler, out unitid); // get unit id of currently connected unit
-                            //            string query = "EXEC proc_storedatapacket @unitid, @sensor_id, @value1, @value2, @value3, @packetdate";
-
-                            //            using (SqlConnection conn = new SqlConnection(connectionString))
-                            //            {
-                            //                // call stored procedure to update data packets database table (string data)
-                            //                using (SqlCommand comm = new SqlCommand(query, conn))
-                            //                {
-                            //                    conn.Open();
-                            //                    comm.Parameters.AddWithValue("@unitid", unitid);
-                            //                    comm.Parameters.AddWithValue("@sensor_id", sensoridint[i]);
-                            //                    comm.Parameters.AddWithValue("@value1", DBNull.Value);
-                            //                    comm.Parameters.AddWithValue("@value2", DBNull.Value);
-                            //                    comm.Parameters.AddWithValue("@value3", sensorvalint[i]);
-                            //                    comm.Parameters.AddWithValue("@packetdate", packettime);
-
-                            //                    try
-                            //                    {
-                            //                        Int32 response = Convert.ToInt32(comm.ExecuteScalar());
-                            //                        //MessageBox.Show(response.ToString());
-
-
-
-                            //                    }
-                            //                    catch (Exception e)
-                            //                    {
-                            //                        MessageBox.Show(e.ToString());
-                            //                    }
-                            //                }
-                            //            }
-
-
-                            //        }
-
-                            //        sensorvalintstr = sensorvalintstr + " " + sensorvalint[i].ToString();   // test
-
-
-                            //    }
-                            //    //MessageBox.Show("Received data packets: " + indatastr + "\r\nwith sensors: " + sensoridintstr + "\r\nwith sensor values: " + sensorvalintstr); //test
-                            //    //if (!initreq)
-                            //    //{
-                            //    //string actupdate;
-                            //    //if (!curraction.ContainsKey(handler))
-                            //    //    curraction.Add(handler, "actisoreq");
-                            //    ////if (!curraction2.ContainsKey(sernum))
-                            //    ////    curraction2.Add(sernum, "actisoreq");
-                            //    //else
-                            //    //{
-                            //    //    curraction.Remove(handler);
-                            //    //    curraction.Add(handler, "actisoreq");
-                            //    //    //curraction2.Remove(sernum);
-                            //    //    //curraction2.Add(sernum, "actisoreq");
-                            //    //}
-                            //    //curraction.TryGetValue(handler, out actupdate);
-                            //    ////curraction2.TryGetValue(sernum, out actupdate);
-                            //    //if (actupdate == "actisoreq")
-                            //    //{
-
-                            //    //    if (!inlogmod.ContainsKey(handler))
-                            //    //        inlogmod.Add(handler, false);
-                            //    //    else
-                            //    //    {
-                            //    //        inlogmod.Remove(handler);
-                            //    //        inlogmod.Add(handler, false);
-                            //    //    }
-
-                            //    string actionidreqstr = "";
-                            //    string comptimestr = "";
-                            //    string query2 = "SELECT [id] FROM [VLink106466].[dbo].[VLinkActions] WHERE ([UnitID] = " + unitid.ToString() + ")" +
-                            //        " AND ([ActionType] = '1')";
-
-                            //    using (SqlConnection conn3 = new SqlConnection(connectionString))
-                            //    {
-                            //        using (SqlCommand comm3 = new SqlCommand(query2, conn3))
-                            //        {
-                            //            conn3.Open();
-
-
-                            //            try
-                            //            {
-                            //                if (comm3.ExecuteScalar() != null)
-                            //                    actionidreqstr = comm3.ExecuteScalar().ToString();
-                            //            }
-
-
-                            //            catch (Exception e2)
-                            //            {
-                            //                MessageBox.Show(e2.ToString());
-                            //            }
-                            //        }
-                            //    }
-
-                            //    if (actionidreqstr != "")
-                            //    {
-                            //        //comptimestr = "";
-                            //        string query3 = "SELECT [CompleteTime] FROM [VLink106466].[dbo].[VLinkActions] WHERE ([id] = " + actionidreqstr + ")";
-
-                            //        using (SqlConnection conn4 = new SqlConnection(connectionString))
-                            //        {
-                            //            using (SqlCommand comm4 = new SqlCommand(query3, conn4))
-                            //            {
-                            //                conn4.Open();
-
-
-                            //                try
-                            //                {
-                            //                    comptimestr = comm4.ExecuteScalar().ToString();
-                            //                }
-
-
-                            //                catch (Exception e2)
-                            //                {
-                            //                    MessageBox.Show(e2.ToString());
-                            //                }
-                            //            }
-                            //        }
-
-
-                            //        //MessageBox.Show("action id = " + actionidreqstr);   //TEST
-
-                            //        //MessageBox.Show("complete time = " + comptimestr);  //TEST
-                            //        if (comptimestr == "")
-                            //        {
-                            //            actionidreq = Convert.ToInt32(actionidreqstr);
-                            //            UpdateAction2(actionidreq, "actisoreq"); // update action table entry for action id
-                            //        }
-                            //    }
-                            //    //}
-                            //    //}
-
-                            //    //if (initreq)
-                            //    //{ 
-                            //    //string disconnstr = "{72,00}\r\n";
-                            //    //Thread.Sleep(1000);
-                            //    //Send(handler, disconnstr); // send disconnect message
-                            //    //initreq = false;
-                            //    //}
-
-
-                            //    //if (actisoreq)
-                            //    //{
-                            //    // acknowledgements not sent for sensor data requests -- this section no longer required
-                            //    //if (ackaction.ContainsKey(content2.Split(',')[1])) // check if packet id of acknowledgement matches a previously sent "request measurement" message
-                            //    //{
-
-                            //    //    if (!inlogmod.ContainsKey(handler))
-                            //    //        inlogmod.Add(handler, false);
-                            //    //    else
-                            //    //    {
-                            //    //        inlogmod.Remove(handler);
-                            //    //        inlogmod.Add(handler, false);
-                            //    //    }
-                            //    //    ackaction.TryGetValue(packetid, out actionidreq); // find action id corresponding to packet id
-                            //    //    //ackaction.TryGetValue(content2.Split(',')[1], out actiontoupdate); // find action id corresponding to packet id of acknowledgement message
-
-                            //    //    //UpdateAction(actionidreq); // update action database table for appropriate action id
-                            //    //    UpdateAction2(actionidreq, "actisoreq"); // update action table entry for action id
-                            //    //                                             //actisoreq = false;
-
-                            //    //}
-
-                            //    //}
-
-                            //    units.TryGetValue(handler, out unitid); // get unit id of currently connected unit
-                            //                                            //MessageBox.Show("About to check alarms for unit " + unitid.ToString());
-                            //    CheckAlarms(unitid);
-
-                            //}
-
-                            //// if a packet of returned sensor data does not have the proper structure, reset the "pending time"
-                            //// in the database action table to trigger new requests for sensor data
-
-                            ////else if (content2.StartsWith("{01,") && !content2.EndsWith("}"))
-                            //else if (content2.StartsWith(sensorstart) && !content2.EndsWith("}"))
-                            //{
-
-                            //    //MessageBox.Show("this is a bad packet; action to update = " + actiontoupdate.ToString());
-                            //    string query = "EXEC proc_updateaction @id, @pending, @complete";
-
-                            //    DateTime pending = DateTime.Parse("1-1-1970 00:00:00"); // reset pending time
-
-                            //    try
-                            //    {
-                            //        using (SqlConnection conn = new SqlConnection(connectionString))
-                            //        {
-                            //            using (SqlCommand comm = new SqlCommand(query, conn))
-                            //            {
-
-                            //                conn.Open();
-                            //                comm.Parameters.AddWithValue("@id", actiontoupdate);
-                            //                comm.Parameters.AddWithValue("@pending", pending);
-                            //                comm.Parameters.AddWithValue("@complete", DBNull.Value);
-
-                            //                try
-                            //                {
-                            //                    Int32 response = Convert.ToInt32(comm.ExecuteScalar());
-                            //                    //MessageBox.Show("response = " + response.ToString());
-                            //                }
-                            //                catch (Exception e)
-                            //                {
-                            //                    MessageBox.Show(e.ToString());
-                            //                }
-                            //            }
-                            //        }
-                            //    }
-                            //    catch (Exception e)
-                            //    {
-                            //        MessageBox.Show(e.ToString());
-                            //    }
-                            //}
-
-                            //if (content2.Contains("{06,")) // received diagnostic data packet
+                            
                             string diagstart = "{VMC01," + sernum + ",06";
                             if (content2.Contains(diagstart)) // received diagnostic data packet
                             {
@@ -2288,7 +1509,6 @@ namespace TCPServer2
                                         {
                                             MessageBox.Show("2881 " + e.ToString());
                                         }
-                                        //units.TryGetValue(handler, out unitid);
                                         unitid = GetUnitIDFromSN(sernum);
                                         string query = "EXEC proc_storedatapacket @unitid, @sensor_id, @value1, @value2, @value3, @packetdate";
 
@@ -2321,18 +1541,10 @@ namespace TCPServer2
 
 
                                 }
-                                //MessageBox.Show("Received data packets: " + indatastr + "\r\nwith sensors: " + sensoridintstr + "\r\nwith sensor values: " + sensorvalintstr); //test
-
+                                
 
                             }
-                            //}
-                            //else
-                            //{
-                            //    // Not all data received. Get more.
-                            //    handler.BeginReceive(state.buffer, 0, StateObject.BufferSize, 0,
-                            //    new AsyncCallback(ReadCallback), state);
-                            //}
-
+                           
                         }
                        
                     }
@@ -2360,15 +1572,13 @@ namespace TCPServer2
             ArrayList indata = new ArrayList();
             ArrayList indata2 = new ArrayList();
             string sensorstart = "VMC01," + sernum + ",01";
-            //if (packet.Contains(sensorstart) && packet.EndsWith("}")) // received sensor data packet with proper structure
+            
             if (packet.Contains(sensorstart) && packet.Contains("}")) // received sensor data packet with proper structure
             {
-                //Outgoing (packet + "\r\n");
-                //MessageBox.Show("Got to 2968"); // TEST
-                string packetid = packet.Split(',')[3];
+               
+                string packetid = packet.Split(',')[3]; // split packet at delimiters and get packet id
                 DateTime packettime = DateTime.Now;
                 packet = packet.Replace("}", ""); // remove "}"
-                                                        //content2 = content2.Replace("\r\n", ""); // remove CRLF 
                 String indatastr = String.Empty;
                 ArrayList sensorid = new ArrayList();
                 ArrayList sensorval = new ArrayList();
@@ -2426,7 +1636,7 @@ namespace TCPServer2
                         }
 
                         unitid = GetUnitIDFromSN(sernum); // get unit id of currently connected unit
-                                                            //units.TryGetValue(handler, out unitid); // get unit id of currently connected unit
+                        
                         string query = "EXEC proc_storedatapacket @unitid, @sensor_id, @value1, @value2, @value3, @packetdate";
 
                         using (SqlConnection conn = new SqlConnection(connectionString))
@@ -2491,8 +1701,7 @@ namespace TCPServer2
                             try
                             {
                                 Int32 response4 = Convert.ToInt32(comm.ExecuteScalar());
-                                //MessageBox.Show(response.ToString());
-
+                                
 
 
                             }
@@ -2519,6 +1728,8 @@ namespace TCPServer2
             string query2 = "SELECT [id] FROM [VLink106466].[dbo].[VLinkActions] WHERE ([UnitID] = " + unitid.ToString() + ")" +
                 " AND ([ActionType] = '1')";
 
+            // check action table to see if a specific data request action item exists for this unit ID
+
             using (SqlConnection conn3 = new SqlConnection(connectionString))
             {
                 using (SqlCommand comm3 = new SqlCommand(query2, conn3))
@@ -2540,9 +1751,9 @@ namespace TCPServer2
                 }
             }
 
-            if (actionidreqstr != "")
+            if (actionidreqstr != "")   // if action item found, check if action has previously been completed
             {
-                //comptimestr = "";
+                
                 string query3 = "SELECT [CompleteTime] FROM [VLink106466].[dbo].[VLinkActions] WHERE ([id] = " + actionidreqstr + ")";
 
                 using (SqlConnection conn4 = new SqlConnection(connectionString))
@@ -2566,13 +1777,13 @@ namespace TCPServer2
                 }
 
 
-                //MessageBox.Show("action id = " + actionidreqstr);   //TEST
+                
 
-                //MessageBox.Show("complete time = " + comptimestr);  //TEST
-                if (comptimestr == "")
+                
+                if (comptimestr == "")  // if action not yet completed
                 {
                     actionidreq = Convert.ToInt32(actionidreqstr);
-                    //UpdateAction2(actionidreq, "actisoreq"); // update action table entry for action id   TEMPORARILY REMOVED
+                    UpdateAction2(actionidreq, "actisoreq"); // update action table entry for action id
                 }
             }
                 
@@ -2585,11 +1796,10 @@ namespace TCPServer2
             // if a packet of returned sensor data does not have the proper structure, reset the "pending time"
             // in the database action table to trigger new requests for sensor data
 
-            //else if (content2.StartsWith("{01,") && !content2.EndsWith("}"))
+            
             else if (packet.StartsWith(sensorstart) && !packet.Contains("}"))
             {
 
-                //MessageBox.Show("this is a bad packet; action to update = " + actiontoupdate.ToString());
                 string query = "EXEC proc_updateaction @id, @pending, @complete";
 
                 DateTime pending = DateTime.Parse("1-1-1970 00:00:00"); // reset pending time
@@ -2609,7 +1819,7 @@ namespace TCPServer2
                             try
                             {
                                 Int32 response5 = Convert.ToInt32(comm.ExecuteScalar());
-                                //MessageBox.Show("response = " + response.ToString());
+                                
                             }
                             catch (Exception e)
                             {
@@ -2624,13 +1834,13 @@ namespace TCPServer2
                 }
             }
 
-            packproc = true;
-            //MessageBox.Show("packproc = " + packproc.ToString());
+            packproc = true; // set flag indicating that packet processing is complete
+            
 
 
 
         }
-
+// *****************CONTINUE CLEANUP FROM HERE **********************************
         private static void CheckUnsentMessages(string sn)
         {
             string filename = "C:\\ProgramData\\TCPServer\\Unsent_Messages_" + sn;
