@@ -264,7 +264,7 @@ namespace TCPServer2
         public static void AcceptCallback(IAsyncResult ar)
         {
 
-
+           
             // Signal the main thread to continue.
             allDone.Set();
 
@@ -289,10 +289,15 @@ namespace TCPServer2
             // Create the state object.
             StateObject state = new StateObject();
             state.workSocket = handler;
-            currAsyncResult = handler.BeginReceive(state.buffer, 0, StateObject.BufferSize, 0,
+            currAsyncResult = ar;
+            //currAsyncResult = handler.BeginReceive(state.buffer, 0, StateObject.BufferSize, 0,
+            //    new AsyncCallback(ReadCallback), state);
+            //if (ar == currAsyncResult)
+            //    MessageBox.Show("Yes, ar = currAsyncResult");
+            handler.BeginReceive(state.buffer, 0, StateObject.BufferSize, 0,
                 new AsyncCallback(ReadCallback), state);
-           
-            
+
+
         }
 
 
@@ -429,7 +434,7 @@ namespace TCPServer2
 
                         if (dr["PendingTime"] == DBNull.Value) 
                         {
-                            AddUnsentMessage(sn, "\r\n" + isoreqstr); // add data request message to lsit of unsent messages
+                            AddUnsentMessage(sn, "\r\n" + isoreqstr); // add data request message to list of unsent messages
                             SendCurrTime(sn);   // send current time message to ping unit and see if it is available
                         }
 
@@ -960,13 +965,18 @@ namespace TCPServer2
             String content3 = String.Empty;
             ArrayList indata = new ArrayList();
             ArrayList indata2 = new ArrayList();
-            
+            SocketError errorCode = SocketError.Success;
+            int bytesRead = 0;
+
             try
             {
 
 
                 // Retrieve the state object and the handler socket
                 // from the asynchronous state object.
+
+                currAsyncResult = ar;
+                //ar = currAsyncResult;
                 StateObject state = (StateObject)ar.AsyncState;
                 //Socket handler = state.workSocket;
                 handler = state.workSocket;
@@ -976,8 +986,32 @@ namespace TCPServer2
 
                 // Read data from the client socket. 
                 // http://stackoverflow.com/questions/2582036/an-existing-connection-was-forcibly-closed-by-the-remote-host
-                SocketError errorCode;
-                int bytesRead = handler.EndReceive(ar, out errorCode);
+                                                                                                                                                      
+
+                try
+                {
+
+                    if (ar == currAsyncResult)
+                    {
+                        //MessageBox.Show("ar = currAsyncResult");
+                        //SocketError errorCode;
+                        bytesRead = handler.EndReceive(ar, out errorCode);
+                        //MessageBox.Show("bytesRead = " + bytesRead.ToString());
+                //    }
+                //    else
+                //    {
+                //        // ignore;
+                //    }
+                //}
+
+                //catch (Exception ex)
+                //{
+                //    //Log exception. Don't throw exception. Most probably BeginReceive failed.
+                //    Outgoing(ex.ToString());
+                //}
+
+
+
 
                 if (errorCode != SocketError.Success)
                 {
@@ -1551,17 +1585,45 @@ namespace TCPServer2
                     else
                     {
                         // Not all data received. Get more.
+                        //if (ar == currAsyncResult)
+                        //    MessageBox.Show("ar is STILL = currAsyncResult");
                         handler.BeginReceive(state.buffer, 0, StateObject.BufferSize, 0,
                         new AsyncCallback(ReadCallback), state);
                     }
                 }
+
+                }
+                    else
+                    {
+                        // ignore;
+                        //MessageBox.Show("Socket change required");
+                    }
+                }
+
+                catch (Exception ex)
+                {
+                    //Log exception. Don't throw exception. Most probably BeginReceive failed.
+                    Outgoing(ex.ToString());
+                }
+
+
+
+
+
             }
+
+           
 
             catch (Exception e)
             {
                 MessageBox.Show("2870 " + e.ToString());
 
             }
+                
+                
+           
+
+            
         
 
         }
