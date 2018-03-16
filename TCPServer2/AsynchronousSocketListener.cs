@@ -133,7 +133,7 @@ namespace TCPServer2
         static ArrayList unsentarr = new ArrayList();
         public static ArrayList sernumlist = new ArrayList();
         static bool packproc = true;
-        static IAsyncResult currAsyncResult;
+        private static IAsyncResult currAsyncResult;
         static bool actionschkd = true;
         static bool logfinished = true;
 
@@ -246,6 +246,7 @@ namespace TCPServer2
                     listener.BeginAccept(
                         new AsyncCallback(AcceptCallback),
                         listener);
+                    
 
 
                     // Wait until a connection is made before continuing.
@@ -291,14 +292,16 @@ namespace TCPServer2
             // Create the state object.
             StateObject state = new StateObject();
             state.workSocket = handler;
-            currAsyncResult = ar;
+            //ar = currAsyncResult;
+            //currAsyncResult = ar;
             //currAsyncResult = handler.BeginReceive(state.buffer, 0, StateObject.BufferSize, 0,
             //    new AsyncCallback(ReadCallback), state);
-            //if (ar == currAsyncResult)
-            //    MessageBox.Show("Yes, ar = currAsyncResult");
+            //if (currAsyncResult == ar)
+            //    MessageBox.Show("Yes, currAsyncResult = ar");
+            //else if (currAsyncResult != ar && currAsyncResult != null)
+            //    MessageBox.Show("No, currAsyncResult != ar");
             handler.BeginReceive(state.buffer, 0, StateObject.BufferSize, 0,
                 new AsyncCallback(ReadCallback), state);
-
 
         }
 
@@ -984,7 +987,7 @@ namespace TCPServer2
                 // Retrieve the state object and the handler socket
                 // from the asynchronous state object.
 
-                currAsyncResult = ar;
+                //currAsyncResult = ar;
                 //ar = currAsyncResult;
                 StateObject state = (StateObject)ar.AsyncState;
                 //Socket handler = state.workSocket;
@@ -1018,11 +1021,24 @@ namespace TCPServer2
                         //    //Log exception. Don't throw exception. Most probably BeginReceive failed.
                         //    Outgoing(ex.ToString());
                         //}
+                    }
+                    else
+                    {
+                        // ignore;
+                        MessageBox.Show("Socket change required");
+                    }
+                 }
+
+                catch (Exception ex)
+                {
+                    //Log exception. Don't throw exception. Most probably BeginReceive failed.
+                    Outgoing(ex.ToString());
+                }
 
 
 
 
-                        if (errorCode != SocketError.Success)
+                    if (errorCode != SocketError.Success)
                         {
                             bytesRead = 0;
                         }
@@ -1051,7 +1067,8 @@ namespace TCPServer2
                                 content2 = content2.Substring(0, content2.IndexOf("}") + 1);
 
 
-                                if (content2.Contains("VMC01,") && content2.EndsWith("}")) // received VLink message
+                                //if (content2.Contains("VMC01,") && content2.EndsWith("}")) // received VLink message
+                                if (content2.Contains("VMC01,")) // received VLink message
 
                                 {
                                     string content2a = "";
@@ -1614,19 +1631,19 @@ namespace TCPServer2
                                 }
                                 }
 
-                            }
-                            else
-                            {
-                                // ignore;
-                                //MessageBox.Show("Socket change required");
-                            }
-                        }
+                            //}
+                            //else
+                            //{
+                            //    // ignore;
+                            //    //MessageBox.Show("Socket change required");
+                            //}
+                        //}
 
-                catch (Exception ex)
-                {
-                    //Log exception. Don't throw exception. Most probably BeginReceive failed.
-                    Outgoing(ex.ToString());
-                }
+                //catch (Exceptio                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               n ex)
+                //{
+                //    //Log exception. Don't throw exception. Most probably BeginReceive failed.
+                //    Outgoing(ex.ToString());
+                //}
 
 
 
