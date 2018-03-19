@@ -242,8 +242,7 @@ namespace TCPServer2
 
                     // Start an asynchronous socket to listen for connections.
 
-
-                    listener.BeginAccept(
+                    currAsyncResult = listener.BeginAccept(
                         new AsyncCallback(AcceptCallback),
                         listener);
                     
@@ -259,6 +258,7 @@ namespace TCPServer2
                 MessageBox.Show(e.ToString());
 
             }
+
 
 
 
@@ -292,10 +292,14 @@ namespace TCPServer2
             // Create the state object.
             StateObject state = new StateObject();
             state.workSocket = handler;
-            //ar = currAsyncResult;
+            ar = currAsyncResult;
             //currAsyncResult = ar;
             //currAsyncResult = handler.BeginReceive(state.buffer, 0, StateObject.BufferSize, 0,
             //    new AsyncCallback(ReadCallback), state);
+            if (ar == currAsyncResult)
+                MessageBox.Show("Yes, ar = currAsyncResult");
+            else if (ar != currAsyncResult)
+                MessageBox.Show("No, ar != currAsyncResult");
             //if (currAsyncResult == ar)
             //    MessageBox.Show("Yes, currAsyncResult = ar");
             //else if (currAsyncResult != ar && currAsyncResult != null)
@@ -992,6 +996,7 @@ namespace TCPServer2
                 StateObject state = (StateObject)ar.AsyncState;
                 //Socket handler = state.workSocket;
                 handler = state.workSocket;
+                
 
                 // Get IP address of client connected to socket
                 ipa = IPAddress.Parse(((IPEndPoint)handler.RemoteEndPoint).Address.ToString());
@@ -1045,6 +1050,7 @@ namespace TCPServer2
 
                         if (bytesRead > 0)
                         {
+
                             // There might be more data, so store the data received so far.
                             state.sb.Append(Encoding.ASCII.GetString(
                                 state.buffer, 0, bytesRead));
