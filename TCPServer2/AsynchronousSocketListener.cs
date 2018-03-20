@@ -136,6 +136,7 @@ namespace TCPServer2
         private static IAsyncResult currAsyncResult;
         static bool actionschkd = true;
         static bool logfinished = true;
+        //static StateObject state = new StateObject();
 
 
 
@@ -242,7 +243,7 @@ namespace TCPServer2
 
                     // Start an asynchronous socket to listen for connections.
 
-                    currAsyncResult = listener.BeginAccept(
+                    listener.BeginAccept(
                         new AsyncCallback(AcceptCallback),
                         listener);
                     
@@ -292,19 +293,19 @@ namespace TCPServer2
             // Create the state object.
             StateObject state = new StateObject();
             state.workSocket = handler;
-            ar = currAsyncResult;
+            //ar = currAsyncResult;
             //currAsyncResult = ar;
             //currAsyncResult = handler.BeginReceive(state.buffer, 0, StateObject.BufferSize, 0,
             //    new AsyncCallback(ReadCallback), state);
-            if (ar == currAsyncResult)
-                MessageBox.Show("Yes, ar = currAsyncResult");
-            else if (ar != currAsyncResult)
-                MessageBox.Show("No, ar != currAsyncResult");
+            //if (ar == currAsyncResult)
+            //    MessageBox.Show("Yes, ar = currAsyncResult");
+            //else if (ar != currAsyncResult)
+            //    MessageBox.Show("No, ar != currAsyncResult");
             //if (currAsyncResult == ar)
             //    MessageBox.Show("Yes, currAsyncResult = ar");
             //else if (currAsyncResult != ar && currAsyncResult != null)
             //    MessageBox.Show("No, currAsyncResult != ar");
-            handler.BeginReceive(state.buffer, 0, StateObject.BufferSize, 0,
+            currAsyncResult = handler.BeginReceive(state.buffer, 0, StateObject.BufferSize, 0,
                 new AsyncCallback(ReadCallback), state);
 
         }
@@ -983,6 +984,7 @@ namespace TCPServer2
             ArrayList indata2 = new ArrayList();
             SocketError errorCode = SocketError.Success;
             int bytesRead = 0;
+            StateObject state = (StateObject)ar.AsyncState;
 
             try
             {
@@ -992,11 +994,12 @@ namespace TCPServer2
                 // from the asynchronous state object.
 
                 //currAsyncResult = ar;
-                //ar = currAsyncResult;
-                StateObject state = (StateObject)ar.AsyncState;
+                ar = currAsyncResult;
+                //StateObject state = (StateObject)ar.AsyncState;
+                state = (StateObject)ar.AsyncState;
                 //Socket handler = state.workSocket;
                 handler = state.workSocket;
-                
+
 
                 // Get IP address of client connected to socket
                 ipa = IPAddress.Parse(((IPEndPoint)handler.RemoteEndPoint).Address.ToString());
@@ -1007,645 +1010,33 @@ namespace TCPServer2
 
                 try
                 {
-
                     if (ar == currAsyncResult)
                     {
                         //MessageBox.Show("ar = currAsyncResult");
                         //SocketError errorCode;
                         bytesRead = handler.EndReceive(ar, out errorCode);
                         //MessageBox.Show("bytesRead = " + bytesRead.ToString());
-                        //    }
-                        //    else
-                        //    {
-                        //        // ignore;
-                        //    }
-                        //}
-
-                        //catch (Exception ex)
-                        //{
-                        //    //Log exception. Don't throw exception. Most probably BeginReceive failed.
-                        //    Outgoing(ex.ToString());
-                        //}
                     }
                     else
                     {
                         // ignore;
-                        MessageBox.Show("Socket change required");
                     }
-                 }
+                }
 
                 catch (Exception ex)
                 {
                     //Log exception. Don't throw exception. Most probably BeginReceive failed.
                     Outgoing(ex.ToString());
                 }
-
-
-
-
-                    if (errorCode != SocketError.Success)
-                        {
-                            bytesRead = 0;
-                        }
-
-                        if (bytesRead > 0)
-                        {
-
-                            // There might be more data, so store the data received so far.
-                            state.sb.Append(Encoding.ASCII.GetString(
-                                state.buffer, 0, bytesRead));
-
-                            // Check for end of data tag. If it is not there, read 
-                            // more data.
-
-                            content2 = "";
-                            content2 = state.sb.ToString();
-
-                            if (content2.IndexOf("}") > -1)
-                            {
-                                // All the data has been read from the 
-                                // client
-
-                                handler.BeginReceive(state.buffer, 0, StateObject.BufferSize, 0,
-                                    new AsyncCallback(ReadCallback), state);
-                                state.sb.Clear();
-
-                                content2 = content2.Substring(0, content2.IndexOf("}") + 1);
-
-
-                                //if (content2.Contains("VMC01,") && content2.EndsWith("}")) // received VLink message
-                                if (content2.Contains("VMC01,")) // received VLink message
-
-                                {
-                                    string content2a = "";
-                                    content2a = content2.TrimEnd('}');
-                                    indata.Clear();
-                                    indata.AddRange(content2a.Split(',')); // split response at delimiters and store elements in arraylist
-                                    sernum = indata[1].ToString(); // extract serial number from message
-
-
-
-                                    Int32 response = 0;
-                                    Int32 response2 = 0;
-
-
-                                    if (!sernumlist.Contains(sernum)) // unit serial number not found in list of units
-                                    {
-                                        //MessageBox.Show("serial number  = " + sernum + " Did not recognize serial number"); // test
-                                        Outgoing("Did not recognize serial number -- disconnecting");
-                                        try
-                                        {
-
-                                            sernum = "";
-                                            handler.Shutdown(SocketShutdown.Both); // disconnect
-
-                                        }
-                                        catch (ObjectDisposedException e)
-                                        {
-                                            MessageBox.Show("1621 " + e.ToString());
-                                        }
-
-                                    }
-                                    else // unit serial number found in list
-                                    {
-                                        response = GetUnitIDFromSN(sernum);
-
-                                        try
-                                        {
-                                            units2.Remove(response);
-                                            units2.Add(response, handler); // add entry for unit ID to units2 dictionary
-
-                                            sernumdict2.Remove(sernum);
-                                            sernumdict2.Add(sernum, handler); // add entry for unit in the dictionary of actively connected units (IP address and unit id)
-
-                                            if (!modesetdict.ContainsKey(response))
-                                                modesetdict.Add(response, false); // add entry to dictionary indicating that mode command has not been sent to this unit
-                                            if (!intervalsetdict.ContainsKey(response))
-                                                intervalsetdict.Add(response, false); // add entry to dictionary indicating that interval command has not been sent to this unit
-                                        }
-
-                                        catch (Exception e)
-                                        {
-                                            MessageBox.Show("1682 " + e.ToString());
-                                        }
-
-                                        content = sernum + "   " + handler.RemoteEndPoint.ToString() + "   " + DateTime.Now.ToShortDateString() + " " + DateTime.Now.ToShortTimeString() + "   " + content2 + "\r\n";
-                                        //Incoming(null, content);
-
-                                        //string infilename = "C:\\Users\\gayakawa\\desktop\\TCPServer Log\\" + sernum + " incoming.log";
-
-                                        //try
-                                        //{
-                                        //    StreamWriter incominglog = new StreamWriter(new FileStream(infilename, FileMode.Append, FileAccess.Write));
-                                        //    incominglog.Write("\r\n" + DateTime.Now + " " + " raw incoming " + content2);
-                                        //    incominglog.Close();
-                                        //}
-
-                                        //catch (Exception e)
-                                        //{
-                                        //    Incoming(null, "===============\r\nIncoming log not updated with the following: " + DateTime.Now + " " + " raw incoming " + content2 + "===============\r\n");
-                                        //}
-
-                                        if (logfinished)
-                                        {
-                                            logfinished = false;
-                                            LogData(content, content2);
-                                        }
-
-
-                                        //}
-
-
-
-                                        if (response2 != response)
-
-                                        {
-
-                                            unitid = response;
-
-
-                                            modesetdict.TryGetValue(unitid, out modeset); // check if operation mode has previously been checked for this unit
-                                            if (!modeset) // operation mode has not previously been checked 
-                                            {
-                                                // query VLinkUnit table to determine operation mode associated with unit ID
-                                                string query2 = "SELECT [Mode] FROM [VLink106466].[dbo].[VLinkUnit] WHERE ([UnitID] = " + response.ToString() + ")";
-
-
-                                                using (SqlConnection conn3 = new SqlConnection(connectionString))
-                                                {
-                                                    using (SqlCommand comm3 = new SqlCommand(query2, conn3))
-                                                    {
-                                                        conn3.Open();
-
-
-                                                        try
-                                                        {
-                                                            OpMode = comm3.ExecuteScalar().ToString();
-                                                            if (OpMode == "0000")
-                                                            {
-                                                                modesetdict.Remove(unitid);
-                                                                modesetdict.Add(unitid, true);
-
-                                                            }
-                                                        }
-                                                        catch (Exception e2)
-                                                        {
-                                                            MessageBox.Show("1748 " + e2.ToString());
-                                                        }
-                                                    }
-                                                }
-                                            }
-
-                                            intervalsetdict.TryGetValue(unitid, out interset);  // check if interval value has previously been checked for this unit 
-                                            if (!interset)  // interval value has not previously been checked
-                                            {
-                                                // query VLinkUnit table to determine data transmission interval associated with unit ID
-                                                string query3 = "SELECT [Interval] FROM [VLink106466].[dbo].[VLinkUnit] WHERE ([UnitID] = " + response.ToString() + ")";
-
-
-                                                using (SqlConnection conn4 = new SqlConnection(connectionString))
-                                                {
-                                                    using (SqlCommand comm4 = new SqlCommand(query3, conn4))
-                                                    {
-                                                        conn4.Open();
-
-
-                                                        try
-                                                        {
-                                                            Interval = comm4.ExecuteScalar().ToString();
-                                                            if (Interval == "0000")
-                                                            {
-                                                                intervalsetdict.Remove(unitid);
-                                                                intervalsetdict.Add(unitid, true);
-
-                                                            }
-
-                                                        }
-                                                        catch (Exception e2)
-                                                        {
-                                                            MessageBox.Show("1781 " + e2.ToString());
-                                                        }
-                                                    }
-                                                }
-
-
-                                            }
-                                        }
-
-
-
-
-                                        CheckUnsentMessages(sernum);    // check for unsent messages for this unit
-                                        if (content2.Contains("VMC01," + sernum + ",09,")) // received date and time request
-                                        {
-                                            SendCurrTime(sernum); // send set time message
-
-
-                                        }
-
-                                        if (content2.Contains("{VMC01," + sernum + ",0A") && fwreq2 == false && fwackwait == false) // received acknowledgement message for action message
-                                        {
-                                            bool match2 = false;
-                                            string actupdate;
-
-                                            // get action type from dictionary associating type of action with unit IP address
-                                            // (only one type of action [setting an output] will now generate an acknowledgement -- sensor
-                                            // data requests no longer do)
-                                            curraction2.TryGetValue(sernum, out actupdate);
-
-                                            if (actupdate == "actsetout") // acknowledgement of set output action
-                                            {
-
-                                                int unitid2 = 0;
-                                                // get unit ID from database table
-                                                unitid2 = GetUnitIDFromSN(sernum);
-
-
-                                                string packid = content2.Split(',')[3]; // get packet id from acknowledgement message
-
-
-
-                                                if (ackaction.ContainsKey(packid)) // check if packet id of acknowledgement matches a previously sent "set output" message
-                                                {
-                                                    int actionid = 0;
-
-                                                    ackaction.TryGetValue(packid, out actionid); // get action id from dictionary relating packet id with action id
-                                                    string query = "SELECT id, unitid FROM [VLink106466].[dbo].VLinkActions";
-
-
-                                                    try
-                                                    {
-                                                        using (SqlConnection conn = new SqlConnection(connectionString))
-                                                        {
-                                                            using (SqlCommand comm = new SqlCommand(query, conn))
-                                                            {
-                                                                conn.Open();
-
-                                                                SqlDataAdapter da = new SqlDataAdapter();
-                                                                DataSet ds = new DataSet();
-
-
-
-                                                                // create dataset and datatable from returned data
-                                                                dt5.Clear();
-                                                                da.SelectCommand = comm;
-                                                                da.Fill(ds, "ActionTable");
-                                                                dt5 = ds.Tables["ActionTable"];
-
-                                                            }
-                                                        }
-
-                                                    }
-
-                                                    catch (Exception e)
-                                                    {
-                                                        MessageBox.Show("1861 " + e.ToString());
-                                                    }
-
-
-                                                    for (int d = 0; d < dt5.Rows.Count; d++)
-                                                    {
-                                                        // find action id and unit id that match action
-                                                        if (Convert.ToInt32(dt5.Rows[d]["id"]) == actionid && Convert.ToInt32(dt5.Rows[d]["unitid"]) == unitid2)
-                                                        {
-                                                            {
-                                                                match2 = true;
-                                                                break;
-                                                            }
-                                                        }
-
-
-
-                                                    }
-                                                    if (content2.Contains("00}") && match2) // positive acknowledgement
-                                                    {
-                                                        // update dictionary object to indicate that the appropriate log file has not been updated 
-                                                        try
-                                                        {
-                                                            if (!outlogmod.ContainsKey(handler))
-                                                                outlogmod.Add(handler, false);
-                                                            else
-                                                            {
-                                                                outlogmod.Remove(handler);
-                                                                outlogmod.Add(handler, false);
-                                                            }
-
-                                                            ackaction.TryGetValue(content2.Split(',')[3], out actiontoupdate); // find action id corresponding to packet id of acknowledgement message
-                                                            UpdateAction2(actiontoupdate, "actsetout"); // update action database table for appropriate action id
-                                                            match2 = false;
-                                                        }
-
-                                                        catch (Exception e)
-                                                        {
-                                                            MessageBox.Show("1910 " + e.ToString());
-                                                        }
-                                                    }
-
-
-
-                                                }
-
-
-
-                                            }
-                                        }
-
-                                        string content2A = content2.TrimEnd('\r', '\n');
-                                        string sensorstart = "VMC01," + sernum + ",01";
-
-                                        if (content2A.Contains(sensorstart) && packproc) // received sensor data packet; previous packet has completed processing
-                                        {
-                                            packproc = false;
-                                            ProcessDataPacket(content2A); // process sensor data packet
-
-                                        }
-
-
-                                        //if (OpMode != "0000" && timeset) // send message if operation mode is not set to default
-                                        if (OpMode != "0000" && sernum != "" & !modeset) // send message if operation mode is not set to default and mode command has not been previously sent
-                                        {
-                                            try
-                                            {
-                                                string opmodeset = "{VMC01," + sernum + ",67,FE," + OpMode + "}\r\n";
-                                                Thread.Sleep(1000);
-                                                Send(handler, opmodeset);
-                                                //modeset = true;
-                                                modesetdict.Remove(unitid);
-                                                modesetdict.Add(unitid, true); // set dictionary value to indicate that mode command has been sent
-                                            }
-
-                                            catch (Exception e)
-                                            {
-                                                MessageBox.Show("2251 " + e.ToString());
-                                            }
-
-                                        }
-
-                                        modesetdict.TryGetValue(unitid, out modeset);
-
-                                        //if (Interval != "0000" && timeset && !modeset) // send message if transmission interval is not set to default
-                                        if (Interval != "0000" && !modeset) // send message if transmission interval is not set to default
-
-                                        {
-                                            try
-                                            {
-                                                string intervalset = "{VMC01," + sernum + ",71,FC," + Interval + "}\r\n";
-                                                Thread.Sleep(1000);
-                                                Send(handler, intervalset);
-                                                intervalsetdict.Remove(unitid);
-                                                intervalsetdict.Add(unitid, true); // set dictionary value to indicate that interval command has been sent
-                                            }
-
-                                            catch (Exception e)
-                                            {
-                                                MessageBox.Show("2273 " + e.ToString());
-                                            }
-
-
-                                        }
-
-                                        if (actionschkd)
-                                        {
-                                            actionschkd = false;
-                                            CheckActions(sernum); // check action table to see if configured actions exist for this unit
-                                            
-                                        }
-
-
-
-                                        if (content2.Contains("{VMC01," + sernum + ",0A,FF") && fwreq2) // received initial acknowledgement for firmware update request
-                                        {
-                                            fwreq2 = false;
-                                            fwstart = true;
-                                            fwackrec = true;
-                                            nakcount = 0;
-                                            Thread.Sleep(5000);
-                                            FWSendFile(); // begin sending firmware file
-                                        }
-
-
-                                        if (content2.Contains("{VMC01," + sernum + ",0A,FE")) // received initial acknowledgement for mode set command
-                                        {
-                                            //modeset = false;
-
-                                            //if (Interval != "0000" && timeset) // send message if transmission interval is not set to default
-                                            if (Interval != "0000") // send message if transmission interval is not set to default
-                                            {
-                                                try
-                                                {
-                                                    string intervalset = "{VMC01," + sernum + ",71,FC," + Interval + "}\r\n";
-                                                    Thread.Sleep(1000);
-                                                    Send(handler, intervalset);
-                                                    //interset = true;
-                                                    intervalsetdict.Remove(unitid);
-                                                    intervalsetdict.Add(unitid, true); // set dictionary value to indicate that interval command has been sent
-                                                }
-
-                                                catch (Exception e)
-                                                {
-                                                    MessageBox.Show("2426 " + e.ToString());
-                                                }
-                                            }
-
-
-                                        }
-
-
-
-                                        if (content2.Contains("{VMC01," + sernum + ",11") && fwreq2 == false && fwackwait == true) // received acknowledgement upon receipt of firmware chunk
-                                        {
-
-                                            current = DateTime.Now;
-                                            diffInSeconds = (current - start).TotalSeconds; // check elapsed time between initial sending of firmware data and receipt of acknowledgement
-                                            if (content2.Contains("00}") && diffInSeconds >= 0 && diffInSeconds < 20) // positive acknowledgement received within 20 seconds
-                                            {
-                                                nakcount = 0;
-                                                // add log entry indicating firmware update acknowledgement has been received
-
-                                                StreamWriter fwuplog = new StreamWriter(new FileStream("C:\\Users\\gayakawa\\desktop\\TCPServer Log\\" + sernum + ".log", FileMode.Append, FileAccess.Write));
-                                                fwuplog.Write("\r\n" + DateTime.Now + " " + handler.RemoteEndPoint.ToString() + " (Serial Number " + sernum + ") firmware update acknowledgement successfully received");
-                                                fwuplog.Close();
-
-                                                Outgoing(sernum + "   " + ipa + " " + DateTime.Now.ToShortDateString() + " " + DateTime.Now.ToShortTimeString() + "  Sent " + (pos + 512).ToString() + " bytes\r\n");
-                                                fwackrec = true;
-                                                fwackwait = false;
-                                                content2 = "";
-                                                diffInSeconds = -1;
-                                                pos += 512;
-                                                FWSendFile2(); // send next firmware chunk
-                                            }
-
-                                            else if (content2.Contains("00}") && diffInSeconds >= 20) // positive acknowledgement not received within 20 seconds
-                                                fwstart = false;
-
-                                            else if ((!content2.Contains("00}")))
-                                            {
-                                                nakcount++;
-                                                Outgoing("nakcount = " + nakcount.ToString() + "\r\n");
-                                                if (nakcount < 5)
-                                                {
-                                                    fwackrec = true;
-                                                    FWSendFile2();
-                                                }
-                                                else if (nakcount == 5)
-                                                    fwstart = false;
-                                            }
-
-
-                                        }
-
-
-                                        string diagstart = "{VMC01," + sernum + ",06";
-                                        if (content2.Contains(diagstart)) // received diagnostic data packet
-                                        {
-                                            DateTime packettime = DateTime.Now;
-                                            content2 = content2.Replace("}", ""); // remove "}"
-                                            content2 = content2.Replace("\r\n", ""); // remove CRLF 
-                                            String indatastr = String.Empty;
-                                            ArrayList sensorid = new ArrayList();
-                                            ArrayList sensorval = new ArrayList();
-                                            String sensoridstr = String.Empty;
-                                            String sensorvalstr = String.Empty;
-                                            String sensoridintstr = String.Empty;
-                                            String sensorvalintstr = String.Empty;
-                                            ArrayList sensoridint = new ArrayList();
-                                            ArrayList sensorvalint = new ArrayList();
-
-                                            indata.Clear();
-                                            indata.AddRange(content2.Split(',')); // split response at delimiters and store elements in arraylist
-                                            sensorvalint.Clear();
-                                            intsensorvals.Clear();
-                                            stringsensorvals.Clear();
-                                            for (int i = 0; i < indata.Count; i++)
-                                            {
-                                                if (indata[i].ToString().Contains("=")) // get data items in format "sensor id = value"
-                                                    indata2.Add(indata[i]);             // and store elements in arraylist
-                                            }
-                                            for (int i = 0; i < indata2.Count; i++)
-                                            {
-                                                indatastr = indatastr + " " + indata2[i].ToString(); //test
-                                                sensorid.Add(indata2[i].ToString().Substring(0, indata2[i].ToString().IndexOf("="))); // add sensor id to arraylist
-                                                sensorval.Add(indata2[i].ToString().Substring(indata2[i].ToString().IndexOf("=") + 1)); // add sensor value to arraylist
-                                                sensoridstr = sensoridstr + " " + sensorid[i].ToString(); // test
-                                                if (IsHex(sensorid[i].ToString())) // value string is hex
-                                                    sensoridint.Add(Convert.ToInt32(sensorid[i].ToString(), 16)); // convert to integer and add to arraylist
-                                                else
-                                                    sensoridint.Add(sensorid[i].ToString()); // add unconverted string to arraylist
-
-                                                sensoridintstr = sensoridintstr + " " + sensoridint[i].ToString(); // test
-                                                sensorvalstr = sensorvalstr + " " + sensorval[i].ToString(); // test
-
-                                                if (IsHex(sensorval[i].ToString())) // string is hex 
-                                                {
-                                                    try
-                                                    {
-                                                        sensorvalint.Add(Convert.ToInt32(sensorval[i].ToString(), 16)); // convert to integer and add to arraylist
-                                                        intsensorvals.Add(Convert.ToInt32(sensoridint[i]), Convert.ToInt32(sensorvalint[i])); // add sensor id and integer value to dictionary of integer sensor values
-                                                    }
-
-                                                    catch (Exception e)
-                                                    {
-                                                        MessageBox.Show("2841 " + e.ToString());
-                                                    }
-                                                    //units.TryGetValue(handler, out unitid);
-                                                    unitid = GetUnitIDFromSN(sernum);
-                                                    string query = "EXEC proc_storedatapacket @unitid, @sensor_id, @value1, @value2, @value3, @packetdate";
-
-                                                    using (SqlConnection conn = new SqlConnection(connectionString))
-                                                    {
-                                                        using (SqlCommand comm = new SqlCommand(query, conn))
-                                                        {
-                                                            conn.Open();
-                                                            comm.Parameters.AddWithValue("@unitid", unitid);
-                                                            comm.Parameters.AddWithValue("@sensor_id", sensoridint[i]);
-                                                            comm.Parameters.AddWithValue("@value1", sensorvalint[i]);
-                                                            comm.Parameters.AddWithValue("@value2", DBNull.Value);
-                                                            comm.Parameters.AddWithValue("@value3", DBNull.Value);
-                                                            comm.Parameters.AddWithValue("@packetdate", packettime);
-
-                                                            try
-                                                            {
-                                                                Int32 response6 = Convert.ToInt32(comm.ExecuteScalar());
-                                                                //MessageBox.Show(response.ToString());
-                                                            }
-                                                            catch (Exception e)
-                                                            {
-                                                                MessageBox.Show("2803 " + e.ToString());
-                                                            }
-                                                        }
-                                                    }
-                                                }
-                                                else
-                                                {
-                                                    try
-                                                    {
-                                                        sensorvalint.Add(sensorval[i].ToString()); // add unconverted string to arraylist
-                                                        stringsensorvals.Add(Convert.ToInt32(sensoridint[i]), sensorvalint[i].ToString()); // add sensor id and string value to dictionary of string sensor values
-                                                    }
-
-                                                    catch (Exception e)
-                                                    {
-                                                        MessageBox.Show("2881 " + e.ToString());
-                                                    }
-                                                    unitid = GetUnitIDFromSN(sernum);
-                                                    string query = "EXEC proc_storedatapacket @unitid, @sensor_id, @value1, @value2, @value3, @packetdate";
-
-                                                    using (SqlConnection conn = new SqlConnection(connectionString))
-                                                    {
-                                                        using (SqlCommand comm = new SqlCommand(query, conn))
-                                                        {
-                                                            conn.Open();
-                                                            comm.Parameters.AddWithValue("@unitid", unitid);
-                                                            comm.Parameters.AddWithValue("@sensor_id", sensoridint[i]);
-                                                            comm.Parameters.AddWithValue("@value1", DBNull.Value);
-                                                            comm.Parameters.AddWithValue("@value2", DBNull.Value);
-                                                            comm.Parameters.AddWithValue("@value3", sensorvalint[i]);
-                                                            comm.Parameters.AddWithValue("@packetdate", packettime);
-
-                                                            try
-                                                            {
-                                                                Int32 response6 = Convert.ToInt32(comm.ExecuteScalar());
-                                                                //MessageBox.Show(response.ToString());
-                                                            }
-                                                            catch (Exception e)
-                                                            {
-                                                                MessageBox.Show("2836 " + e.ToString());
-                                                            }
-                                                        }
-                                                    }
-                                                }
-
-                                                sensorvalintstr = sensorvalintstr + " " + sensorvalint[i].ToString();   // test
-
-
-                                            }
-
-
-                                        }
-
-                                        }
-
-                                    }
-                                }
-                                else
-                                {
-                                    // Not all data received. Get more.
-                                    //if (ar == currAsyncResult)
-                                    //    MessageBox.Show("ar is STILL = currAsyncResult");
-                                    handler.BeginReceive(state.buffer, 0, StateObject.BufferSize, 0,
-                                    new AsyncCallback(ReadCallback), state);
-                                }
-                                }
-
-                            //}
-                            //else
-                            //{
-                            //    // ignore;
-                            //    //MessageBox.Show("Socket change required");
-                            //}
-                        //}
-
-                //catch (Exceptio                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               n ex)
+                //}
+                //else
+                //{
+                // ignore;
+                //    MessageBox.Show("Socket change required");
+                //}
+                //}
+
+                //catch (Exception ex)
                 //{
                 //    //Log exception. Don't throw exception. Most probably BeginReceive failed.
                 //    Outgoing(ex.ToString());
@@ -1654,8 +1045,624 @@ namespace TCPServer2
 
 
 
+                if (errorCode != SocketError.Success)
+                {
+                    bytesRead = 0;
+                }
 
+                if (bytesRead > 0)
+                {
+
+                    // There might be more data, so store the data received so far.
+                    state.sb.Append(Encoding.ASCII.GetString(
+                        state.buffer, 0, bytesRead));
+
+                    // Check for end of data tag. If it is not there, read 
+                    // more data.
+
+                    content2 = "";
+                    content2 = state.sb.ToString();
+
+                    if (content2.IndexOf("}") > -1)
+                    {
+                        // All the data has been read from the 
+                        // client
+
+                        handler.BeginReceive(state.buffer, 0, StateObject.BufferSize, 0,
+                            new AsyncCallback(ReadCallback), state);
+                        state.sb.Clear();
+
+                        content2 = content2.Substring(0, content2.IndexOf("}") + 1);
+
+
+                        //if (content2.Contains("VMC01,") && content2.EndsWith("}")) // received VLink message
+                        if (content2.Contains("VMC01,")) // received VLink message
+
+                        {
+                            string content2a = "";
+                            content2a = content2.TrimEnd('}');
+                            indata.Clear();
+                            indata.AddRange(content2a.Split(',')); // split response at delimiters and store elements in arraylist
+                            sernum = indata[1].ToString(); // extract serial number from message
+
+
+
+                            Int32 response = 0;
+                            Int32 response2 = 0;
+
+
+                            if (!sernumlist.Contains(sernum)) // unit serial number not found in list of units
+                            {
+                                //MessageBox.Show("serial number  = " + sernum + " Did not recognize serial number"); // test
+                                Outgoing("Did not recognize serial number -- disconnecting");
+                                try
+                                {
+
+                                    sernum = "";
+                                    handler.Shutdown(SocketShutdown.Both); // disconnect
+
+                                }
+                                catch (ObjectDisposedException e)
+                                {
+                                    MessageBox.Show("1621 " + e.ToString());
+                                }
+
+                            }
+                            else // unit serial number found in list
+                            {
+                                response = GetUnitIDFromSN(sernum);
+
+                                try
+                                {
+                                    units2.Remove(response);
+                                    units2.Add(response, handler); // add entry for unit ID to units2 dictionary
+
+                                    sernumdict2.Remove(sernum);
+                                    sernumdict2.Add(sernum, handler); // add entry for unit in the dictionary of actively connected units (IP address and unit id)
+
+                                    if (!modesetdict.ContainsKey(response))
+                                        modesetdict.Add(response, false); // add entry to dictionary indicating that mode command has not been sent to this unit
+                                    if (!intervalsetdict.ContainsKey(response))
+                                        intervalsetdict.Add(response, false); // add entry to dictionary indicating that interval command has not been sent to this unit
+                                }
+
+                                catch (Exception e)
+                                {
+                                    MessageBox.Show("1682 " + e.ToString());
+                                }
+
+                                content = sernum + "   " + handler.RemoteEndPoint.ToString() + "   " + DateTime.Now.ToShortDateString() + " " + DateTime.Now.ToShortTimeString() + "   " + content2 + "\r\n";
+                                //Incoming(null, content);
+
+                                //string infilename = "C:\\Users\\gayakawa\\desktop\\TCPServer Log\\" + sernum + " incoming.log";
+
+                                //try
+                                //{
+                                //    StreamWriter incominglog = new StreamWriter(new FileStream(infilename, FileMode.Append, FileAccess.Write));
+                                //    incominglog.Write("\r\n" + DateTime.Now + " " + " raw incoming " + content2);
+                                //    incominglog.Close();
+                                //}
+
+                                //catch (Exception e)
+                                //{
+                                //    Incoming(null, "===============\r\nIncoming log not updated with the following: " + DateTime.Now + " " + " raw incoming " + content2 + "===============\r\n");
+                                //}
+
+                                if (logfinished)
+                                {
+                                    logfinished = false;
+                                    LogData(content, content2);
+                                }
+
+
+                                //}
+
+
+
+                                if (response2 != response)
+
+                                {
+
+                                    unitid = response;
+
+
+                                    modesetdict.TryGetValue(unitid, out modeset); // check if operation mode has previously been checked for this unit
+                                    if (!modeset) // operation mode has not previously been checked 
+                                    {
+                                        // query VLinkUnit table to determine operation mode associated with unit ID
+                                        string query2 = "SELECT [Mode] FROM [VLink106466].[dbo].[VLinkUnit] WHERE ([UnitID] = " + response.ToString() + ")";
+
+
+                                        using (SqlConnection conn3 = new SqlConnection(connectionString))
+                                        {
+                                            using (SqlCommand comm3 = new SqlCommand(query2, conn3))
+                                            {
+                                                conn3.Open();
+
+
+                                                try
+                                                {
+                                                    OpMode = comm3.ExecuteScalar().ToString();
+                                                    if (OpMode == "0000")
+                                                    {
+                                                        modesetdict.Remove(unitid);
+                                                        modesetdict.Add(unitid, true);
+
+                                                    }
+                                                }
+                                                catch (Exception e2)
+                                                {
+                                                    MessageBox.Show("1748 " + e2.ToString());
+                                                }
+                                            }
+                                        }
+                                    }
+
+                                    intervalsetdict.TryGetValue(unitid, out interset);  // check if interval value has previously been checked for this unit 
+                                    if (!interset)  // interval value has not previously been checked
+                                    {
+                                        // query VLinkUnit table to determine data transmission interval associated with unit ID
+                                        string query3 = "SELECT [Interval] FROM [VLink106466].[dbo].[VLinkUnit] WHERE ([UnitID] = " + response.ToString() + ")";
+
+
+                                        using (SqlConnection conn4 = new SqlConnection(connectionString))
+                                        {
+                                            using (SqlCommand comm4 = new SqlCommand(query3, conn4))
+                                            {
+                                                conn4.Open();
+
+
+                                                try
+                                                {
+                                                    Interval = comm4.ExecuteScalar().ToString();
+                                                    if (Interval == "0000")
+                                                    {
+                                                        intervalsetdict.Remove(unitid);
+                                                        intervalsetdict.Add(unitid, true);
+
+                                                    }
+
+                                                }
+                                                catch (Exception e2)
+                                                {
+                                                    MessageBox.Show("1781 " + e2.ToString());
+                                                }
+                                            }
+                                        }
+
+
+                                    }
+                                }
+
+
+
+
+                                CheckUnsentMessages(sernum);    // check for unsent messages for this unit
+                                if (content2.Contains("VMC01," + sernum + ",09,")) // received date and time request
+                                {
+                                    SendCurrTime(sernum); // send set time message
+
+
+                                }
+
+                                if (content2.Contains("{VMC01," + sernum + ",0A") && fwreq2 == false && fwackwait == false) // received acknowledgement message for action message
+                                {
+                                    bool match2 = false;
+                                    string actupdate;
+
+                                    // get action type from dictionary associating type of action with unit IP address
+                                    // (only one type of action [setting an output] will now generate an acknowledgement -- sensor
+                                    // data requests no longer do)
+                                    curraction2.TryGetValue(sernum, out actupdate);
+
+                                    if (actupdate == "actsetout") // acknowledgement of set output action
+                                    {
+
+                                        int unitid2 = 0;
+                                        // get unit ID from database table
+                                        unitid2 = GetUnitIDFromSN(sernum);
+
+
+                                        string packid = content2.Split(',')[3]; // get packet id from acknowledgement message
+
+
+
+                                        if (ackaction.ContainsKey(packid)) // check if packet id of acknowledgement matches a previously sent "set output" message
+                                        {
+                                            int actionid = 0;
+
+                                            ackaction.TryGetValue(packid, out actionid); // get action id from dictionary relating packet id with action id
+                                            string query = "SELECT id, unitid FROM [VLink106466].[dbo].VLinkActions";
+
+
+                                            try
+                                            {
+                                                using (SqlConnection conn = new SqlConnection(connectionString))
+                                                {
+                                                    using (SqlCommand comm = new SqlCommand(query, conn))
+                                                    {
+                                                        conn.Open();
+
+                                                        SqlDataAdapter da = new SqlDataAdapter();
+                                                        DataSet ds = new DataSet();
+
+
+
+                                                        // create dataset and datatable from returned data
+                                                        dt5.Clear();
+                                                        da.SelectCommand = comm;
+                                                        da.Fill(ds, "ActionTable");
+                                                        dt5 = ds.Tables["ActionTable"];
+
+                                                    }
+                                                }
+
+                                            }
+
+                                            catch (Exception e)
+                                            {
+                                                MessageBox.Show("1861 " + e.ToString());
+                                            }
+
+
+                                            for (int d = 0; d < dt5.Rows.Count; d++)
+                                            {
+                                                // find action id and unit id that match action
+                                                if (Convert.ToInt32(dt5.Rows[d]["id"]) == actionid && Convert.ToInt32(dt5.Rows[d]["unitid"]) == unitid2)
+                                                {
+                                                    {
+                                                        match2 = true;
+                                                        break;
+                                                    }
+                                                }
+
+
+
+                                            }
+                                            if (content2.Contains("00}") && match2) // positive acknowledgement
+                                            {
+                                                // update dictionary object to indicate that the appropriate log file has not been updated 
+                                                try
+                                                {
+                                                    if (!outlogmod.ContainsKey(handler))
+                                                        outlogmod.Add(handler, false);
+                                                    else
+                                                    {
+                                                        outlogmod.Remove(handler);
+                                                        outlogmod.Add(handler, false);
+                                                    }
+
+                                                    ackaction.TryGetValue(content2.Split(',')[3], out actiontoupdate); // find action id corresponding to packet id of acknowledgement message
+                                                    UpdateAction2(actiontoupdate, "actsetout"); // update action database table for appropriate action id
+                                                    match2 = false;
+                                                }
+
+                                                catch (Exception e)
+                                                {
+                                                    MessageBox.Show("1910 " + e.ToString());
+                                                }
+                                            }
+
+
+
+                                        }
+
+
+
+                                    }
+                                }
+
+                                string content2A = content2.TrimEnd('\r', '\n');
+                                string sensorstart = "VMC01," + sernum + ",01";
+
+                                if (content2A.Contains(sensorstart) && packproc) // received sensor data packet; previous packet has completed processing
+                                {
+                                    packproc = false;
+                                    ProcessDataPacket(content2A); // process sensor data packet
+
+                                }
+
+
+                                //if (OpMode != "0000" && timeset) // send message if operation mode is not set to default
+                                if (OpMode != "0000" && sernum != "" & !modeset) // send message if operation mode is not set to default and mode command has not been previously sent
+                                {
+                                    try
+                                    {
+                                        string opmodeset = "{VMC01," + sernum + ",67,FE," + OpMode + "}\r\n";
+                                        Thread.Sleep(1000);
+                                        Send(handler, opmodeset);
+                                        //modeset = true;
+                                        modesetdict.Remove(unitid);
+                                        modesetdict.Add(unitid, true); // set dictionary value to indicate that mode command has been sent
+                                    }
+
+                                    catch (Exception e)
+                                    {
+                                        MessageBox.Show("2251 " + e.ToString());
+                                    }
+
+                                }
+
+                                modesetdict.TryGetValue(unitid, out modeset);
+
+                                //if (Interval != "0000" && timeset && !modeset) // send message if transmission interval is not set to default
+                                if (Interval != "0000" && !modeset) // send message if transmission interval is not set to default
+
+                                {
+                                    try
+                                    {
+                                        string intervalset = "{VMC01," + sernum + ",71,FC," + Interval + "}\r\n";
+                                        Thread.Sleep(1000);
+                                        Send(handler, intervalset);
+                                        intervalsetdict.Remove(unitid);
+                                        intervalsetdict.Add(unitid, true); // set dictionary value to indicate that interval command has been sent
+                                    }
+
+                                    catch (Exception e)
+                                    {
+                                        MessageBox.Show("2273 " + e.ToString());
+                                    }
+
+
+                                }
+
+                                if (actionschkd)
+                                {
+                                    actionschkd = false;
+                                    CheckActions(sernum); // check action table to see if configured actions exist for this unit
+
+                                }
+
+
+
+                                if (content2.Contains("{VMC01," + sernum + ",0A,FF") && fwreq2) // received initial acknowledgement for firmware update request
+                                {
+                                    fwreq2 = false;
+                                    fwstart = true;
+                                    fwackrec = true;
+                                    nakcount = 0;
+                                    Thread.Sleep(5000);
+                                    FWSendFile(); // begin sending firmware file
+                                }
+
+
+                                if (content2.Contains("{VMC01," + sernum + ",0A,FE")) // received initial acknowledgement for mode set command
+                                {
+                                    //modeset = false;
+
+                                    //if (Interval != "0000" && timeset) // send message if transmission interval is not set to default
+                                    if (Interval != "0000") // send message if transmission interval is not set to default
+                                    {
+                                        try
+                                        {
+                                            string intervalset = "{VMC01," + sernum + ",71,FC," + Interval + "}\r\n";
+                                            Thread.Sleep(1000);
+                                            Send(handler, intervalset);
+                                            //interset = true;
+                                            intervalsetdict.Remove(unitid);
+                                            intervalsetdict.Add(unitid, true); // set dictionary value to indicate that interval command has been sent
+                                        }
+
+                                        catch (Exception e)
+                                        {
+                                            MessageBox.Show("2426 " + e.ToString());
+                                        }
+                                    }
+
+
+                                }
+
+
+
+                                if (content2.Contains("{VMC01," + sernum + ",11") && fwreq2 == false && fwackwait == true) // received acknowledgement upon receipt of firmware chunk
+                                {
+
+                                    current = DateTime.Now;
+                                    diffInSeconds = (current - start).TotalSeconds; // check elapsed time between initial sending of firmware data and receipt of acknowledgement
+                                    if (content2.Contains("00}") && diffInSeconds >= 0 && diffInSeconds < 20) // positive acknowledgement received within 20 seconds
+                                    {
+                                        nakcount = 0;
+                                        // add log entry indicating firmware update acknowledgement has been received
+
+                                        StreamWriter fwuplog = new StreamWriter(new FileStream("C:\\Users\\gayakawa\\desktop\\TCPServer Log\\" + sernum + ".log", FileMode.Append, FileAccess.Write));
+                                        fwuplog.Write("\r\n" + DateTime.Now + " " + handler.RemoteEndPoint.ToString() + " (Serial Number " + sernum + ") firmware update acknowledgement successfully received");
+                                        fwuplog.Close();
+
+                                        Outgoing(sernum + "   " + ipa + " " + DateTime.Now.ToShortDateString() + " " + DateTime.Now.ToShortTimeString() + "  Sent " + (pos + 512).ToString() + " bytes\r\n");
+                                        fwackrec = true;
+                                        fwackwait = false;
+                                        content2 = "";
+                                        diffInSeconds = -1;
+                                        pos += 512;
+                                        FWSendFile2(); // send next firmware chunk
+                                    }
+
+                                    else if (content2.Contains("00}") && diffInSeconds >= 20) // positive acknowledgement not received within 20 seconds
+                                        fwstart = false;
+
+                                    else if ((!content2.Contains("00}")))
+                                    {
+                                        nakcount++;
+                                        Outgoing("nakcount = " + nakcount.ToString() + "\r\n");
+                                        if (nakcount < 5)
+                                        {
+                                            fwackrec = true;
+                                            FWSendFile2();
+                                        }
+                                        else if (nakcount == 5)
+                                            fwstart = false;
+                                    }
+
+
+                                }
+
+
+                                string diagstart = "{VMC01," + sernum + ",06";
+                                if (content2.Contains(diagstart)) // received diagnostic data packet
+                                {
+                                    DateTime packettime = DateTime.Now;
+                                    content2 = content2.Replace("}", ""); // remove "}"
+                                    content2 = content2.Replace("\r\n", ""); // remove CRLF 
+                                    String indatastr = String.Empty;
+                                    ArrayList sensorid = new ArrayList();
+                                    ArrayList sensorval = new ArrayList();
+                                    String sensoridstr = String.Empty;
+                                    String sensorvalstr = String.Empty;
+                                    String sensoridintstr = String.Empty;
+                                    String sensorvalintstr = String.Empty;
+                                    ArrayList sensoridint = new ArrayList();
+                                    ArrayList sensorvalint = new ArrayList();
+
+                                    indata.Clear();
+                                    indata.AddRange(content2.Split(',')); // split response at delimiters and store elements in arraylist
+                                    sensorvalint.Clear();
+                                    intsensorvals.Clear();
+                                    stringsensorvals.Clear();
+                                    for (int i = 0; i < indata.Count; i++)
+                                    {
+                                        if (indata[i].ToString().Contains("=")) // get data items in format "sensor id = value"
+                                            indata2.Add(indata[i]);             // and store elements in arraylist
+                                    }
+                                    for (int i = 0; i < indata2.Count; i++)
+                                    {
+                                        indatastr = indatastr + " " + indata2[i].ToString(); //test
+                                        sensorid.Add(indata2[i].ToString().Substring(0, indata2[i].ToString().IndexOf("="))); // add sensor id to arraylist
+                                        sensorval.Add(indata2[i].ToString().Substring(indata2[i].ToString().IndexOf("=") + 1)); // add sensor value to arraylist
+                                        sensoridstr = sensoridstr + " " + sensorid[i].ToString(); // test
+                                        if (IsHex(sensorid[i].ToString())) // value string is hex
+                                            sensoridint.Add(Convert.ToInt32(sensorid[i].ToString(), 16)); // convert to integer and add to arraylist
+                                        else
+                                            sensoridint.Add(sensorid[i].ToString()); // add unconverted string to arraylist
+
+                                        sensoridintstr = sensoridintstr + " " + sensoridint[i].ToString(); // test
+                                        sensorvalstr = sensorvalstr + " " + sensorval[i].ToString(); // test
+
+                                        if (IsHex(sensorval[i].ToString())) // string is hex 
+                                        {
+                                            try
+                                            {
+                                                sensorvalint.Add(Convert.ToInt32(sensorval[i].ToString(), 16)); // convert to integer and add to arraylist
+                                                intsensorvals.Add(Convert.ToInt32(sensoridint[i]), Convert.ToInt32(sensorvalint[i])); // add sensor id and integer value to dictionary of integer sensor values
+                                            }
+
+                                            catch (Exception e)
+                                            {
+                                                MessageBox.Show("2841 " + e.ToString());
+                                            }
+                                            //units.TryGetValue(handler, out unitid);
+                                            unitid = GetUnitIDFromSN(sernum);
+                                            string query = "EXEC proc_storedatapacket @unitid, @sensor_id, @value1, @value2, @value3, @packetdate";
+
+                                            using (SqlConnection conn = new SqlConnection(connectionString))
+                                            {
+                                                using (SqlCommand comm = new SqlCommand(query, conn))
+                                                {
+                                                    conn.Open();
+                                                    comm.Parameters.AddWithValue("@unitid", unitid);
+                                                    comm.Parameters.AddWithValue("@sensor_id", sensoridint[i]);
+                                                    comm.Parameters.AddWithValue("@value1", sensorvalint[i]);
+                                                    comm.Parameters.AddWithValue("@value2", DBNull.Value);
+                                                    comm.Parameters.AddWithValue("@value3", DBNull.Value);
+                                                    comm.Parameters.AddWithValue("@packetdate", packettime);
+
+                                                    try
+                                                    {
+                                                        Int32 response6 = Convert.ToInt32(comm.ExecuteScalar());
+                                                        //MessageBox.Show(response.ToString());
+                                                    }
+                                                    catch (Exception e)
+                                                    {
+                                                        MessageBox.Show("2803 " + e.ToString());
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        else
+                                        {
+                                            try
+                                            {
+                                                sensorvalint.Add(sensorval[i].ToString()); // add unconverted string to arraylist
+                                                stringsensorvals.Add(Convert.ToInt32(sensoridint[i]), sensorvalint[i].ToString()); // add sensor id and string value to dictionary of string sensor values
+                                            }
+
+                                            catch (Exception e)
+                                            {
+                                                MessageBox.Show("2881 " + e.ToString());
+                                            }
+                                            unitid = GetUnitIDFromSN(sernum);
+                                            string query = "EXEC proc_storedatapacket @unitid, @sensor_id, @value1, @value2, @value3, @packetdate";
+
+                                            using (SqlConnection conn = new SqlConnection(connectionString))
+                                            {
+                                                using (SqlCommand comm = new SqlCommand(query, conn))
+                                                {
+                                                    conn.Open();
+                                                    comm.Parameters.AddWithValue("@unitid", unitid);
+                                                    comm.Parameters.AddWithValue("@sensor_id", sensoridint[i]);
+                                                    comm.Parameters.AddWithValue("@value1", DBNull.Value);
+                                                    comm.Parameters.AddWithValue("@value2", DBNull.Value);
+                                                    comm.Parameters.AddWithValue("@value3", sensorvalint[i]);
+                                                    comm.Parameters.AddWithValue("@packetdate", packettime);
+
+                                                    try
+                                                    {
+                                                        Int32 response6 = Convert.ToInt32(comm.ExecuteScalar());
+                                                        //MessageBox.Show(response.ToString());
+                                                    }
+                                                    catch (Exception e)
+                                                    {
+                                                        MessageBox.Show("2836 " + e.ToString());
+                                                    }
+                                                }
+                                            }
+                                        }
+
+                                        sensorvalintstr = sensorvalintstr + " " + sensorvalint[i].ToString();   // test
+
+
+                                    }
+
+
+                                }
+
+                            }
+
+                        }
+                    }
+                    else
+                    {
+                        // Not all data received. Get more.
+                        if (ar == currAsyncResult)
+                        {
+                            MessageBox.Show("ar is STILL = currAsyncResult");
+                            handler.BeginReceive(state.buffer, 0, StateObject.BufferSize, 0,
+                            new AsyncCallback(ReadCallback), state);
+                        }
+
+                    }
+                }
             }
+
+
+            //}
+            //else
+            //{
+            //    // ignore;
+            //    //MessageBox.Show("Socket change required");
+            //}
+            //}
+
+            //catch (Exception ex)
+            //{
+            //    //Log exception. Don't throw exception. Most probably BeginReceive failed.
+            //    Outgoing(ex.ToString());
+            //}
+
+
+
+
+
+            //}
 
 
 
