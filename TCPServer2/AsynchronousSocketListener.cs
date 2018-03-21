@@ -1,4 +1,4 @@
-﻿#define TEST
+﻿#define DON
 
 using System;
 using System.Text;
@@ -305,7 +305,7 @@ namespace TCPServer2
             //    MessageBox.Show("Yes, currAsyncResult = ar");
             //else if (currAsyncResult != ar && currAsyncResult != null)
             //    MessageBox.Show("No, currAsyncResult != ar");
-            currAsyncResult = handler.BeginReceive(state.buffer, 0, StateObject.BufferSize, 0,
+            handler.BeginReceive(state.buffer, 0, StateObject.BufferSize, 0,
                 new AsyncCallback(ReadCallback), state);
 
         }
@@ -984,7 +984,7 @@ namespace TCPServer2
             ArrayList indata2 = new ArrayList();
             SocketError errorCode = SocketError.Success;
             int bytesRead = 0;
-            StateObject state = (StateObject)ar.AsyncState;
+            //StateObject state = (StateObject)ar.AsyncState;
 
             try
             {
@@ -994,9 +994,9 @@ namespace TCPServer2
                 // from the asynchronous state object.
 
                 //currAsyncResult = ar;
-                ar = currAsyncResult;
-                //StateObject state = (StateObject)ar.AsyncState;
-                state = (StateObject)ar.AsyncState;
+                //ar = currAsyncResult;
+                StateObject state = (StateObject)ar.AsyncState;
+                //state = (StateObject)ar.AsyncState;
                 //Socket handler = state.workSocket;
                 handler = state.workSocket;
 
@@ -1010,17 +1010,17 @@ namespace TCPServer2
 
                 try
                 {
-                    if (ar == currAsyncResult)
-                    {
-                        //MessageBox.Show("ar = currAsyncResult");
-                        //SocketError errorCode;
+                    //if (ar == currAsyncResult)
+                    //{
+                    //    //MessageBox.Show("ar = currAsyncResult");
+                    //    //SocketError errorCode;
                         bytesRead = handler.EndReceive(ar, out errorCode);
-                        //MessageBox.Show("bytesRead = " + bytesRead.ToString());
-                    }
-                    else
-                    {
-                        // ignore;
-                    }
+                    //    //MessageBox.Show("bytesRead = " + bytesRead.ToString());
+                    //}
+                    //else
+                    //{
+                    //    //ignore;
+                    //}
                 }
 
                 catch (Exception ex)
@@ -1632,12 +1632,12 @@ namespace TCPServer2
                     else
                     {
                         // Not all data received. Get more.
-                        if (ar == currAsyncResult)
-                        {
-                            MessageBox.Show("ar is STILL = currAsyncResult");
+                        //if (ar == currAsyncResult)
+                        //{
+                        //    MessageBox.Show("ar is STILL = currAsyncResult");
                             handler.BeginReceive(state.buffer, 0, StateObject.BufferSize, 0,
                             new AsyncCallback(ReadCallback), state);
-                        }
+                        //}
 
                     }
                 }
