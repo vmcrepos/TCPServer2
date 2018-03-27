@@ -1,4 +1,4 @@
-﻿#define DON
+﻿#define GREGG
 
 using System;
 using System.Text;
@@ -137,6 +137,7 @@ namespace TCPServer2
         static bool actionschkd = true;
         static bool logfinished = true;
         //static StateObject state = new StateObject();
+        static bool msgsent = false;
 
 
 
@@ -985,6 +986,7 @@ namespace TCPServer2
             SocketError errorCode = SocketError.Success;
             int bytesRead = 0;
             //StateObject state = (StateObject)ar.AsyncState;
+            msgsent = false;
 
             try
             {
@@ -1078,6 +1080,7 @@ namespace TCPServer2
                         //if (content2.Contains("VMC01,") && content2.EndsWith("}")) // received VLink message
                         if (content2.Contains("VMC01,")) // received VLink message
 
+                       
                         {
                             string content2a = "";
                             content2a = content2.TrimEnd('}');
@@ -1236,8 +1239,13 @@ namespace TCPServer2
 
 
 
+                                if (!msgsent)
+                                {
+                                    msgsent = true;
+                                    CheckUnsentMessages(sernum);    // check for unsent messages for this unit
+                                    
+                                }
 
-                                CheckUnsentMessages(sernum);    // check for unsent messages for this unit
                                 if (content2.Contains("VMC01," + sernum + ",09,")) // received date and time request
                                 {
                                     SendCurrTime(sernum); // send set time message
@@ -1978,6 +1986,7 @@ namespace TCPServer2
 // *****************CONTINUE CLEANUP FROM HERE **********************************
         private static void CheckUnsentMessages(string sn)
         {
+            
             string filename = "C:\\ProgramData\\TCPServer\\Unsent_Messages_" + sn;
             //if (File.Exists("C:\\ProgramData\\TCPServer\\Unsent_Messages.txt"))
             if (File.Exists(filename + ".txt"))
@@ -2004,30 +2013,36 @@ namespace TCPServer2
                 unsentcheck.Close();
                 unsentcheck.Dispose();
 
+                File.Delete(filename + ".txt");
+
 
 
 
                 for (int x = 0; x < unsentarr.Count; x++)
-                {
-                    if (unsentarr[x].ToString().Contains("Send Current Time,"))
-                        SendCurrTime(sn);
-                    else
                     {
-                        if (unsentarr[x].ToString().Contains("64,FF"))
+                        if (unsentarr[x].ToString().Contains("Send Current Time,"))
+                            SendCurrTime(sn);
+                        else
                         {
-                            fwreq2 = true;
-                            pos = 0;
+                            if (unsentarr[x].ToString().Contains("64,FF"))
+                            {
+                                fwreq2 = true;
+                                pos = 0;
+                            }
+
+                            Socket handler2 = null;
+                            sernumdict2.TryGetValue(sn, out handler2);
+                            Send(handler2, unsentarr[x].ToString() + "\r\n");
                         }
-
-                        Socket handler2 = null;
-                        sernumdict2.TryGetValue(sn, out handler2);
-                        Send(handler2, unsentarr[x].ToString() + "\r\n");
+                        
+                        Thread.Sleep(10000);
+                        
                     }
-                    Thread.Sleep(2000);
+                    
+                
 
-                }
-
-                File.Delete(filename + ".txt");
+                
+                //File.Delete(filename + ".txt");
 
 
             }
