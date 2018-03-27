@@ -527,6 +527,21 @@ namespace TCPServer2
                 //MessageBox.Show(AsynchronousSocketListener.clientSockets[x].RemoteEndPoint.ToString());
                 richTextBox1.Text = richTextBox1.Text + AsynchronousSocketListener.clientSockets[x].RemoteEndPoint.ToString() + "\r\n";
         }
+
+        private void btnReqModVer_Click(object sender, EventArgs e)
+        {
+            if (selid != "")
+            {
+                string data = "{VMC01," + selid + ",57,01}\r\n";
+
+                AsynchronousSocketListener.AddUnsentMessage(selid, "\r\n" + data);
+                AsynchronousSocketListener.SendCurrTime(selid);
+
+                
+            }
+            else
+                MessageBox.Show("Please select (click on) a unit from the serial number list");
+        }
     }   
 }
 

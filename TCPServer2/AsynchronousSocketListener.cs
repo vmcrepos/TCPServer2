@@ -1,4 +1,4 @@
-﻿#define GREGG
+﻿#define TEST
 
 using System;
 using System.Text;
@@ -3114,6 +3114,144 @@ namespace TCPServer2
 
 
 
+
+        }
+
+        public static void CheckAndSetMode(string sn)
+        {
+            int modesetint = 0;
+            string modestr = "";
+            int intervalsetint = 0;
+            string intervalstr = "";
+
+            string query = "SELECT [ModeSet] FROM [VLink106466].[dbo].[VLinkUnit] WHERE ([SerialNumber] = " + sn + ")";
+
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            {
+                using (SqlCommand comm = new SqlCommand(query, conn))
+                {
+                    conn.Open();
+
+
+                    try
+                    {
+                        modesetint = Convert.ToInt16(comm.ExecuteScalar());
+
+                    }
+
+
+                    catch (Exception e2)
+                    {
+                        MessageBox.Show(e2.ToString());
+                    }
+                }
+            }
+
+            string query2 = "SELECT [Mode] FROM [VLink106466].[dbo].[VLinkUnit] WHERE ([SerialNumber] = " + sn + ")";
+
+            using (SqlConnection conn2 = new SqlConnection(connectionString))
+            {
+                using (SqlCommand comm2 = new SqlCommand(query2, conn2))
+                {
+                    conn2.Open();
+
+
+                    try
+                    {
+                        modestr = comm2.ExecuteScalar().ToString();
+
+                    }
+
+
+                    catch (Exception e2)
+                    {
+                        MessageBox.Show(e2.ToString());
+                    }
+                }
+            }
+
+            if (modesetint == 0)
+            {
+                try
+                {
+                    string opmodeset = "{VMC01," + sernum + ",67,FE," + modestr + "}\r\n";
+                    Thread.Sleep(1000);
+                    Send(handler, opmodeset);
+
+                }
+
+                catch (Exception e)
+                {
+                    MessageBox.Show(e.ToString());
+                }
+
+
+            }
+
+            string query3 = "SELECT [IntervalSet] FROM [VLink106466].[dbo].[VLinkUnit] WHERE ([SerialNumber] = " + sn + ")";
+
+            using (SqlConnection conn3 = new SqlConnection(connectionString))
+            {
+                using (SqlCommand comm3 = new SqlCommand(query3, conn3))
+                {
+                    conn3.Open();
+
+
+                    try
+                    {
+                        intervalsetint = Convert.ToInt16(comm3.ExecuteScalar());
+
+                    }
+
+
+                    catch (Exception e2)
+                    {
+                        MessageBox.Show(e2.ToString());
+                    }
+                }
+            }
+
+            string query4 = "SELECT [Interval] FROM [VLink106466].[dbo].[VLinkUnit] WHERE ([SerialNumber] = " + sn + ")";
+
+            using (SqlConnection conn4 = new SqlConnection(connectionString))
+            {
+                using (SqlCommand comm4 = new SqlCommand(query4, conn4))
+                {
+                    conn4.Open();
+
+
+                    try
+                    {
+                        intervalstr = comm4.ExecuteScalar().ToString();
+
+                    }
+
+
+                    catch (Exception e2)
+                    {
+                        MessageBox.Show(e2.ToString());
+                    }
+                }
+            }
+
+
+            if (intervalsetint == 0)
+            {
+                try
+                {
+                    string intervalset = "{VMC01," + sernum + ",71,FC," + intervalstr + "}\r\n";
+                    Thread.Sleep(1000);
+                    Send(handler, intervalset);
+
+                }
+
+                catch (Exception e)
+                {
+                    MessageBox.Show(e.ToString());
+                }
+
+
+            }
 
         }
 

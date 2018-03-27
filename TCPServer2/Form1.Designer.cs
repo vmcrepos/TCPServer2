@@ -63,6 +63,7 @@
             this.btnClrOutgoing = new System.Windows.Forms.Button();
             this.button2 = new System.Windows.Forms.Button();
             this.richTextBox1 = new System.Windows.Forms.RichTextBox();
+            this.btnReqModVer = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
             this.groupBox1.SuspendLayout();
             this.SuspendLayout();
@@ -320,6 +321,7 @@
             // 
             // groupBox1
             // 
+            this.groupBox1.Controls.Add(this.btnReqModVer);
             this.groupBox1.Controls.Add(this.btnFWUpdate);
             this.groupBox1.Controls.Add(this.label4);
             this.groupBox1.Controls.Add(this.btnReboot);
@@ -382,6 +384,16 @@
             this.richTextBox1.Size = new System.Drawing.Size(262, 112);
             this.richTextBox1.TabIndex = 25;
             this.richTextBox1.Text = "";
+            // 
+            // btnReqModVer
+            // 
+            this.btnReqModVer.Location = new System.Drawing.Point(253, 98);
+            this.btnReqModVer.Name = "btnReqModVer";
+            this.btnReqModVer.Size = new System.Drawing.Size(212, 67);
+            this.btnReqModVer.TabIndex = 22;
+            this.btnReqModVer.Text = "Send \"Modem Version Request\"";
+            this.btnReqModVer.UseVisualStyleBackColor = true;
+            this.btnReqModVer.Click += new System.EventHandler(this.btnReqModVer_Click);
             // 
             // Form1
             // 
@@ -451,6 +463,7 @@
         private System.Windows.Forms.Button btnClrOutgoing;
         private System.Windows.Forms.Button button2;
         private System.Windows.Forms.RichTextBox richTextBox1;
+        private System.Windows.Forms.Button btnReqModVer;
     }
 }
 
