@@ -1,4 +1,4 @@
-﻿
+﻿#define TEST
 
 using System;
 using System.Windows.Forms;
@@ -551,10 +551,12 @@ namespace TCPServer2
             // a second application will check for the existence of this file as an indication that the
             // application is still running
 
-            string filename = "C:\\Users\\gayakawa\\Desktop\\TCPServerOK.txt";
+#if GREGG
+            string filename = "C:\\Users\\gayakawa\\Desktop\\TCPServer2OK.txt";
 
             var myFile = File.Create(filename);
             myFile.Close();
+#endif
         }
     }   
 }
