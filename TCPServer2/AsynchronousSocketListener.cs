@@ -1,4 +1,4 @@
-﻿#define TEST
+﻿#define GREGG
 
 using System;
 using System.Text;
@@ -947,7 +947,7 @@ namespace TCPServer2
 
                             handler.Send(header); // send header byte
                             handler.Send(buffer, 514, SocketFlags.None); // send chunk + footer and checksum bytes
-                                                                         
+                            
                             fwackwait = true;
                             fwackrec = false;
                             
@@ -1462,7 +1462,8 @@ namespace TCPServer2
 
 
 
-                                if (content2.Contains("{VMC01," + sernum + ",11") && fwreq2 == false && fwackwait == true) // received acknowledgement upon receipt of firmware chunk
+                                //if (content2.Contains("{VMC01," + sernum + ",11") && fwreq2 == false && fwackwait == true) // received acknowledgement upon receipt of firmware chunk
+                                if (content2.Contains(sernum + ",11") && fwreq2 == false && fwackwait == true) // received acknowledgement upon receipt of firmware chunk
                                 {
 
                                     current = DateTime.Now;
@@ -3124,7 +3125,7 @@ namespace TCPServer2
             int intervalsetint = 0;
             string intervalstr = "";
 
-            string query = "SELECT [ModeSet] FROM [VLink106466].[dbo].[VLinkUnit] WHERE ([SerialNumber] = " + sn + ")";
+            string query = "SELECT [ModeSet] FROM [VLink106466].[dbo].[VLinkUnit] WHERE ([SerialNumber] = '" + sn + "')";
 
             using (SqlConnection conn = new SqlConnection(connectionString))
             {
@@ -3147,7 +3148,7 @@ namespace TCPServer2
                 }
             }
 
-            string query2 = "SELECT [Mode] FROM [VLink106466].[dbo].[VLinkUnit] WHERE ([SerialNumber] = " + sn + ")";
+            string query2 = "SELECT [Mode] FROM [VLink106466].[dbo].[VLinkUnit] WHERE ([SerialNumber] = '" + sn + "')";
 
             using (SqlConnection conn2 = new SqlConnection(connectionString))
             {
@@ -3178,6 +3179,29 @@ namespace TCPServer2
                     Thread.Sleep(1000);
                     Send(handler, opmodeset);
 
+                    string update = "UPDATE [VLink106466].[dbo].[VLinkUnit] SET ModeSet = 1 WHERE ([SerialNumber] = '" + sn + "')";
+
+                    using (SqlConnection conn5 = new SqlConnection(connectionString))
+                    {
+                        using (SqlCommand comm5 = new SqlCommand(update, conn5))
+                        {
+                            conn5.Open();
+
+
+                            try
+                            {
+                                comm5.ExecuteNonQuery();
+
+                            }
+
+
+                            catch (Exception e2)
+                            {
+                                MessageBox.Show(e2.ToString());
+                            }
+                        }
+                    }
+                                        
                 }
 
                 catch (Exception e)
@@ -3188,7 +3212,7 @@ namespace TCPServer2
 
             }
 
-            string query3 = "SELECT [IntervalSet] FROM [VLink106466].[dbo].[VLinkUnit] WHERE ([SerialNumber] = " + sn + ")";
+            string query3 = "SELECT [IntervalSet] FROM [VLink106466].[dbo].[VLinkUnit] WHERE ([SerialNumber] = '" + sn + "')";
 
             using (SqlConnection conn3 = new SqlConnection(connectionString))
             {
@@ -3211,7 +3235,7 @@ namespace TCPServer2
                 }
             }
 
-            string query4 = "SELECT [Interval] FROM [VLink106466].[dbo].[VLinkUnit] WHERE ([SerialNumber] = " + sn + ")";
+            string query4 = "SELECT [Interval] FROM [VLink106466].[dbo].[VLinkUnit] WHERE ([SerialNumber] = '" + sn + "')";
 
             using (SqlConnection conn4 = new SqlConnection(connectionString))
             {
@@ -3243,6 +3267,29 @@ namespace TCPServer2
                     Thread.Sleep(1000);
                     Send(handler, intervalset);
 
+                    string update2 = "UPDATE [VLink106466].[dbo].[VLinkUnit] SET IntervalSet = 1 WHERE ([SerialNumber] = '" + sn + "')";
+
+                    using (SqlConnection conn6= new SqlConnection(connectionString))
+                    {
+                        using (SqlCommand comm6 = new SqlCommand(update2, conn6))
+                        {
+                            conn6.Open();
+
+
+                            try
+                            {
+                                comm6.ExecuteNonQuery();
+
+                            }
+
+
+                            catch (Exception e2)
+                            {
+                                MessageBox.Show(e2.ToString());
+                            }
+                        }
+                    }
+
                 }
 
                 catch (Exception e)
@@ -3253,7 +3300,10 @@ namespace TCPServer2
 
             }
 
+
         }
+
+                
 
         public static bool IsFileLocked(FileInfo file)
         {

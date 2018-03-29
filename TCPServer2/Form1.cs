@@ -196,6 +196,8 @@ namespace TCPServer2
 
         private void button1_Click(object sender, EventArgs e)
         {
+
+            AsynchronousSocketListener.CheckAndSetMode("nd0");
             //for (int x = 0; x < dataGridView1.RowCount; x++)
             //{
                
@@ -541,6 +543,18 @@ namespace TCPServer2
             }
             else
                 MessageBox.Show("Please select (click on) a unit from the serial number list");
+        }
+
+        private void timer2_Tick(object sender, EventArgs e)
+        {
+            // write blank text file to desktop every 60 seconds
+            // a second application will check for the existence of this file as an indication that the
+            // application is still running
+
+            string filename = "C:\\Users\\gayakawa\\Desktop\\TCPServerOK.txt";
+
+            var myFile = File.Create(filename);
+            myFile.Close();
         }
     }   
 }
