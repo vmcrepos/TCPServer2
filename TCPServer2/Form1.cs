@@ -49,10 +49,10 @@ namespace TCPServer2
             
 
             btnStart_Click(null, null);
-            
+            this.Text = "TCP Server 2: Monitoring Port " + AsynchronousSocketListener.port;
             //lstUnits.DrawMode = DrawMode.OwnerDrawFixed;
             //lstUnits.DrawItem += new DrawItemEventHandler(lstUnits_DrawItem);
-            
+
 
 
         }
@@ -72,6 +72,7 @@ namespace TCPServer2
             AsynchronousSocketListener.Connected += AsynchronousSocketListener_Connected;
             // FormLoad(null, null);
             btnStart.Enabled = false;
+            
 
             CheckForNewUnits();
             timer4.Enabled = true;
@@ -557,6 +558,18 @@ namespace TCPServer2
             var myFile = File.Create(filename);
             myFile.Close();
 #endif
+        }
+
+        private void btnCreate_Click(object sender, EventArgs e)
+        {
+            if (selid != "")
+            {
+                Form CreateForm = new frmCreate(); // display form for confirming reboot
+                CreateForm.ShowDialog();
+            }
+            else
+                MessageBox.Show("Please select (click on) a unit from the serial number list");
+
         }
     }   
 }

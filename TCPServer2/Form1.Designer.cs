@@ -64,6 +64,7 @@
             this.btnClrOutgoing = new System.Windows.Forms.Button();
             this.button2 = new System.Windows.Forms.Button();
             this.richTextBox1 = new System.Windows.Forms.RichTextBox();
+            this.btnCreate = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
             this.groupBox1.SuspendLayout();
             this.SuspendLayout();
@@ -323,6 +324,7 @@
             // 
             // groupBox1
             // 
+            this.groupBox1.Controls.Add(this.btnCreate);
             this.groupBox1.Controls.Add(this.btnReqModVer);
             this.groupBox1.Controls.Add(this.btnFWUpdate);
             this.groupBox1.Controls.Add(this.label4);
@@ -397,6 +399,16 @@
             this.richTextBox1.TabIndex = 25;
             this.richTextBox1.Text = "";
             // 
+            // btnCreate
+            // 
+            this.btnCreate.Location = new System.Drawing.Point(253, 178);
+            this.btnCreate.Name = "btnCreate";
+            this.btnCreate.Size = new System.Drawing.Size(212, 29);
+            this.btnCreate.TabIndex = 23;
+            this.btnCreate.Text = "Create && Send Message";
+            this.btnCreate.UseVisualStyleBackColor = true;
+            this.btnCreate.Click += new System.EventHandler(this.btnCreate_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
@@ -466,6 +478,7 @@
         private System.Windows.Forms.Button button2;
         private System.Windows.Forms.RichTextBox richTextBox1;
         private System.Windows.Forms.Button btnReqModVer;
+        private System.Windows.Forms.Button btnCreate;
     }
 }
 

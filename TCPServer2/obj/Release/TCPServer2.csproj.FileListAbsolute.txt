@@ -14,3 +14,4 @@ C:\Users\gregg\Documents\Visual Studio 2015\Projects\TCPServer2\TCPServer2\obj\R
 C:\Users\gregg\Documents\Visual Studio 2015\Projects\TCPServer2\TCPServer2\obj\Release\TCPServer2.application
 C:\Users\gregg\Documents\Visual Studio 2015\Projects\TCPServer2\TCPServer2\obj\Release\TCPServer2.exe
 C:\Users\gregg\Documents\Visual Studio 2015\Projects\TCPServer2\TCPServer2\obj\Release\TCPServer2.pdb
+C:\Users\gregg\Documents\Visual Studio 2015\Projects\TCPServer2\TCPServer2\obj\Release\TCPServer2.frmCreate.resources

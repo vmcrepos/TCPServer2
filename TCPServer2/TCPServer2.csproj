@@ -96,6 +96,12 @@
     <Compile Include="frmChgPort.Designer.cs">
       <DependentUpon>frmChgPort.cs</DependentUpon>
     </Compile>
+    <Compile Include="frmCreate.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmCreate.Designer.cs">
+      <DependentUpon>frmCreate.cs</DependentUpon>
+    </Compile>
     <Compile Include="frmReboot.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -111,6 +117,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="frmChgPort.resx">
       <DependentUpon>frmChgPort.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmCreate.resx">
+      <DependentUpon>frmCreate.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="frmReboot.resx">
       <DependentUpon>frmReboot.cs</DependentUpon>
