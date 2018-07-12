@@ -1,4 +1,4 @@
-﻿#define GREGG
+﻿#define TEST
 
 using System;
 using System.Text;
@@ -1762,16 +1762,18 @@ namespace TCPServer2
 
                     sensoridintstr = sensoridintstr + " " + sensoridint[i].ToString(); // test
                     sensorvalstr = sensorvalstr + " " + sensorval[i].ToString(); // test
-                    
-                    
 
-                    if (IsHex(sensorval[i].ToString())) // string is hex 
+
+                    int packetunixtime = 0;
+                    if (IsHex(sensorval[i].ToString())) // string is hex
+                                                 
                     {
                         try
                         {
                             sensorvalint.Add(Convert.ToInt32(sensorval[i].ToString(), 16)); // convert to integer and add to arraylist
                             intsensorvals.Add(Convert.ToInt32(sensoridint[i]), Convert.ToInt32(sensorvalint[i])); // add sensor id and integer value to dictionary of integer sensor values
-                            
+                            packetunixtime = Convert.ToInt32(sensorvalint[0]);
+                            MessageBox.Show("packet unix time = " + packetunixtime.ToString());
                         }
 
                         catch (Exception e)
@@ -1794,7 +1796,15 @@ namespace TCPServer2
                                 comm.Parameters.AddWithValue("@value1", sensorvalint[i]);
                                 comm.Parameters.AddWithValue("@value2", DBNull.Value);
                                 comm.Parameters.AddWithValue("@value3", DBNull.Value);
-                                comm.Parameters.AddWithValue("@packetdate", packettime);
+                                if (packetunixtime < 1514764800)
+                                    comm.Parameters.AddWithValue("@packetdate", packettime);
+                                else
+                                {
+                                    packettime = UnixTimeStampToDateTime(packetunixtime);
+                                    comm.Parameters.AddWithValue("@packetdate", packettime);
+                                }
+
+
 
                                 try
                                 {
@@ -3303,7 +3313,14 @@ namespace TCPServer2
 
         }
 
-                
+
+        public static DateTime UnixTimeStampToDateTime(double unixTimeStamp)
+        {
+            // Unix timestamp is seconds past epoch
+            System.DateTime dtDateTime = new DateTime(1970, 1, 1, 0, 0, 0, 0, System.DateTimeKind.Utc);
+            dtDateTime = dtDateTime.AddSeconds(unixTimeStamp).ToLocalTime();
+            return dtDateTime;
+        }
 
         public static bool IsFileLocked(FileInfo file)
         {
