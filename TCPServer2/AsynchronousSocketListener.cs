@@ -1765,6 +1765,7 @@ namespace TCPServer2
 
 
                     int packetunixtime = 0;
+                    bool dst = false;
                     if (IsHex(sensorval[i].ToString())) // string is hex
                                                  
                     {
@@ -1797,11 +1798,17 @@ namespace TCPServer2
                                 comm.Parameters.AddWithValue("@value2", DBNull.Value);
                                 comm.Parameters.AddWithValue("@value3", DBNull.Value);
                                 if (packetunixtime < 1514764800)
+                                {
+                                    packettime = DateTime.Now.ToUniversalTime();
                                     comm.Parameters.AddWithValue("@packetdate", packettime);
+                                    
+                                }
                                 else
                                 {
                                     packettime = UnixTimeStampToDateTime(packetunixtime);
+                                    packettime = packettime.ToUniversalTime();
                                     comm.Parameters.AddWithValue("@packetdate", packettime);
+                                    
                                 }
 
 
@@ -1850,8 +1857,21 @@ namespace TCPServer2
                             comm.Parameters.AddWithValue("@value1", DBNull.Value);
                             comm.Parameters.AddWithValue("@value2", DBNull.Value);
                             comm.Parameters.AddWithValue("@value3", sensorvalint[i]);
-                            comm.Parameters.AddWithValue("@packetdate", packettime);
 
+                            if (packetunixtime < 1514764800)
+                            {
+                                packettime = DateTime.Now.ToUniversalTime();
+                                comm.Parameters.AddWithValue("@packetdate", packettime);
+
+                            }
+                            else
+                            {
+                                packettime = UnixTimeStampToDateTime(packetunixtime);
+                                packettime = packettime.ToUniversalTime();
+                                comm.Parameters.AddWithValue("@packetdate", packettime);
+
+                            }
+                            
                             try
                             {
                                 Int32 response4 = Convert.ToInt32(comm.ExecuteScalar());
