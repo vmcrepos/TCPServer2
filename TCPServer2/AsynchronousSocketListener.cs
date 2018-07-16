@@ -1765,7 +1765,7 @@ namespace TCPServer2
 
 
                     int packetunixtime = 0;
-                    bool dst = false;
+                    
                     if (IsHex(sensorval[i].ToString())) // string is hex
                                                  
                     {
@@ -1773,8 +1773,8 @@ namespace TCPServer2
                         {
                             sensorvalint.Add(Convert.ToInt32(sensorval[i].ToString(), 16)); // convert to integer and add to arraylist
                             intsensorvals.Add(Convert.ToInt32(sensoridint[i]), Convert.ToInt32(sensorvalint[i])); // add sensor id and integer value to dictionary of integer sensor values
-                            packetunixtime = Convert.ToInt32(sensorvalint[0]);
-                            MessageBox.Show("packet unix time = " + packetunixtime.ToString());
+                            packetunixtime = Convert.ToInt32(sensorvalint[0]); // convert packet time hex data to decimal integer
+                            //MessageBox.Show("packet unix time = " + packetunixtime.ToString());
                         }
 
                         catch (Exception e)
@@ -1797,16 +1797,17 @@ namespace TCPServer2
                                 comm.Parameters.AddWithValue("@value1", sensorvalint[i]);
                                 comm.Parameters.AddWithValue("@value2", DBNull.Value);
                                 comm.Parameters.AddWithValue("@value3", DBNull.Value);
-                                if (packetunixtime < 1514764800)
+
+                                if (packetunixtime < 1514764800) // if data packet timestamp year < 2018
                                 {
                                     packettime = DateTime.Now.ToUniversalTime();
-                                    comm.Parameters.AddWithValue("@packetdate", packettime);
-                                    
+                                    comm.Parameters.AddWithValue("@packetdate", packettime); // use current time (converted to UTC) as packet timestamp sent to database
+
                                 }
-                                else
+                                else // if data packet timestamp year >= 2018
                                 {
                                     packettime = UnixTimeStampToDateTime(packetunixtime);
-                                    packettime = packettime.ToUniversalTime();
+                                    packettime = packettime.ToUniversalTime(); // use data packet time data (converted to UTC) as packet timestamp sent to database
                                     comm.Parameters.AddWithValue("@packetdate", packettime);
                                     
                                 }
@@ -1858,17 +1859,17 @@ namespace TCPServer2
                             comm.Parameters.AddWithValue("@value2", DBNull.Value);
                             comm.Parameters.AddWithValue("@value3", sensorvalint[i]);
 
-                            if (packetunixtime < 1514764800)
+                            if (packetunixtime < 1514764800) // if data packet timestamp year < 2018
                             {
                                 packettime = DateTime.Now.ToUniversalTime();
-                                comm.Parameters.AddWithValue("@packetdate", packettime);
+                                comm.Parameters.AddWithValue("@packetdate", packettime); // use current time (converted to UTC) as packet timestamp sent to database
+                                }
 
-                            }
-                            else
+                            else // if data packet timestamp year >= 2018
                             {
                                 packettime = UnixTimeStampToDateTime(packetunixtime);
-                                packettime = packettime.ToUniversalTime();
-                                comm.Parameters.AddWithValue("@packetdate", packettime);
+                                packettime = packettime.ToUniversalTime(); // use data packet time data (converted to UTC) as packet timestamp sent to database 
+                                    comm.Parameters.AddWithValue("@packetdate", packettime);
 
                             }
                             
