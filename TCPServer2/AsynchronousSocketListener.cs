@@ -1365,6 +1365,7 @@ namespace TCPServer2
 
                                 if (content2A.Contains(sensorstart) && packproc) // received sensor data packet; previous packet has completed processing
                                 {
+                                    SendCurrTime(sernum); // send current tiem to unit to acknowledge receipt of sensor data packet
                                     packproc = false;
                                     ProcessDataPacket(content2A); // process sensor data packet
 
