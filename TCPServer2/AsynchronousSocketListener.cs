@@ -1756,7 +1756,7 @@ namespace TCPServer2
                     sensorid.Add(indata2[i].ToString().Substring(0, indata2[i].ToString().IndexOf("="))); // add sensor id to arraylist
                     sensorval.Add(indata2[i].ToString().Substring(indata2[i].ToString().IndexOf("=") + 1)); // add sensor value to arraylist
                     sensoridstr = sensoridstr + " " + sensorid[i].ToString(); // test
-                    if (IsHex(sensorid[i].ToString())) // value string is hex
+                    if (IsHex(sensorid[i].ToString())) // id string is hex
                         sensoridint.Add(Convert.ToInt32(sensorid[i].ToString(), 16)); // convert to integer and add to arraylist
                     else
                         sensoridint.Add(sensorid[i].ToString()); // add unconverted string to arraylist
@@ -1766,8 +1766,11 @@ namespace TCPServer2
 
 
                     //int packetunixtime = 0;
-                    
-                    if (IsHex(sensorval[i].ToString())) // string is hex
+
+                    // hex data from sensors (not user input from Isotote touchscreen device)
+                    if (!(indata2[i].ToString().StartsWith("35=") || indata2[i].ToString().StartsWith("36=") || indata2[i].ToString().StartsWith("37=")
+                        || indata2[i].ToString().StartsWith("38=") || indata2[i].ToString().StartsWith("39=")))
+                    //if (IsHex(sensorval[i].ToString())) // string is hex
                                                  
                     {
                         try
@@ -1832,8 +1835,10 @@ namespace TCPServer2
 
                     }
 
-                else
-                {
+                    // string data from Isotote touchscreen device user input
+                    else if (indata2[i].ToString().StartsWith("35=") || indata2[i].ToString().StartsWith("36=") || indata2[i].ToString().StartsWith("37=")
+                        || indata2[i].ToString().StartsWith("38=") || indata2[i].ToString().StartsWith("39="))
+                    {
                     try
                     {
                         sensorvalint.Add(sensorval[i].ToString()); // add unconverted string to arraylist
