@@ -1223,7 +1223,7 @@ namespace TCPServer2
                                                         intervalsetdict.Remove(unitid);
                                                         intervalsetdict.Add(unitid, true);
 
-                                                    }
+                                                     }
 
                                                 }
                                                 catch (Exception e2)
@@ -1767,9 +1767,10 @@ namespace TCPServer2
 
                     //int packetunixtime = 0;
 
-                    // hex data from sensors (not user input from Isotote touchscreen device)
+                    // hex data from sensors (not user input from Isotote touchscreen device) 
                     if (!(indata2[i].ToString().StartsWith("35=") || indata2[i].ToString().StartsWith("36=") || indata2[i].ToString().StartsWith("37=")
-                        || indata2[i].ToString().StartsWith("38=") || indata2[i].ToString().StartsWith("39=")))
+                        || indata2[i].ToString().StartsWith("38=") || indata2[i].ToString().StartsWith("39=") || indata2[i].ToString().StartsWith("4f=") 
+                        || indata2[i].ToString().StartsWith("50=")))
                     //if (IsHex(sensorval[i].ToString())) // string is hex
                                                  
                     {
@@ -1835,9 +1836,10 @@ namespace TCPServer2
 
                     }
 
-                    // string data from Isotote touchscreen device user input
+                    // string data from Isotote touchscreen device user input and fuel efficiency test (latitude and longitude)
                     else if (indata2[i].ToString().StartsWith("35=") || indata2[i].ToString().StartsWith("36=") || indata2[i].ToString().StartsWith("37=")
-                        || indata2[i].ToString().StartsWith("38=") || indata2[i].ToString().StartsWith("39="))
+                        || indata2[i].ToString().StartsWith("38=") || indata2[i].ToString().StartsWith("39=") || indata2[i].ToString().StartsWith("4f=") 
+                        || indata2[i].ToString().StartsWith("50="))
                     {
                     try
                     {
