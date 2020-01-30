@@ -1,4 +1,4 @@
-﻿#define GREGG
+﻿#define TEST
 
 using System;
 using System.Windows.Forms;
