@@ -1,4 +1,4 @@
-﻿#define TEST
+﻿#define GREGG
 
 using System;
 using System.Text;
@@ -33,7 +33,8 @@ namespace TCPServer2
         public delegate void conn(string IPAddress);
         public static event conn Connected;
         public static Boolean verrqstd = false;
-        public static string connectionString = @"Server=P4469916\VLINKDB; Initial Catalog=VLink106466; User=vlink; Password='TestVlink'; Integrated Security=True";
+        //public static string connectionString = @"Server=P4469916\VLINKDB; Initial Catalog=VLink106466; User=vlink; Password='TestVlink'; Integrated Security=True";
+        public static string connectionString = @"Server=P6230003\VLINKDB; Initial Catalog=VLink106466; User=VLink106466; Password='GreenCo2017'; Integrated Security=False";
         //public static string connectionString = @"Server=P4469916\VLINKDB; Initial Catalog=VLink_GreenCo; User=vlink; Password='TestVlink'; Integrated Security=True";
         //public static string connectionString = @"Server=VMCIS\SQLEXPRESS; Initial Catalog=VLink; User=VLink; Password='TestVlink'; Integrated Security=True";
         //public static string connectionString = @"Server=207.198.117.37\VMCIS\SQLEXPRESS; Initial Catalog=VLink; User=VLink; Password='TestVlink'; Integrated Security=True";

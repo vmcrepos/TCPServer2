@@ -1,4 +1,4 @@
-﻿#define TEST
+﻿#define GREGG
 
 using System;
 using System.Windows.Forms;
@@ -21,7 +21,8 @@ namespace TCPServer2
 
         public static bool fwreq = false;
         public static string fwfile;
-        static string connectionString = @"Server=P4469916\VLINKDB; Initial Catalog=VLink106466; User=vlink; Password='TestVlink'; Integrated Security=True";
+        //static string connectionString = @"Server=P4469916\VLINKDB; Initial Catalog=VLink106466; User=vlink; Password='TestVlink'; Integrated Security=True";
+        static string connectionString = @"Server=P6230003\VLINKDB; Initial Catalog=VLink106466; User=VLink106466; Password='GreenCo2017'; Integrated Security=False";
         DataTable dt = new DataTable();
         DataTable dt2 = new DataTable();
         public static string selid = "";
