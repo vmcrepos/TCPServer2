@@ -1771,7 +1771,7 @@ namespace TCPServer2
                     // hex data from sensors (not user input from Isotote touchscreen device) 
                     if (!(indata2[i].ToString().StartsWith("35=") || indata2[i].ToString().StartsWith("36=") || indata2[i].ToString().StartsWith("37=")
                         || indata2[i].ToString().StartsWith("38=") || indata2[i].ToString().StartsWith("39=") || indata2[i].ToString().StartsWith("4f=")
-                        || indata2[i].ToString().StartsWith("50=") || indata2[i].ToString().StartsWith("3c=") || indata2[i].ToString().StartsWith("3d=") || indata2[i].ToString().StartsWith("3e=")
+                        || indata2[i].ToString().StartsWith("50=") || indata2[i].ToString().StartsWith("3d=") || indata2[i].ToString().StartsWith("3e=")
                         || indata2[i].ToString().StartsWith("3f=") || indata2[i].ToString().StartsWith("40=") || indata2[i].ToString().StartsWith("41=")
                         || indata2[i].ToString().StartsWith("42=") || indata2[i].ToString().StartsWith("43=") || indata2[i].ToString().StartsWith("44=") || indata2[i].ToString().StartsWith("45=")
                         || indata2[i].ToString().StartsWith("46=") || indata2[i].ToString().StartsWith("47=") || indata2[i].ToString().StartsWith("48=")
@@ -1780,74 +1780,151 @@ namespace TCPServer2
                         || indata2[i].ToString().StartsWith("52=") || indata2[i].ToString().StartsWith("53=") || indata2[i].ToString().StartsWith("54=") || indata2[i].ToString().StartsWith("55=")
                         || indata2[i].ToString().StartsWith("56=") || indata2[i].ToString().StartsWith("57=")))
                     //if (IsHex(sensorval[i].ToString())) // string is hex
-                                                 
+
                     {
-                        try
+                        if (indata2[i].ToString().StartsWith("3B=")) //temperature sensor is float that must be converted to 16-bit integer. Final
+                                                                     // valuc multiplied by 10 before sending to database
                         {
-                            sensorvalint.Add(Convert.ToInt32(sensorval[i].ToString(), 16)); // convert to integer and add to arraylist
-                            intsensorvals.Add(Convert.ToInt32(sensoridint[i]), Convert.ToInt32(sensorvalint[i])); // add sensor id and integer value to dictionary of integer sensor values
-                            //packetunixtime = Convert.ToInt32(sensorvalint[0]); // convert packet time hex data to decimal integer
-                            //MessageBox.Show("packet unix time = " + packetunixtime.ToString());
-                        }
-
-                        catch (Exception e)
-                        {
-                            MessageBox.Show("1980 " + sensoridintstr + "\r\n" + e.ToString());
-                        }
-
-                        unitid = GetUnitIDFromSN(sernum); // get unit id of currently connected unit
-                        
-                        string query = "EXEC proc_storedatapacket @unitid, @sensor_id, @value1, @value2, @value3, @packetdate";
-
-                        using (SqlConnection conn = new SqlConnection(connectionString))
-                        {
-                            // call stored procedure to update data packets database table (hex data converted to integer)
-                            using (SqlCommand comm = new SqlCommand(query, conn))
+                            try
                             {
-                                conn.Open();
-                                comm.Parameters.AddWithValue("@unitid", unitid);
-                                comm.Parameters.AddWithValue("@sensor_id", sensoridint[i]);
-                                comm.Parameters.AddWithValue("@value1", sensorvalint[i]);
-                                comm.Parameters.AddWithValue("@value2", DBNull.Value);
-                                comm.Parameters.AddWithValue("@value3", DBNull.Value);
-                                comm.Parameters.AddWithValue("@packetdate", packettime);
+                                string hexString = sensorval[i].ToString();
+                                uint num = uint.Parse(hexString, System.Globalization.NumberStyles.AllowHexSpecifier); // parse received string as hex value
 
-                                //if (packetunixtime < 1514764800) // if data packet timestamp year < 2018
+                                byte[] bytes = BitConverter.GetBytes(num); // create byte array
+                                //if (BitConverter.IsLittleEndian)
                                 //{
-                                //    packettime = DateTime.Now.ToUniversalTime();
-                                //    comm.Parameters.AddWithValue("@packetdate", packettime); // use current time (converted to UTC) as packet timestamp sent to database
-
+                                //    bytes = bytes.Reverse().ToArray();
                                 //}
-                                //else // if data packet timestamp year >= 2018
-                                //{
-                                //    packettime = UnixTimeStampToDateTime(packetunixtime);
-                                //    packettime = packettime.ToUniversalTime(); // use data packet time data (converted to UTC) as packet timestamp sent to database
-                                //    comm.Parameters.AddWithValue("@packetdate", packettime);
-                                    
-                                //}
+                                float myFloat = BitConverter.ToSingle(bytes, 0); // convert byte array to float
+                                short roundx = (short)Math.Round(myFloat, 0); // convert float to 16-bit integer (rounding to nearest integer)
+                                short finalx = (Int16)(roundx * 10); //multiply value by 10
+                                sensorvalint.Add(finalx); // convert to integer and add to arraylist
+                                intsensorvals.Add(Convert.ToInt32(sensoridint[i]), Convert.ToInt32(sensorvalint[i])); // add sensor id and integer value to dictionary of integer sensor values
+                                                                                                                      //packetunixtime = Convert.ToInt32(sensorvalint[0]); // convert packet time hex data to decimal integer
+                                                                                                                      //MessageBox.Show("packet unix time = " + packetunixtime.ToString());
+                            }
 
+                            catch (Exception e)
+                            {
+                                MessageBox.Show("1980 " + sensoridintstr + "\r\n" + e.ToString());
+                            }
 
+                            unitid = GetUnitIDFromSN(sernum); // get unit id of currently connected unit
 
-                                try
+                            string query = "EXEC proc_storedatapacket @unitid, @sensor_id, @value1, @value2, @value3, @packetdate";
+
+                            using (SqlConnection conn = new SqlConnection(connectionString))
+                            {
+                                // call stored procedure to update data packets database table (hex data converted to integer)
+                                using (SqlCommand comm = new SqlCommand(query, conn))
                                 {
-                                    Int32 response3 = Convert.ToInt32(comm.ExecuteScalar());
-                                    //MessageBox.Show(response.ToString());
+                                    conn.Open();
+                                    comm.Parameters.AddWithValue("@unitid", unitid);
+                                    comm.Parameters.AddWithValue("@sensor_id", sensoridint[i]);
+                                    comm.Parameters.AddWithValue("@value1", sensorvalint[i]);
+                                    comm.Parameters.AddWithValue("@value2", DBNull.Value);
+                                    comm.Parameters.AddWithValue("@value3", DBNull.Value);
+                                    comm.Parameters.AddWithValue("@packetdate", packettime);
 
-                                }
-                                catch (Exception e)
-                                {
-                                    MessageBox.Show("1984 " + e.ToString());
+                                    //if (packetunixtime < 1514764800) // if data packet timestamp year < 2018
+                                    //{
+                                    //    packettime = DateTime.Now.ToUniversalTime();
+                                    //    comm.Parameters.AddWithValue("@packetdate", packettime); // use current time (converted to UTC) as packet timestamp sent to database
+
+                                    //}
+                                    //else // if data packet timestamp year >= 2018
+                                    //{
+                                    //    packettime = UnixTimeStampToDateTime(packetunixtime);
+                                    //    packettime = packettime.ToUniversalTime(); // use data packet time data (converted to UTC) as packet timestamp sent to database
+                                    //    comm.Parameters.AddWithValue("@packetdate", packettime);
+
+                                    //}
+
+
+
+                                    try
+                                    {
+                                        Int32 response3 = Convert.ToInt32(comm.ExecuteScalar());
+                                        //MessageBox.Show(response.ToString());
+
+                                    }
+                                    catch (Exception e)
+                                    {
+                                        MessageBox.Show("1984 " + e.ToString());
+                                    }
                                 }
                             }
                         }
 
+                        else
+                        {
+                            try
+                            {
+                                sensorvalint.Add(Convert.ToInt32(sensorval[i].ToString(), 16)); // convert to integer and add to arraylist
+                                intsensorvals.Add(Convert.ToInt32(sensoridint[i]), Convert.ToInt32(sensorvalint[i])); // add sensor id and integer value to dictionary of integer sensor values
+                                //packetunixtime = Convert.ToInt32(sensorvalint[0]); // convert packet time hex data to decimal integer
+                                //MessageBox.Show("packet unix time = " + packetunixtime.ToString());
+                            }
 
+                            catch (Exception e)
+                            {
+                                MessageBox.Show("1980 " + sensoridintstr + "\r\n" + e.ToString());
+                            }
+
+                            unitid = GetUnitIDFromSN(sernum); // get unit id of currently connected unit
+
+                            string query = "EXEC proc_storedatapacket @unitid, @sensor_id, @value1, @value2, @value3, @packetdate";
+
+                            using (SqlConnection conn = new SqlConnection(connectionString))
+                            {
+                                // call stored procedure to update data packets database table (hex data converted to integer)
+                                using (SqlCommand comm = new SqlCommand(query, conn))
+                                {
+                                    conn.Open();
+                                    comm.Parameters.AddWithValue("@unitid", unitid);
+                                    comm.Parameters.AddWithValue("@sensor_id", sensoridint[i]);
+                                    comm.Parameters.AddWithValue("@value1", sensorvalint[i]);
+                                    comm.Parameters.AddWithValue("@value2", DBNull.Value);
+                                    comm.Parameters.AddWithValue("@value3", DBNull.Value);
+                                    comm.Parameters.AddWithValue("@packetdate", packettime);
+
+                                    //if (packetunixtime < 1514764800) // if data packet timestamp year < 2018
+                                    //{
+                                    //    packettime = DateTime.Now.ToUniversalTime();
+                                    //    comm.Parameters.AddWithValue("@packetdate", packettime); // use current time (converted to UTC) as packet timestamp sent to database
+
+                                    //}
+                                    //else // if data packet timestamp year >= 2018
+                                    //{
+                                    //    packettime = UnixTimeStampToDateTime(packetunixtime);
+                                    //    packettime = packettime.ToUniversalTime(); // use data packet time data (converted to UTC) as packet timestamp sent to database
+                                    //    comm.Parameters.AddWithValue("@packetdate", packettime);
+
+                                    //}
+
+
+
+                                    try
+                                    {
+                                        Int32 response3 = Convert.ToInt32(comm.ExecuteScalar());
+                                        //MessageBox.Show(response.ToString());
+
+                                    }
+                                    catch (Exception e)
+                                    {
+                                        MessageBox.Show("1984 " + e.ToString());
+                                    }
+                                }
+                            }
+
+
+                        }
                     }
 
                     // string data from Isotote touchscreen device user input and fuel efficiency test (latitude and longitude)
                     else if (indata2[i].ToString().StartsWith("35=") || indata2[i].ToString().StartsWith("36=") || indata2[i].ToString().StartsWith("37=")
-                        || indata2[i].ToString().StartsWith("38=") || indata2[i].ToString().StartsWith("39=") || indata2[i].ToString().StartsWith("4f=") 
-                        || indata2[i].ToString().StartsWith("50=") || indata2[i].ToString().StartsWith("3c=") || indata2[i].ToString().StartsWith("3d=") || indata2[i].ToString().StartsWith("3e=")
+                        || indata2[i].ToString().StartsWith("38=") || indata2[i].ToString().StartsWith("39=") || indata2[i].ToString().StartsWith("4f=")
+                        || indata2[i].ToString().StartsWith("50=") || indata2[i].ToString().StartsWith("3d=") || indata2[i].ToString().StartsWith("3e=")
                         || indata2[i].ToString().StartsWith("3f=") || indata2[i].ToString().StartsWith("40=") || indata2[i].ToString().StartsWith("41=")
                         || indata2[i].ToString().StartsWith("42=") || indata2[i].ToString().StartsWith("43=") || indata2[i].ToString().StartsWith("44=") || indata2[i].ToString().StartsWith("45=")
                         || indata2[i].ToString().StartsWith("46=") || indata2[i].ToString().StartsWith("47=") || indata2[i].ToString().StartsWith("48=")
@@ -1856,64 +1933,64 @@ namespace TCPServer2
                         || indata2[i].ToString().StartsWith("52=") || indata2[i].ToString().StartsWith("53=") || indata2[i].ToString().StartsWith("54=") || indata2[i].ToString().StartsWith("55=")
                         || indata2[i].ToString().StartsWith("56=") || indata2[i].ToString().StartsWith("57="))
                     {
-                    try
-                    {
-                        sensorvalint.Add(sensorval[i].ToString()); // add unconverted string to arraylist
-                        stringsensorvals.Add(Convert.ToInt32(sensoridint[i]), sensorvalint[i].ToString()); // add sensor id and string value to dictionary of string sensor values
-                    }
-
-                    catch (Exception e)
-                    {
-                        MessageBox.Show("2018 " + e.ToString());
-                    }
-
-                    unitid = GetUnitIDFromSN(sernum); // get unit id of currently connected unit
-                                                      //units.TryGetValue(handler, out unitid); // get unit id of currently connected unit
-                    string query = "EXEC proc_storedatapacket @unitid, @sensor_id, @value1, @value2, @value3, @packetdate";
-
-                    using (SqlConnection conn = new SqlConnection(connectionString))
-                    {
-                        // call stored procedure to update data packets database table (string data)
-                        using (SqlCommand comm = new SqlCommand(query, conn))
+                        try
                         {
-                            conn.Open();
-                            comm.Parameters.AddWithValue("@unitid", unitid);
-                            comm.Parameters.AddWithValue("@sensor_id", sensoridint[i]);
-                            comm.Parameters.AddWithValue("@value1", DBNull.Value);
-                            comm.Parameters.AddWithValue("@value2", DBNull.Value);
-                            comm.Parameters.AddWithValue("@value3", sensorvalint[i]);
-                            comm.Parameters.AddWithValue("@packetdate", packettime);
+                            sensorvalint.Add(sensorval[i].ToString()); // add unconverted string to arraylist
+                            stringsensorvals.Add(Convert.ToInt32(sensoridint[i]), sensorvalint[i].ToString()); // add sensor id and string value to dictionary of string sensor values
+                        }
 
-                            //if (packetunixtime < 1514764800) // if data packet timestamp year < 2018
-                            //{
-                            //    packettime = DateTime.Now.ToUniversalTime();
-                            //    comm.Parameters.AddWithValue("@packetdate", packettime); // use current time (converted to UTC) as packet timestamp sent to database
-                            //    }
+                        catch (Exception e)
+                        {
+                            MessageBox.Show("2018 " + e.ToString());
+                        }
 
-                            //else // if data packet timestamp year >= 2018
-                            //{
-                            //    packettime = UnixTimeStampToDateTime(packetunixtime);
-                            //    packettime = packettime.ToUniversalTime(); // use data packet time data (converted to UTC) as packet timestamp sent to database 
-                            //        comm.Parameters.AddWithValue("@packetdate", packettime);
+                        unitid = GetUnitIDFromSN(sernum); // get unit id of currently connected unit
+                                                          //units.TryGetValue(handler, out unitid); // get unit id of currently connected unit
+                        string query = "EXEC proc_storedatapacket @unitid, @sensor_id, @value1, @value2, @value3, @packetdate";
 
-                            //}
-                            
-                            try
+                        using (SqlConnection conn = new SqlConnection(connectionString))
+                        {
+                            // call stored procedure to update data packets database table (string data)
+                            using (SqlCommand comm = new SqlCommand(query, conn))
                             {
-                                Int32 response4 = Convert.ToInt32(comm.ExecuteScalar());
-                                
+                                conn.Open();
+                                comm.Parameters.AddWithValue("@unitid", unitid);
+                                comm.Parameters.AddWithValue("@sensor_id", sensoridint[i]);
+                                comm.Parameters.AddWithValue("@value1", DBNull.Value);
+                                comm.Parameters.AddWithValue("@value2", DBNull.Value);
+                                comm.Parameters.AddWithValue("@value3", sensorvalint[i]);
+                                comm.Parameters.AddWithValue("@packetdate", packettime);
+
+                                //if (packetunixtime < 1514764800) // if data packet timestamp year < 2018
+                                //{
+                                //    packettime = DateTime.Now.ToUniversalTime();
+                                //    comm.Parameters.AddWithValue("@packetdate", packettime); // use current time (converted to UTC) as packet timestamp sent to database
+                                //    }
+
+                                //else // if data packet timestamp year >= 2018
+                                //{
+                                //    packettime = UnixTimeStampToDateTime(packetunixtime);
+                                //    packettime = packettime.ToUniversalTime(); // use data packet time data (converted to UTC) as packet timestamp sent to database 
+                                //        comm.Parameters.AddWithValue("@packetdate", packettime);
+
+                                //}
+
+                                try
+                                {
+                                    Int32 response4 = Convert.ToInt32(comm.ExecuteScalar());
 
 
-                            }
-                            catch (Exception e)
-                            {
-                                MessageBox.Show("2023 " + e.ToString());
+
+                                }
+                                catch (Exception e)
+                                {
+                                    MessageBox.Show("2023 " + e.ToString());
+                                }
                             }
                         }
+
+
                     }
-
-
-                }
 
                 sensorvalintstr = sensorvalintstr + " " + sensorvalint[i].ToString();   // test
 
